@@ -1,0 +1,196 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libENUgraphics", "libENUgraphics\libENUgraphics.vcxproj", "{A943724C-1DC0-4711-9539-B78A8D6ECEC7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resources", "resources", "{96425147-A5FD-4D64-8E08-00A3BF701D94}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "models", "models", "{2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shaders", "shaders", "{2194805E-ABC9-4D12-A0CD-98C0073AEC73}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\depth_of_field.frag = resources\shaders\depth_of_field.frag
+		resources\shaders\glow_shader.frag = resources\shaders\glow_shader.frag
+		resources\shaders\greyscale.frag = resources\shaders\greyscale.frag
+		resources\shaders\lens_flare.frag = resources\shaders\lens_flare.frag
+		resources\shaders\motion_blur.frag = resources\shaders\motion_blur.frag
+		resources\shaders\spot.frag = resources\shaders\spot.frag
+		resources\shaders\spot.vert = resources\shaders\spot.vert
+		resources\shaders\ssao_shader.frag = resources\shaders\ssao_shader.frag
+		resources\shaders\texture_passthrough.frag = resources\shaders\texture_passthrough.frag
+		resources\shaders\texture_passthrough.vert = resources\shaders\texture_passthrough.vert
+		resources\shaders\vignette.frag = resources\shaders\vignette.frag
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "textures", "textures", "{CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\brown.jpg = resources\textures\brown.jpg
+		resources\textures\noise.jpg = resources\textures\noise.jpg
+		resources\textures\noise.xcf = resources\textures\noise.xcf
+		resources\textures\white.jpg = resources\textures\white.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "barn", "barn", "{14BDD389-6B0A-408F-BE46-BF563F9AC10A}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\barn\barn.3ds = resources\models\barn\barn.3ds
+		resources\models\barn\barn.blend = resources\models\barn\barn.blend
+		resources\models\barn\barn.blend1 = resources\models\barn\barn.blend1
+		resources\models\barn\barn.obj = resources\models\barn\barn.obj
+		resources\models\barn\FCFbarn2009.jpg = resources\models\barn\FCFbarn2009.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fence", "fence", "{5B06A087-A557-4809-A314-6EF14064EFA4}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\fence\fence.blend = resources\models\fence\fence.blend
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grass", "grass", "{746F0BFE-C8C0-4465-ACA0-2D8E386C5335}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\grass\grass.blend = resources\models\grass\grass.blend
+		resources\models\grass\grass.obj = resources\models\grass\grass.obj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hay", "hay", "{A30F9D41-6DE0-46C1-8C92-438091C41258}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\hay\hay.blend = resources\models\hay\hay.blend
+		resources\models\hay\hay.blend1 = resources\models\hay\hay.blend1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pitchfork", "pitchfork", "{496361E8-AA62-4422-8CEF-6A343487F4A7}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\pitchfork\pitchfork.blend = resources\models\pitchfork\pitchfork.blend
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "barn", "barn", "{11CC83B3-025C-40AF-94A5-2E3DEB3CF06A}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\barn\barn.jpg = resources\textures\barn\barn.jpg
+		resources\textures\barn\barn.xcf = resources\textures\barn\barn.xcf
+		resources\textures\barn\barn_normal.png = resources\textures\barn\barn_normal.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "billboards", "billboards", "{FFD5F924-7837-4EA6-9557-AA0A0F408775}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\billboards\island_billboard.xcf = resources\textures\billboards\island_billboard.xcf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hay", "hay", "{8FE6C716-EA27-45A5-B66D-9CED8D528F91}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\hay\hay.png = resources\textures\hay\hay.png
+		resources\textures\hay\hay.xcf = resources\textures\hay\hay.xcf
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CW", "CW\CW.vcxproj", "{98FDB3FD-0279-4CF7-B646-8C642E3A9629}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "character", "character", "{9E4B3E79-A59D-4B51-94DA-FF81EAD73A56}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\character\character.3ds = resources\models\character\character.3ds
+		resources\models\character\character.blend = resources\models\character\character.blend
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "character", "character", "{63144DA9-05F1-4257-9B4E-FA0FFC5EAFFF}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\character\character.jpg = resources\textures\character\character.jpg
+		resources\textures\character\character.xcf = resources\textures\character\character.xcf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "island", "island", "{B707B3C1-6865-4193-BD49-3C517760FE76}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\island\island.blend = resources\models\island\island.blend
+		resources\models\island\island.blend1 = resources\models\island\island.blend1
+		resources\models\island\island.obj = resources\models\island\island.obj
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "island", "island", "{2C3FF61A-B9BA-404F-9A3F-DCD8C74B0566}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\island\island.jpg = resources\textures\island\island.jpg
+		resources\textures\island\island.xcf = resources\textures\island\island.xcf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bridge", "bridge", "{9AD5A904-E99D-4AC8-A792-559FD9572466}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\bridge\bridge.blend = resources\models\bridge\bridge.blend
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grass", "grass", "{136805EA-62CB-4831-8609-2E53D00A978F}"
+	ProjectSection(SolutionItems) = preProject
+		resources\textures\grass\g.png = resources\textures\grass\g.png
+		resources\textures\grass\g.xcf = resources\textures\grass\g.xcf
+		resources\textures\grass\grass.jpg = resources\textures\grass\grass.jpg
+		resources\textures\grass\grass.xcf = resources\textures\grass\grass.xcf
+		resources\textures\grass\grassHeight.jpg = resources\textures\grass\grassHeight.jpg
+		resources\textures\grass\grassHeight.xcf = resources\textures\grass\grassHeight.xcf
+		resources\textures\grass\grassTexture.jpg = resources\textures\grass\grassTexture.jpg
+		resources\textures\grass\grassTexture.xcf = resources\textures\grass\grassTexture.xcf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "main_shader", "main_shader", "{633F74E9-3DAB-44CF-A432-53BCA78956E3}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\main_shader\main_shader.frag = resources\shaders\main_shader\main_shader.frag
+		resources\shaders\main_shader\main_shader.vert = resources\shaders\main_shader\main_shader.vert
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grass_shader", "grass_shader", "{A8625D35-E832-4264-A672-274E341C4B67}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\grass_shader\grass.frag = resources\shaders\grass_shader\grass.frag
+		resources\shaders\grass_shader\grass.geo = resources\shaders\grass_shader\grass.geo
+		resources\shaders\grass_shader\grass.vert = resources\shaders\grass_shader\grass.vert
+		resources\shaders\grass_shader\grass_spotlight.frag = resources\shaders\grass_shader\grass_spotlight.frag
+		resources\shaders\grass_shader\grass_spotlight.geo = resources\shaders\grass_shader\grass_spotlight.geo
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "depth_shader", "depth_shader", "{8A9A95CE-4D14-497D-997C-F93EFB18F259}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\depth_shader\depth.frag = resources\shaders\depth_shader\depth.frag
+		resources\shaders\depth_shader\depth.vert = resources\shaders\depth_shader\depth.vert
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "silo", "silo", "{7462643C-14C6-4436-8A16-95ACFD64DB5F}"
+	ProjectSection(SolutionItems) = preProject
+		resources\models\silo\silo.blend = resources\models\silo\silo.blend
+		resources\models\silo\silo.obj = resources\models\silo\silo.obj
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A943724C-1DC0-4711-9539-B78A8D6ECEC7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A943724C-1DC0-4711-9539-B78A8D6ECEC7}.Debug|Win32.Build.0 = Debug|Win32
+		{A943724C-1DC0-4711-9539-B78A8D6ECEC7}.Release|Win32.ActiveCfg = Release|Win32
+		{A943724C-1DC0-4711-9539-B78A8D6ECEC7}.Release|Win32.Build.0 = Release|Win32
+		{98FDB3FD-0279-4CF7-B646-8C642E3A9629}.Debug|Win32.ActiveCfg = Debug|Win32
+		{98FDB3FD-0279-4CF7-B646-8C642E3A9629}.Debug|Win32.Build.0 = Debug|Win32
+		{98FDB3FD-0279-4CF7-B646-8C642E3A9629}.Release|Win32.ActiveCfg = Release|Win32
+		{98FDB3FD-0279-4CF7-B646-8C642E3A9629}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A7C624E-4CC2-4A47-BBEF-5441FA222F5B} = {96425147-A5FD-4D64-8E08-00A3BF701D94}
+		{2194805E-ABC9-4D12-A0CD-98C0073AEC73} = {96425147-A5FD-4D64-8E08-00A3BF701D94}
+		{CFBA0286-F119-4C28-B1EE-F2F1B076D8DA} = {96425147-A5FD-4D64-8E08-00A3BF701D94}
+		{14BDD389-6B0A-408F-BE46-BF563F9AC10A} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{5B06A087-A557-4809-A314-6EF14064EFA4} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{746F0BFE-C8C0-4465-ACA0-2D8E386C5335} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{A30F9D41-6DE0-46C1-8C92-438091C41258} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{496361E8-AA62-4422-8CEF-6A343487F4A7} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{11CC83B3-025C-40AF-94A5-2E3DEB3CF06A} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
+		{FFD5F924-7837-4EA6-9557-AA0A0F408775} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
+		{8FE6C716-EA27-45A5-B66D-9CED8D528F91} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
+		{9E4B3E79-A59D-4B51-94DA-FF81EAD73A56} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{63144DA9-05F1-4257-9B4E-FA0FFC5EAFFF} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
+		{B707B3C1-6865-4193-BD49-3C517760FE76} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{2C3FF61A-B9BA-404F-9A3F-DCD8C74B0566} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
+		{9AD5A904-E99D-4AC8-A792-559FD9572466} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{136805EA-62CB-4831-8609-2E53D00A978F} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
+		{633F74E9-3DAB-44CF-A432-53BCA78956E3} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
+		{A8625D35-E832-4264-A672-274E341C4B67} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
+		{8A9A95CE-4D14-497D-997C-F93EFB18F259} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
+		{7462643C-14C6-4436-8A16-95ACFD64DB5F} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+	EndGlobalSection
+EndGlobal

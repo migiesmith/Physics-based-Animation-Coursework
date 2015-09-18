@@ -171,8 +171,8 @@ bool initialise()
 {
 
 	SphereCollider a = SphereCollider(vec3(0, 0, 0), 1);
-	SphereCollider b = SphereCollider(vec3(0, 0, 0), 1);
-	cout << "Sphere collision = " << a.intersects(b).doesIntersect << endl;
+	SphereCollider b = SphereCollider(vec3(0, 0, 1.999999999f), 1);
+	cout << "Sphere collision = " << a.intersects(&b).doesIntersect << endl;
 
 
 	// Hide the cursor

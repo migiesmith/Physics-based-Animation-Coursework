@@ -24,13 +24,14 @@ enum class ColliderTypes :short{
 class Collider
 {
 private:
+	bool _solid = true;
 
 public:
 
 	vec3 position;
 	ColliderTypes colliderType;
 
-
+	virtual bool Collider::isSolid();
 	Collider(vec3 position, ColliderTypes colliderType);
 	ColliderTypes getType(){ return colliderType; }
 	~Collider();

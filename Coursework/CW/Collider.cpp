@@ -14,6 +14,14 @@ Collider::Collider(vec3 position, ColliderTypes colliderType)
 	this->colliderType = colliderType;
 }
 
+void Collider::setPosition(vec3 position){
+	this->position = position;
+}
+
+void Collider::translate(vec3 translation){
+	this->position += translation;
+}
+
 bool Collider::isSolid(){
 	return _solid;
 }

@@ -15,9 +15,10 @@ IntersectionData SphereCollider::intersects(Collider* other){
 	switch(other->getType()){
 		case ColliderTypes::SPHERE : {
 			data.direction = this->position - other->position;
-			cout << this->radius + dynamic_cast<SphereCollider*>(other)->radius << endl;
-			if (Util::magnitude(data.direction) <= this->radius + dynamic_cast<SphereCollider*>(other)->radius)
+			data.amount = Util::magnitude(data.direction) - (this->radius + dynamic_cast<SphereCollider*>(other)->radius);
+			if (data.amount <= 0){
 				data.doesIntersect = true;
+			}
 			
 			}
 			

@@ -31,6 +31,9 @@ float totalTime = 0.0f; // Stores how much time has passed (used for time based 
 
 bool spotLightEnabled = false; // Whether or not to render the spot light
 
+//TODO
+SphereCollider sphereA = SphereCollider(vec3(0, 0, 0), 1);
+SphereCollider sphereB = SphereCollider(vec3(0, 0, 1.0f), 1);
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
@@ -169,12 +172,6 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 
 bool initialise()
 {
-
-	SphereCollider a = SphereCollider(vec3(0, 0, 0), 1);
-	SphereCollider b = SphereCollider(vec3(0, 0, 1.999999999f), 1);
-	cout << "Sphere collision = " << a.intersects(&b).doesIntersect << endl;
-
-
 	// Hide the cursor
 	glfwSetInputMode(renderer::get_window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -977,6 +974,13 @@ bool render()
 		}
 
 	}
+
+
+	IntersectionData data = sphereA.intersects(&sphereB);
+	cout << "Sphere collision: " << endl;
+	cout << data.doesIntersect << endl;
+	cout << data.direction.x << ", " << data.direction.y << ", " << data.direction.z << " * " << data.amount << endl;
+	
 
 	// Disable wireframe
 	glPolygonMode(GL_FRONT, GL_FILL);

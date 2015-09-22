@@ -17,9 +17,10 @@ class SphereCollider :
 	public Collider
 {
 private:
-	float radius = 0.0f;
 
 public:
+
+	float radius = 0.0f;
 
 	SphereCollider(vec3 position, float radius) : Collider(position, ColliderTypes::SPHERE){
 		this->radius = radius;

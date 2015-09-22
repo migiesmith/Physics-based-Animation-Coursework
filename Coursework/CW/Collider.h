@@ -33,6 +33,8 @@ public:
 
 	virtual bool Collider::isSolid();
 	Collider(vec3 position, ColliderTypes colliderType);
+	void setPosition(vec3 position);
+	void translate(vec3 translation);
 	ColliderTypes getType(){ return colliderType; }
 	~Collider();
 };

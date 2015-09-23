@@ -9,6 +9,7 @@ TODO
 #pragma once
 
 #include <renderer.h>
+#include <math.h>
 
 using namespace std;
 using namespace graphics_framework;

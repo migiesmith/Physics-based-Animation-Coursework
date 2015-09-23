@@ -7,7 +7,6 @@ TODO
 */
 
 #include "SphereCollider.h"
-#include <math.h>
 
 IntersectionData SphereCollider::intersects(Collider* other){
 	IntersectionData data = IntersectionData();
@@ -22,13 +21,11 @@ IntersectionData SphereCollider::intersects(Collider* other){
 			
 			}
 			
-		/*
 		case ColliderTypes::CUBE :
-			{
-				data = ((CubeCollider)other).intersects(this);
-				data.direction = data.direction*-1.0;
+		{
+			data = dynamic_cast<CubeCollider*>(other)->intersects(this);
+			data.direction = data.direction * -1.0f;
 			}
-		*/
 	}
 
 	return data;

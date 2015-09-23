@@ -8,6 +8,7 @@
 //TODO
 
 #include "SphereCollider.h"
+#include "CubeCollider.h"
 
 //TODO
 

@@ -8,6 +8,7 @@ TODO
 
 #pragma once
 #include "Collider.h"
+#include "CubeCollider.h"
 #include "IntersectionData.h"
 #include "Util.h"
 

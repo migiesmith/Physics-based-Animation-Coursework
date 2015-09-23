@@ -32,8 +32,8 @@ float totalTime = 0.0f; // Stores how much time has passed (used for time based 
 bool spotLightEnabled = false; // Whether or not to render the spot light
 
 //TODO
-SphereCollider sphereA = SphereCollider(vec3(0, 0, 0), 1);
-SphereCollider sphereB = SphereCollider(vec3(0, 0, 1.0f), 1);
+SphereCollider sphereA = SphereCollider(vec3(0, 100, 0), 1);
+SphereCollider sphereB = SphereCollider(vec3(0, 100, 2.0f), 1);
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
@@ -222,6 +222,7 @@ bool load_content()
 	meshes["silo"] = loadModel("silo\\silo.obj");
 	meshes["farmhouse"] = loadModel("farmhouse\\farmhouse.obj");
 	meshes["glass"] = loadModel("glass\\glass.obj");
+	meshes["sphere"] = loadModel("sphere\\sphere.obj");
 
 	skyBox[0] = loadModel("skybox.obj");
 	skyBox[1] = skyBox[0];
@@ -415,6 +416,23 @@ void initSceneObjects(){
 	sceneObjects["island"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["island"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["island"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+		vec4(0.7, 0.7, 0.7, 1),
+		vec4(1, 1, 1, 1),
+		50.0f);
+
+
+	sceneObjects["sphereA"] = meshes["sphere"];
+	sceneObjects["sphereA"].set_texture(texs["island"]); // Sets the texture
+	sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+		vec4(0.7, 0.7, 0.7, 1),
+		vec4(1, 1, 1, 1),
+		50.0f);
+
+	sceneObjects["sphereB"] = meshes["sphere"];
+	sceneObjects["sphereB"].set_texture(texs["island"]); // Sets the texture
+	sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["sphereB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
@@ -954,6 +972,19 @@ bool render()
 		for (SceneObject* mapObj : objectVector){
 			renderMesh(mapObj, V, P);
 		}
+
+
+		IntersectionData data = sphereA.intersects(&sphereB);
+		cout << "Sphere collision: " << endl;
+		cout << data.doesIntersect << endl;
+		cout << data.direction.x << ", " << data.direction.y << ", " << data.direction.z << " * " << data.amount << endl;
+		//sphereA.translate(vec3(0.0,0.0,0.01));
+		if (data.doesIntersect){
+			sphereA.translate(data.direction*data.amount);
+		}
+		
+		sceneObjects["sphereA"].get_transform().position = sphereA.position;
+		sceneObjects["sphereB"].get_transform().position = sphereB.position;
 		
 	}
 	else{
@@ -974,13 +1005,6 @@ bool render()
 		}
 
 	}
-
-
-	IntersectionData data = sphereA.intersects(&sphereB);
-	cout << "Sphere collision: " << endl;
-	cout << data.doesIntersect << endl;
-	cout << data.direction.x << ", " << data.direction.y << ", " << data.direction.z << " * " << data.amount << endl;
-	
 
 	// Disable wireframe
 	glPolygonMode(GL_FRONT, GL_FILL);

@@ -32,9 +32,11 @@ float totalTime = 0.0f; // Stores how much time has passed (used for time based 
 bool spotLightEnabled = false; // Whether or not to render the spot light
 
 //TODO
-//SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
-CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
+SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
+//CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+//CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+IntersectionData dataTODO;
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
@@ -423,7 +425,7 @@ void initSceneObjects(){
 		50.0f);
 
 
-	sceneObjects["sphereA"] = meshes["cube"];
+	sceneObjects["sphereA"] = meshes["sphere"];
 	sceneObjects["sphereA"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
@@ -431,7 +433,7 @@ void initSceneObjects(){
 		vec4(1, 1, 1, 1),
 		50.0f);
 	
-	sceneObjects["sphereB"] = meshes["cube"];
+	sceneObjects["sphereB"] = meshes["sphere"];
 	sceneObjects["sphereB"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
@@ -439,8 +441,8 @@ void initSceneObjects(){
 		vec4(1, 1, 1, 1),
 		50.0f);
 
-	sphereB.rotate(vec3(0,0,1), 45.0f);
-	sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
+	//sphereB.rotate(vec3(0,0,1), 45.0f);
+	//sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
 
 }
 
@@ -653,14 +655,13 @@ bool update(float delta_time)
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
 		sphereA.translate(vec3(0.0, 0.0, -velocity)*delta_time);
 	
-	IntersectionData data = sphereA.intersects(&sphereB, magnitude(vec3(0.0, 0.0, -velocity))*delta_time);
+	dataTODO = sphereA.intersects(&sphereB, magnitude(vec3(0.0, 0.0, -velocity))*delta_time);
 	//sphereA.translate(vec3(0.0,0.0,0.01));
-	if (data.doesIntersect){
-		sphereA.translate(data.direction*-data.amount);
+	if (dataTODO.doesIntersect){
+		sphereA.translate(dataTODO.direction*-dataTODO.amount);
 		cout << "Sphere collision: " << endl;
-		cout << data.doesIntersect << endl;
-		cout << data.direction.x << ", " << data.direction.y << ", " << data.direction.z << " * " << data.amount << endl;
-		//cout << sphereA.position.x << ", " << sphereA.position.y << ", " << sphereA.position.z << " * " << data.amount << endl;
+		cout << dataTODO.doesIntersect << endl;
+		cout << dataTODO.direction.x << ", " << dataTODO.direction.y << ", " << dataTODO.direction.z << " * " << dataTODO.amount << endl;
 	}
 
 	sceneObjects["sphereA"].get_transform().position = sphereA.position;
@@ -1002,6 +1003,20 @@ bool render()
 		for (SceneObject* mapObj : objectVector){
 			renderMesh(mapObj, V, P);
 		}
+
+		if (dataTODO.doesIntersect){
+			glDisable(GL_DEPTH_TEST);
+			SceneObject s = meshes["sphere"];//SceneObject(sceneObjects["sphereA"]);
+			s.set_texture(texs["island"]); // Sets the texture
+			s.set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+			s.get_transform().position = (dataTODO.intersection);
+			s.get_transform().scale = vec3(0.1,0.1,0.1);
+			s.update(0.0f);
+			cout << vec3ToString(s.get_transform().position) << endl;
+			s.get_transform().scale = vec3(0.2, 0.2, 0.2);
+			renderMesh(&s, V, P);
+			glEnable(GL_DEPTH_TEST);
+		}
 	
 	}
 	else{
@@ -1022,6 +1037,7 @@ bool render()
 		}
 
 	}
+
 
 	// Disable wireframe
 	glPolygonMode(GL_FRONT, GL_FILL);

@@ -16,125 +16,18 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 
 	switch(other->colliderType){
 	case ColliderTypes::SPHERE : {
-		SphereCollider* sphere = dynamic_cast<SphereCollider*>(other);
-				if (colliderType == ColliderTypes::OBBCUBE) {
-					/*
-					vector<vec3> corners = getCorners();
-					vec3 max = corners[0];
-					vec3 min = corners[6];
-					float r = sphere->radius;
-					vec3 center = sphere->position;
-					
-					cout << "max = " << vec3ToString(max) << " - " << "min = " << vec3ToString(min) << endl;
-
-					float r2 = r * r;
-					float delta = 0.0;
-					for (int i = 0; i < 2; i++){
-						if (center[i] < min[i]) delta += (center[i] - min[i]) * (center[i] - min[i]);
-						else if (center[i] > max[i]) delta += (center[i] - max[i]) * (center[i] - max[i]);
-					}
-					data.doesIntersect = delta <= r2;
-					data.amount = r2 - delta;
-					data.direction = (center - position);
-					if (!isZeroVec3(data.direction)) data.direction = normalize(data.direction);
-					*/
-					vec3 pt = vec3(0, 0, 0);
-					data.doesIntersect = testSphereObb(sphere, *this, pt);
-					
-					vec3 direction = position - sphere->position;
-					if (!isZeroVec3(direction))
-						direction = normalize(direction);
-
-					data.amount = std::numeric_limits<float>::max();
-					int closestIndex = 0;
-					vector<vec3> norms = {
-						normals[0],
-						normals[1],
-						normals[2],
-						-normals[0],
-						-normals[1],
-						-normals[2]
-					};
-					for (int i = 0; i < norms.size(); i++){
-						float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - sphere->position));
-						if (d < data.amount){
-							closestIndex = i;
-							data.amount = d;
-						}
-					}
-
-					data.direction = norms[closestIndex];
-					if (!isZeroVec3(data.direction)) data.direction = normalize(data.direction);
-					data.amount = velocity;
-				}
-				else { //AABB Cube
-
-					data.doesIntersect = (sqdDistPointAABB(sphere->position, *this) <= (sphere->radius * 2.0f));
-
-					vec3 direction = position - sphere->position;
-					if (!isZeroVec3(direction))
-						direction = normalize(direction);
-
-					data.amount = std::numeric_limits<float>::max();
-					int closestIndex = 0;
-					vector<vec3> norms = {
-						normals[0],
-						normals[1],
-						normals[2],
-						-normals[0],
-						-normals[1],
-						-normals[2]
-					};
-					for (int i = 0; i < norms.size(); i++){
-						float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - sphere->position));
-						if (d < data.amount){
-							closestIndex = i;
-							data.amount = d;
-						}
-					}
-					direction = norms[closestIndex];
-
-					data.amount = velocity;
-					if (!isZeroVec3(direction)){
-						direction = normalize(direction);
-					}
-
-					data.direction = direction;
-				}
-				break;
+			data = sphereToCubeCollision(dynamic_cast<SphereCollider*>(other), velocity);
+			break;
 		}
 
 	case ColliderTypes::CUBE :
 		{
 
 		if (colliderType == ColliderTypes::OBBCUBE){
-				CubeCollider* otherCollider = dynamic_cast<CubeCollider*>(other);
-				vec3 offset = other->position - position;
-				vector<vec3> norms = {
-					normals[0],
-					normals[1],
-					normals[2],
-					otherCollider->normals[0],
-					otherCollider->normals[1],
-					otherCollider->normals[2],
-					cross(normals[0], otherCollider->normals[0]),
-					cross(normals[0], otherCollider->normals[1]),
-					cross(normals[0], otherCollider->normals[2]),
-					cross(normals[1], otherCollider->normals[0]),
-					cross(normals[1], otherCollider->normals[1]),
-					cross(normals[1], otherCollider->normals[2]),
-					cross(normals[2], otherCollider->normals[0]),
-					cross(normals[2], otherCollider->normals[1]),
-					cross(normals[2], otherCollider->normals[2]),
-					normalize(offset)* -1.0f
-				};
-				if (isZeroVec3(offset)) norms[norms.size() - 1] = vec3(0.0, 0.0, 0.0);
-				data = oBBCollision(*otherCollider, norms);
-				if (dot(data.direction, offset) < 0.0f) data.direction *= -1.0f;
-				data.amount = velocity;
+			data = obbCollision(dynamic_cast<CubeCollider*>(other), velocity);
 
-			}
-		else {
+			} else {
+
 				vec3 otherPos = other->position;
 				vec3 otherDimen = dynamic_cast<CubeCollider*>(other)->dimensions;
 
@@ -142,34 +35,8 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 					if (abs(position.y - otherPos.y) < dimensions.y + otherDimen.y) {
 						if (abs(position.z - otherPos.z) < dimensions.z + otherDimen.z) {
 							data.doesIntersect = true;
-
-							vec3 direction = position - otherPos;
-
-							data.amount = std::numeric_limits<float>::max();
-							int closestIndex = 0;
-							vector<vec3> norms = {
-								normals[0],
-								normals[1],
-								normals[2],
-								-normals[0],
-								-normals[1],
-								-normals[2]
-							};
-							for (int i = 0; i < norms.size(); i++){
-								float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - other->position));
-								if (d < data.amount){
-									closestIndex = i;
-									data.amount = d;
-								}
-							}
-							direction = norms[closestIndex];
-
+							data.direction = closestCollidingNormal(other);
 							data.amount = velocity;
-							if (!isZeroVec3(direction)){
-								direction = normalize(direction);
-							}
-
-							data.direction = direction;
 						}
 					}
 				}
@@ -179,37 +46,77 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 
 	case ColliderTypes::OBBCUBE :
 		{
-			CubeCollider* otherCollider = dynamic_cast<CubeCollider*>(other);
-
-			vec3 offset = other->position - position;
-			vector<vec3> norms = {
-				normals[0],
-				normals[1],
-				normals[2],
-				otherCollider->normals[0],
-				otherCollider->normals[1],
-				otherCollider->normals[2],
-				cross(normals[0], otherCollider->normals[0]),
-				cross(normals[0], otherCollider->normals[1]),
-				cross(normals[0], otherCollider->normals[2]),
-				cross(normals[1], otherCollider->normals[0]),
-				cross(normals[1], otherCollider->normals[1]),
-				cross(normals[1], otherCollider->normals[2]),
-				cross(normals[2], otherCollider->normals[0]),
-				cross(normals[2], otherCollider->normals[1]),
-				cross(normals[2], otherCollider->normals[2]),
-				normalize(offset)* -1.0f
-			};
-			if (isZeroVec3(offset)) norms[norms.size() - 1] = vec3(0.0, 0.0, 0.0);
-
-
-			data = oBBCollision(*otherCollider, norms);
-			if (dot(data.direction, offset) < 0.0f) data.direction *= -1.0f;
-			data.amount = velocity;
+			data = obbCollision(dynamic_cast<CubeCollider*>(other), velocity);
 			break;
 		}
 	}
 
+	return data;
+}
+
+vec3 CubeCollider::closestCollidingNormal(Collider* other){
+	vec3 direction = position - other->position;
+	if (!isZeroVec3(direction))
+		direction = normalize(direction);
+
+	float minCollision = std::numeric_limits<float>::max();
+	int closestIndex = 0;
+	vector<vec3> norms = {
+		normals[0],
+		normals[1],
+		normals[2],
+		-normals[0],
+		-normals[1],
+		-normals[2]
+	};
+	for (int i = 0; i < norms.size(); i++){
+		float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - other->position));
+		if (d < minCollision){
+			closestIndex = i;
+			minCollision = d;
+		}
+	}
+	vec3 outNorm = norms[closestIndex];
+	if (!isZeroVec3(outNorm)) outNorm = normalize(outNorm);
+	return outNorm;
+}
+
+IntersectionData CubeCollider::obbCollision(CubeCollider* cube, float velocity){
+	IntersectionData data = IntersectionData();
+	vec3 offset = cube->position - position;
+	vector<vec3> norms = {
+		normals[0],
+		normals[1],
+		normals[2],
+		cube->normals[0],
+		cube->normals[1],
+		cube->normals[2],
+		cross(normals[0], cube->normals[0]),
+		cross(normals[0], cube->normals[1]),
+		cross(normals[0], cube->normals[2]),
+		cross(normals[1], cube->normals[0]),
+		cross(normals[1], cube->normals[1]),
+		cross(normals[1], cube->normals[2]),
+		cross(normals[2], cube->normals[0]),
+		cross(normals[2], cube->normals[1]),
+		cross(normals[2], cube->normals[2]),
+		normalize(offset)* -1.0f
+	};
+	if (isZeroVec3(offset)) norms[norms.size() - 1] = vec3(0.0, 0.0, 0.0);
+	data = oBBCollision(*cube, norms);
+	if (dot(data.direction, offset) < 0.0f) data.direction *= -1.0f;
+	data.amount = velocity;
+	data.intersection = position + data.direction * dimensions;
+
+	return data;
+}
+
+IntersectionData CubeCollider::sphereToCubeCollision(SphereCollider* sphere, float velocity){
+	IntersectionData data = IntersectionData();
+	vec3 pt = vec3(0, 0, 0);
+	data.doesIntersect = testSphereObb(sphere, *this, pt);
+	data.direction = closestCollidingNormal(sphere);
+	data.amount = velocity;
 	return data;
 }
 
@@ -352,6 +259,8 @@ float CubeCollider::sqdDistPointAABB(vec3 p, CubeCollider aabb){
 			sq += sqdValue(p.x, aabb.getMin().x, aabb.getMax().x);
 			sq += sqdValue(p.y, aabb.getMin().y, aabb.getMax().y);
 			sq += sqdValue(p.z, aabb.getMin().z, aabb.getMax().z);
+			sq / 3.0f;
+
 			return sq;
 }
 

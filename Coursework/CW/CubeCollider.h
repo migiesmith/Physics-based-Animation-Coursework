@@ -45,6 +45,9 @@ public:
 	float sqdDistPointAABB(vec3 p, CubeCollider aabb);
 	float sqdValue(float pVal, float bmin, float bmax);
 
+	vec3 closestCollidingNormal(Collider* other);
+	IntersectionData obbCollision(CubeCollider* cube, float velocity);
+	IntersectionData sphereToCubeCollision(SphereCollider* sphere, float velocity);
 	bool testSphereObb(SphereCollider* sphere, CubeCollider obb, vec3 pt);
 	vec3 closestPtOnOBB(vec3 v);
 

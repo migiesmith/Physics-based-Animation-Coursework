@@ -52,7 +52,14 @@ public:
 	// Creates a mesh object with the provided geometry and material
 	SceneObject(geometry &geom, material &mat) : _mesh(geom, mat){ }
 	// Default copy constructor and assignment operator
-	SceneObject(const SceneObject &other) = default;
+	SceneObject(const SceneObject &other) : _mesh((geometry)other.get_geometry()) {
+		_texture = other._texture;
+		_origionalLocalTransform = other._origionalLocalTransform;
+		_localTransform = other._localTransform;
+		_normal = other._normal;
+		_parentTransform = graphics_framework::transform();
+	}
+
 	SceneObject& operator=(const SceneObject &rhs) = default;
 	// Destroys the mesh object
 	~SceneObject();

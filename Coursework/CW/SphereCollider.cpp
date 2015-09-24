@@ -17,6 +17,7 @@ IntersectionData SphereCollider::intersects(Collider* other, float velocity){
 			data.amount = Util::magnitude(data.direction) - (this->radius + dynamic_cast<SphereCollider*>(other)->radius);
 			if (data.amount <= 0){
 				data.doesIntersect = true;
+				data.intersection = position + (radius * normalize(-data.direction));
 			}
 			break;
 			
@@ -26,12 +27,14 @@ IntersectionData SphereCollider::intersects(Collider* other, float velocity){
 		{
 			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
 			data.direction = data.direction * -1.0f;
+			data.intersection = position + (radius * normalize(data.direction));
 			break;
 		}
 		case ColliderTypes::OBBCUBE:
 		{
 			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
 			data.direction = data.direction * -1.0f;
+			data.intersection = position + (radius *normalize(data.direction));
 			break;
 		}
 	}

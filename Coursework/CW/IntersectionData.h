@@ -22,6 +22,7 @@ public:
 	bool doesIntersect = false;
 	vec3 direction = vec3(0.0f, 0.0f, 0.0f);
 	float amount = 0.0f;
+	vec3 intersection = vec3(0.0f,0.0f,0.0f);
 
 	IntersectionData();
 	~IntersectionData();

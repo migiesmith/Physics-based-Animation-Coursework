@@ -32,8 +32,9 @@ float totalTime = 0.0f; // Stores how much time has passed (used for time based 
 bool spotLightEnabled = false; // Whether or not to render the spot light
 
 //TODO
-SphereCollider sphereA = SphereCollider(vec3(0, 100, 0), 1);
-CubeCollider sphereB = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0,1.0,1.0), ColliderTypes::CUBE);
+//SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
+CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
@@ -422,14 +423,14 @@ void initSceneObjects(){
 		50.0f);
 
 
-	sceneObjects["sphereA"] = meshes["sphere"];
+	sceneObjects["sphereA"] = meshes["cube"];
 	sceneObjects["sphereA"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-
+	
 	sceneObjects["sphereB"] = meshes["cube"];
 	sceneObjects["sphereB"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
@@ -437,6 +438,9 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+
+	sphereB.rotate(vec3(0,0,1), 45.0f);
+	sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
 
 }
 
@@ -639,17 +643,17 @@ bool update(float delta_time)
 {
 	totalTime += delta_time;
 
+	float velocity = 5.5f;
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
-		sphereA.translate(vec3(1.5, 0.0, 0.0)*delta_time);
+		sphereA.translate(vec3(velocity, 0.0, 0.0)*delta_time);
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN))
-		sphereA.translate(vec3(-1.5, 0.0, 0.0)*delta_time);
+		sphereA.translate(vec3(-velocity, 0.0, 0.0)*delta_time);
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_LEFT))
-		sphereA.translate(vec3(0.0, 0.0, 1.5)*delta_time);
+		sphereA.translate(vec3(0.0, 0.0, velocity)*delta_time);
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
-		sphereA.translate(vec3(0.0,0.0,-1.5)*delta_time);
-
-
-	IntersectionData data = sphereA.intersects(&sphereB);
+		sphereA.translate(vec3(0.0, 0.0, -velocity)*delta_time);
+	
+	IntersectionData data = sphereA.intersects(&sphereB, magnitude(vec3(0.0, 0.0, -velocity))*delta_time);
 	//sphereA.translate(vec3(0.0,0.0,0.01));
 	if (data.doesIntersect){
 		sphereA.translate(data.direction*-data.amount);

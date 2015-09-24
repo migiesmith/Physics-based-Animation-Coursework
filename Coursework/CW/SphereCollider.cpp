@@ -8,7 +8,7 @@ TODO
 
 #include "SphereCollider.h"
 
-IntersectionData SphereCollider::intersects(Collider* other){
+IntersectionData SphereCollider::intersects(Collider* other, float velocity){
 	IntersectionData data = IntersectionData();
 
 	switch(other->getType()){
@@ -18,14 +18,22 @@ IntersectionData SphereCollider::intersects(Collider* other){
 			if (data.amount <= 0){
 				data.doesIntersect = true;
 			}
+			break;
 			
 			}
 			
 		case ColliderTypes::CUBE :
 		{
-			data = dynamic_cast<CubeCollider*>(other)->intersects(this);
+			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
 			data.direction = data.direction * -1.0f;
-			}
+			break;
+		}
+		case ColliderTypes::OBBCUBE:
+		{
+			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
+			data.direction = data.direction * -1.0f;
+			break;
+		}
 	}
 
 	return data;

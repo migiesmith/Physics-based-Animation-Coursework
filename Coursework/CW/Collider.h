@@ -9,6 +9,7 @@ TODO
 #pragma once
 
 #include <renderer.h>
+#include "IntersectionData.h"
 #include <math.h>
 
 using namespace std;
@@ -36,6 +37,7 @@ public:
 	Collider(vec3 position, ColliderTypes colliderType);
 	void setPosition(vec3 position);
 	void translate(vec3 translation);
+	IntersectionData intersects(Collider* other, float velocity);
 	ColliderTypes getType(){ return colliderType; }
 	~Collider();
 };

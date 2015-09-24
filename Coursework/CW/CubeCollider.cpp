@@ -7,23 +7,25 @@ TODO
 */
 
 #include "CubeCollider.h"
+#include "SphereCollider.h"
 
 
 
-IntersectionData CubeCollider::intersects(Collider* other){
+IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 	IntersectionData data = IntersectionData();
 
 	switch(other->colliderType){
 	case ColliderTypes::SPHERE : {
 		SphereCollider* sphere = dynamic_cast<SphereCollider*>(other);
 				if (colliderType == ColliderTypes::OBBCUBE) {
-
+					/*
 					vector<vec3> corners = getCorners();
-
 					vec3 max = corners[0];
 					vec3 min = corners[6];
 					float r = sphere->radius;
 					vec3 center = sphere->position;
+					
+					cout << "max = " << vec3ToString(max) << " - " << "min = " << vec3ToString(min) << endl;
 
 					float r2 = r * r;
 					float delta = 0.0;
@@ -35,7 +37,35 @@ IntersectionData CubeCollider::intersects(Collider* other){
 					data.amount = r2 - delta;
 					data.direction = (center - position);
 					if (!isZeroVec3(data.direction)) data.direction = normalize(data.direction);
+					*/
+					vec3 pt = vec3(0, 0, 0);
+					data.doesIntersect = testSphereObb(sphere, *this, pt);
+					
+					vec3 direction = position - sphere->position;
+					if (!isZeroVec3(direction))
+						direction = normalize(direction);
 
+					data.amount = std::numeric_limits<float>::max();
+					int closestIndex = 0;
+					vector<vec3> norms = {
+						normals[0],
+						normals[1],
+						normals[2],
+						-normals[0],
+						-normals[1],
+						-normals[2]
+					};
+					for (int i = 0; i < norms.size(); i++){
+						float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - sphere->position));
+						if (d < data.amount){
+							closestIndex = i;
+							data.amount = d;
+						}
+					}
+
+					data.direction = norms[closestIndex];
+					if (!isZeroVec3(data.direction)) data.direction = normalize(data.direction);
+					data.amount = velocity;
 				}
 				else { //AABB Cube
 
@@ -45,7 +75,7 @@ IntersectionData CubeCollider::intersects(Collider* other){
 					if (!isZeroVec3(direction))
 						direction = normalize(direction);
 
-					data.amount = 10000.0f;
+					data.amount = std::numeric_limits<float>::max();
 					int closestIndex = 0;
 					vector<vec3> norms = {
 						normals[0],
@@ -63,16 +93,10 @@ IntersectionData CubeCollider::intersects(Collider* other){
 						}
 					}
 					direction = norms[closestIndex];
-					if (data.amount < 0)data.amount += sphere->radius; else data.amount -= sphere->radius;
-					
-					cout << Util::vec3ToString(direction) << endl;
-					
 
-
-					//TODO FIX this bit
+					data.amount = velocity;
 					if (!isZeroVec3(direction)){
 						direction = normalize(direction);
-						cout << data.amount << "|||" << endl;
 					}
 
 					data.direction = direction;
@@ -105,7 +129,9 @@ IntersectionData CubeCollider::intersects(Collider* other){
 					normalize(offset)* -1.0f
 				};
 				if (isZeroVec3(offset)) norms[norms.size() - 1] = vec3(0.0, 0.0, 0.0);
-					data = oBBCollision(*otherCollider, norms);
+				data = oBBCollision(*otherCollider, norms);
+				if (dot(data.direction, offset) < 0.0f) data.direction *= -1.0f;
+				data.amount = velocity;
 
 			}
 		else {
@@ -118,19 +144,31 @@ IntersectionData CubeCollider::intersects(Collider* other){
 							data.doesIntersect = true;
 
 							vec3 direction = position - otherPos;
-							if (!isZeroVec3(direction))
-								direction = normalize(direction);
 
-							if (abs(direction.x) >= 0.5) {
-								direction = vec3(round(direction.x), 0.0, 0.0);
+							data.amount = std::numeric_limits<float>::max();
+							int closestIndex = 0;
+							vector<vec3> norms = {
+								normals[0],
+								normals[1],
+								normals[2],
+								-normals[0],
+								-normals[1],
+								-normals[2]
+							};
+							for (int i = 0; i < norms.size(); i++){
+								float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - other->position));
+								if (d < data.amount){
+									closestIndex = i;
+									data.amount = d;
+								}
 							}
-							if (abs(direction.y) >= 0.5) {
-								direction = vec3(0.0, round(direction.y), 0.0);
+							direction = norms[closestIndex];
+
+							data.amount = velocity;
+							if (!isZeroVec3(direction)){
+								direction = normalize(direction);
 							}
-							if (abs(direction.z) >= 0.5) {
-								direction = vec3(0.0, 0.0, round(direction.z));
-							}
-							
+
 							data.direction = direction;
 						}
 					}
@@ -163,22 +201,51 @@ IntersectionData CubeCollider::intersects(Collider* other){
 				normalize(offset)* -1.0f
 			};
 			if (isZeroVec3(offset)) norms[norms.size() - 1] = vec3(0.0, 0.0, 0.0);
-				data = oBBCollision(*otherCollider, norms);
 
-				break;
+
+			data = oBBCollision(*otherCollider, norms);
+			if (dot(data.direction, offset) < 0.0f) data.direction *= -1.0f;
+			data.amount = velocity;
+			break;
 		}
 	}
 
 	return data;
 }
 
+bool CubeCollider::testSphereObb(SphereCollider* sphere, CubeCollider obb, vec3 pt)
+
+{
+	pt = obb.closestPtOnOBB(sphere->position);
+	vec3 v = pt - sphere->position;
+	
+	return dot(v, v) <= sphere->radius * sphere->radius;
+
+}
+
+vec3 CubeCollider::closestPtOnOBB(vec3 v){
+
+	vec3 retPt;
+	vec3 d = v - position;
+	retPt = position;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		float dist = dot(d, normals[i]);
+
+		if (dist > dimensions[i]) dist = dimensions[i];
+		if (dist < -dimensions[i]) dist = -dimensions[i];
+		retPt += dist * normals[i];
+	}
+	return retPt;
+
+}
+
 IntersectionData CubeCollider::oBBCollision(CubeCollider other, vector<vec3> norms){
 	IntersectionData data = IntersectionData();
-	vec3 offset = other.position - position;
+	vec3 offset = position - other.position;
 
 	if (magnitude(offset) > magnitude(getCorners()[0] - position) + magnitude(other.getCorners()[0] - other.position)) return data;
-
-
 
 		vector<float> depth = {};
 		vector<vec3> axis = {};
@@ -186,26 +253,25 @@ IntersectionData CubeCollider::oBBCollision(CubeCollider other, vector<vec3> nor
 		int j = 0;
 
 		for (int i = 0; i < norms.size() - 1; i++){
-		//if(!norms[i].isZero()){
-			pair<bool, float> out = checkProjectedIntersection(getCorners(), other.getCorners(), norms[i], offset);
+			if(!isZeroVec3(norms[i])){
+				pair<bool, float> out = checkProjectedIntersection(getCorners(), other.getCorners(), norms[i], offset);
 
-			if (!out.first) return data;
-			axis.assign(j, norms[i]);
-			depth[j] = out.second;
-			//}
-			j++;
+				if (!out.first) return data;
+				axis.push_back( norms[i]);
+				depth.push_back( out.second);
+				j++;
+			}
 		}
-
 
 		int minPos = 0;
 		float minVal = std::numeric_limits<float>::max();
-		for (int i = 0; i < norms.size() - 1; i++){
-			if (&axis[i])if (abs(depth[i]) < minVal){ minVal = depth[i]; minPos = i; }
+		for (int i = 0; i < axis.size(); i++){
+			if (abs(depth.at(i)) < minVal){ minVal = depth.at(i); minPos = i; cout << "min pos = " << i << endl; }
 		}
 
 		data.doesIntersect = true;
 		data.amount = depth[minPos];
-		data.direction = axis[minPos];
+		data.direction = normalize(axis[minPos]);
 		return data;
 }
 
@@ -240,32 +306,46 @@ pair<bool, float> CubeCollider::checkProjectedIntersection(vector<vec3> corners0
 }
 
 void CubeCollider::rotate(vec3 axis, float degrees){
-		if (colliderType == ColliderTypes::OBBCUBE){
-			for (int i = 0; i < 2; i++)
-				normals[i] = Util::rotate(normals[i], axis, degrees);
-		}
-		else{
-			cout << ("Missues of CubeCollider - You cannot rotate a cube that isn't an OBBCUBE") << endl;
-		}
+	if (colliderType == ColliderTypes::OBBCUBE){
+		rotation = Util::rotationMat4(axis, degrees);
+		for (int i = 0; i < 2; i++){
+			vec4 rotatedNorm = vec4(normals[i], 1.0) * rotation;
+			normals[i] = vec3(rotatedNorm.x, rotatedNorm.y, rotatedNorm.z);
+		}	
+	} else{
+		cout << ("Missues of CubeCollider - You cannot rotate a cube that isn't an OBBCUBE") << endl;
 	}
+}
 
 vector<vec3> CubeCollider::getCorners(){
-	vec3 halfDimen = dimensions / 2.0f;
-
+	vec3 halfDimen = dimensions*2.0f;
 	//TODO Add in the rotation code here? if(colliderType == ColliderTypes.OBBCUBE)
+	if (colliderType == ColliderTypes::CUBE){
+		return{
+			position + vec3(halfDimen.x, halfDimen.y, halfDimen.z),//Vec3(1.0,1.0,1.0),
+			position + vec3(-halfDimen.x, halfDimen.y, halfDimen.z),//Vec3(-1.0,1.0,1.0),
+			position + vec3(-halfDimen.x, halfDimen.y, -halfDimen.z),//Vec3(-1.0,1.0,-1.0),
+			position + vec3(halfDimen.x, halfDimen.y, -halfDimen.z),//Vec3(1.0,1.0,-1.0),
 
-	return{
-		position + vec3(halfDimen.x, halfDimen.y, halfDimen.z),//Vec3(1.0,1.0,1.0),
-		position + vec3(-halfDimen.x, halfDimen.y, halfDimen.z),//Vec3(-1.0,1.0,1.0),
-		position + vec3(-halfDimen.x, halfDimen.y, -halfDimen.z),//Vec3(-1.0,1.0,-1.0),
-		position + vec3(halfDimen.x, halfDimen.y, -halfDimen.z),//Vec3(1.0,1.0,-1.0),
+			position + vec3(halfDimen.x, -halfDimen.y, halfDimen.z),//Vec3(1.0,-1.0,1.0),
+			position + vec3(-halfDimen.x, -halfDimen.y, halfDimen.z),//Vec3(-1.0,-1.0,1.0),
+			position + vec3(-halfDimen.x, -halfDimen.y, -halfDimen.z),//Vec3(-1.0,-1.0,-1.0),
+			position + vec3(halfDimen.x, -halfDimen.y, -halfDimen.z)//Vec3(1.0,-1.0,-1.0)
+		};
+	}else{
+		return{
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(halfDimen.x, halfDimen.y, halfDimen.z)) * rotation),//Vec3(1.0,1.0,1.0),
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(-halfDimen.x, halfDimen.y, halfDimen.z)) * rotation),//Vec3(-1.0,1.0,1.0),
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(-halfDimen.x, halfDimen.y, -halfDimen.z)) * rotation),//Vec3(-1.0,1.0,-1.0),
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(halfDimen.x, halfDimen.y, -halfDimen.z)) * rotation),//Vec3(1.0,1.0,-1.0),
 
-		position + vec3(halfDimen.x, -halfDimen.y, halfDimen.z),//Vec3(1.0,-1.0,1.0),
-		position + vec3(-halfDimen.x, -halfDimen.y, halfDimen.z),//Vec3(-1.0,-1.0,1.0),
-		position + vec3(-halfDimen.x, -halfDimen.y, -halfDimen.z),//Vec3(-1.0,-1.0,-1.0),
-		position + vec3(halfDimen.x, -halfDimen.y, -halfDimen.z)//Vec3(1.0,-1.0,-1.0)
-	};
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(halfDimen.x, -halfDimen.y, halfDimen.z)) * rotation),//Vec3(1.0,-1.0,1.0),
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(-halfDimen.x, -halfDimen.y, halfDimen.z)) * rotation),//Vec3(-1.0,-1.0,1.0),
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(-halfDimen.x, -halfDimen.y, -halfDimen.z)) * rotation),//Vec3(-1.0,-1.0,-1.0),
+			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(halfDimen.x, -halfDimen.y, -halfDimen.z)) * rotation)//Vec3(1.0,-1.0,-1.0)
+		};
 	}
+}
 
 float CubeCollider::sqdDistPointAABB(vec3 p, CubeCollider aabb){
 			float sq = 0.0;

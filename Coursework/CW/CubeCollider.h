@@ -7,11 +7,13 @@ TODO
 */
 
 #pragma once
-#include "SphereCollider.h"
+//#include "SphereCollider.h"
+#include "Collider.h"
 #include "IntersectionData.h"
 #include "Util.h"
 
 using namespace Util;
+class SphereCollider;
 
 class CubeCollider :
 	public Collider
@@ -35,13 +37,16 @@ public:
 		this->dimensions = dimensions;
 	}
 
-	IntersectionData intersects(Collider* other);
+	IntersectionData intersects(Collider* other, float velocity);
 	IntersectionData oBBCollision(CubeCollider other, vector<vec3> norms);
 	pair<bool, float> checkProjectedIntersection(vector<vec3> corners0, vector<vec3> corners1, vec3 axis, vec3 offset);
 	vector<vec3> getCorners();
 	void rotate(vec3 axis, float degrees);
 	float sqdDistPointAABB(vec3 p, CubeCollider aabb);
 	float sqdValue(float pVal, float bmin, float bmax);
+
+	bool testSphereObb(SphereCollider* sphere, CubeCollider obb, vec3 pt);
+	vec3 closestPtOnOBB(vec3 v);
 
 	// Returns AABB Min
 	vec3 getMin();

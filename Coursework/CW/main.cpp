@@ -456,17 +456,17 @@ void initCameras(){
 	chaseCam.set_springiness(0.5f);
 	chaseCam.move( (*sceneObjects["island"].get_children())["character"].get_transform_with_parent().position,
 		eulerAngles((*sceneObjects["island"].get_children())["character"].get_transform_with_parent().orientation));
-	chaseCam.set_projection(quarter_pi<float>(), aspect, NEAR, FAR);
+	chaseCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 	*/
 
 	//Target Camera
 	targetCam.set_position(vec3(1200.0f, 650.0f, 1200.0f));
 	targetCam.set_target(vec3(0.0f, -200.0f, 0.0f));
-	targetCam.set_projection(quarter_pi<float>(), aspect, NEAR, FAR);
+	targetCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 
 	// Free Camera
 	freeCam.set_position(vec3(0.0f, 85.0f, 0.0f));
-	freeCam.set_projection(quarter_pi<float>(), aspect, NEAR, FAR);
+	freeCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 	
 	// MVP for post processing (Orthographics projection)
 	float w = renderer::get_screen_width() / 2.0f;
@@ -878,15 +878,15 @@ bool render()
 
 	// Compute the MVP matrix from the light's point of view
 	float orthoScale = 1.0f / 8.0f;
-	float farOrtho = FAR*orthoScale;
+	float farOrtho = MYFAR*orthoScale;
 	mat4 depthProjectionMatrix = ortho<float>(-farOrtho, farOrtho, -farOrtho, farOrtho, -farOrtho, farOrtho);
 	mat4 depthViewMatrix = lookAt(normalize(ambientLightPosition), normalize(-ambientLightPosition), vec3(0, 1, 0));
 	
 	// Bind the depth shader
 	renderer::bind(depthEffect);
 	glUniform1f(depthEffect.get_uniform_location("totalTime"), totalTime);
-	glUniform1f(depthEffect.get_uniform_location("near"), NEAR);
-	glUniform1f(depthEffect.get_uniform_location("far"), FAR);
+	glUniform1f(depthEffect.get_uniform_location("near"), MYNEAR);
+	glUniform1f(depthEffect.get_uniform_location("far"), MYFAR);
 	// Render the list of sorted child SceneObjects
 	for (SceneObject* mapObj : objectVector){
 		renderMeshDepth(mapObj, depthViewMatrix, depthProjectionMatrix);
@@ -1014,7 +1014,10 @@ bool render()
 			s.update(0.0f);
 			cout << vec3ToString(s.get_transform().position) << endl;
 			s.get_transform().scale = vec3(0.2, 0.2, 0.2);
-			renderMesh(&s, V, P);
+			//renderMesh(&s, V, P);
+
+			//TODO
+			DrawArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 0.1f);
 			glEnable(GL_DEPTH_TEST);
 		}
 	
@@ -1143,8 +1146,8 @@ void dof(){
 	glUniform1f(dofEffect.get_uniform_location("screenHeight"), float(renderer::get_screen_height()));
 
 	// Send the near and far values to the shader
-	glUniform1f(dofEffect.get_uniform_location("near"), NEAR);
-	glUniform1f(dofEffect.get_uniform_location("far"), FAR);
+	glUniform1f(dofEffect.get_uniform_location("near"), MYNEAR);
+	glUniform1f(dofEffect.get_uniform_location("far"), MYFAR);
 
 	// Send the shader the focal length and stop value
 	glUniform1f(dofEffect.get_uniform_location("focalLength"), dofFocalLength);
@@ -1305,8 +1308,8 @@ void ssao(){
 	glUniform1f(ssaoEffect.get_uniform_location("screenHeight"), (float)renderer::get_screen_height());
 
 	// Send the near and far values to the shader
-	glUniform1f(ssaoEffect.get_uniform_location("near"), NEAR);
-	glUniform1f(ssaoEffect.get_uniform_location("far"), FAR);
+	glUniform1f(ssaoEffect.get_uniform_location("near"), MYNEAR);
+	glUniform1f(ssaoEffect.get_uniform_location("far"), MYFAR);
 
 
 	// Send the shader the degree of blurring (rings + samples per ring)
@@ -1458,6 +1461,7 @@ void main()
 	application.set_initialise(initialise);
 	application.set_update(update);
 	application.set_render(render);
+
 	// Run application
 	application.run();
 }

@@ -42,10 +42,10 @@ namespace graphics_framework
 		// Gets the current projection matrix for the camera
 		glm::mat4 get_projection() const { return _projection; }
 		// Builds projection matrix
-		void set_projection(float fov, float aspect, float near, float far)
+		void set_projection(float fov, float aspect, float inNear, float inFar)
 		{
 			// Call GLM's perspective function
-			_projection = glm::perspective(fov, aspect, near, far);
+			_projection = glm::perspective(fov, aspect, inNear, inFar);
 		}
 		// Updates the camera.  This is a pure virtual function.
 		virtual void update(float delta_time) = 0;

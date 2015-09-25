@@ -9,6 +9,7 @@
 
 #include "SphereCollider.h"
 #include "CubeCollider.h"
+#include "helpergraphics.h"
 
 //TODO
 
@@ -25,8 +26,8 @@ using namespace std;
 using namespace graphics_framework;
 
 
-float NEAR = 2.414f;
-float FAR = 3500.0f;
+float MYNEAR = 2.414f;
+float MYFAR = 3500.0f;
 
 // Debug menu toggle
 bool toggleDebugMenu = false;
@@ -39,7 +40,7 @@ bool glowEnabled = true;
 bool ssaoEnabled = true;
 bool greyscaleEnabled = false;
 bool vignetteEnabled = true;
-bool dofEnabled = true;
+bool dofEnabled = false;
 bool lensFlareEnabled = true;
 
 static effect mainEffect; // The main effect used

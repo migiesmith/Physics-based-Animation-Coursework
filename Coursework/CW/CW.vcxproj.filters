@@ -71,5 +71,11 @@
     <ClInclude Include="CubeCollider.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="helpermath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpergraphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

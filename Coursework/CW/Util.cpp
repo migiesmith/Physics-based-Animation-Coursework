@@ -14,6 +14,16 @@ using namespace glm;
 
 using namespace Util;
 
+	geometry arrowGeom;
+
+	void Util::init(){
+		arrowGeom = loadModel("arrow\\arrow.obj");
+	}
+
+
+	// Loads in a model and returns it
+	geometry Util::loadModel(string modelName){ return geometry("..\\resources\\models\\" + modelName); }
+
 	//Returns the magnitude vec3 v
 	float Util::magnitude(vec3 v){
 		return sqrtf(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
@@ -77,4 +87,31 @@ using namespace Util;
 
 	string Util::vec3ToString(vec3 v){
 		return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z);
+	}
+
+	void Util::renderArrow(vec3 start, vec3 end, float length, float radius, mat4 PV, effect currentEffect){
+		// Calculate the rotation of the arrow
+		quat q;
+		vec3 a = cross(normalize(start - end), vec3(1,0,0));
+		q.x = a.x;
+		q.y = a.y;
+		q.z = a.z;
+		q.w = sqrtf((pow(magnitude(start - end), 2)) * (pow(magnitude(vec3(1, 0, 0)), 2))) + dot(start - end, vec3(-1, 0, 0));
+
+		// Create a transform to store the rotation, translation and scale of the arrow
+		graphics_framework::transform t;
+		t.position = start + (end - start);
+		t.rotate(normalize(q));
+		t.scale = vec3(length, radius, radius);
+
+		// Pass the transform matrix to the shader
+		mat4 MVP = PV * t.get_transform_matrix();
+		glUniformMatrix4fv(
+			currentEffect.get_uniform_location("MVP"), // Location of uniform
+			1, // Number of values - 1 mat4
+			GL_FALSE, // Transpose the matrix?
+			value_ptr(MVP)); // Pointer to matrix data
+
+		// Render the arrow
+		renderer::render(arrowGeom);
 	}

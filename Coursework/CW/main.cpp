@@ -32,10 +32,10 @@ float totalTime = 0.0f; // Stores how much time has passed (used for time based 
 bool spotLightEnabled = false; // Whether or not to render the spot light
 
 //TODO
-SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
-SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
-//CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-//CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+//SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
+//SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
+CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 IntersectionData dataTODO;
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -206,6 +206,8 @@ bool initialise()
 	// Set the clear colour
 	glClearColor(0,0,0,0);
 
+	Util::init();
+
 	return true;
 }
 
@@ -214,21 +216,21 @@ bool load_content()
 	// *************
 	// Load in models
 	// *************
-	meshes["island"] = loadModel("island\\island.obj");
-	meshes["barn"] = loadModel("barn\\barn.obj");
-	meshes["character"] = loadModel("character\\character.3ds");
-	meshes["hay"] = loadModel("hay\\hay.3ds");
-	meshes["bridge"] = loadModel("bridge\\bridge.obj");
-	meshes["cloth"] = loadModel("cloth\\cloth1.obj");
-	meshes["smallRock"] = loadModel("island\\smallRock.obj");
-	meshes["largeRock"] = loadModel("island\\largeRock.obj");
-	meshes["silo"] = loadModel("silo\\silo.obj");
-	meshes["farmhouse"] = loadModel("farmhouse\\farmhouse.obj");
-	meshes["glass"] = loadModel("glass\\glass.obj");
-	meshes["sphere"] = loadModel("sphere\\sphere.obj");
-	meshes["cube"] = loadModel("cube\\cube.obj");
+	meshes["island"] = Util::loadModel("island\\island.obj");
+	meshes["barn"] = Util::loadModel("barn\\barn.obj");
+	meshes["character"] = Util::loadModel("character\\character.3ds");
+	meshes["hay"] = Util::loadModel("hay\\hay.3ds");
+	meshes["bridge"] = Util::loadModel("bridge\\bridge.obj");
+	meshes["cloth"] = Util::loadModel("cloth\\cloth1.obj");
+	meshes["smallRock"] = Util::loadModel("island\\smallRock.obj");
+	meshes["largeRock"] = Util::loadModel("island\\largeRock.obj");
+	meshes["silo"] = Util::loadModel("silo\\silo.obj");
+	meshes["farmhouse"] = Util::loadModel("farmhouse\\farmhouse.obj");
+	meshes["glass"] = Util::loadModel("glass\\glass.obj");
+	meshes["sphere"] = Util::loadModel("sphere\\sphere.obj");
+	meshes["cube"] = Util::loadModel("cube\\cube.obj");
 
-	skyBox[0] = loadModel("skybox.obj");
+	skyBox[0] = Util::loadModel("skybox.obj");
 	skyBox[1] = skyBox[0];
 	skyBox[2] = skyBox[0];
 
@@ -329,6 +331,10 @@ void initShaders(){
 	dofEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
 	dofEffect.add_shader("..\\resources\\shaders\\depth_of_field.frag", GL_FRAGMENT_SHADER);
 
+	
+	colourPassThroughEffect.add_shader("..\\resources\\shaders\\colour_passthrough.vert", GL_VERTEX_SHADER);
+	colourPassThroughEffect.add_shader("..\\resources\\shaders\\colour_passthrough.frag", GL_FRAGMENT_SHADER);
+
 	// Build effect
 	mainEffect.build();
 	passThroughEffect.build();
@@ -341,6 +347,7 @@ void initShaders(){
 	greyscaleEffect.build();
 	vignetteEffect.build();
 	dofEffect.build();
+	colourPassThroughEffect.build();
 
 }
 
@@ -425,7 +432,7 @@ void initSceneObjects(){
 		50.0f);
 
 
-	sceneObjects["sphereA"] = meshes["sphere"];
+	sceneObjects["sphereA"] = meshes["cube"];
 	sceneObjects["sphereA"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
@@ -433,7 +440,7 @@ void initSceneObjects(){
 		vec4(1, 1, 1, 1),
 		50.0f);
 	
-	sceneObjects["sphereB"] = meshes["sphere"];
+	sceneObjects["sphereB"] = meshes["cube"];
 	sceneObjects["sphereB"].set_texture(texs["island"]); // Sets the texture
 	sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
@@ -441,8 +448,8 @@ void initSceneObjects(){
 		vec4(1, 1, 1, 1),
 		50.0f);
 
-	//sphereB.rotate(vec3(0,0,1), 45.0f);
-	//sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
+	sphereB.rotate(vec3(0,0,1), 45.0f);
+	sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
 
 }
 
@@ -1017,7 +1024,10 @@ bool render()
 			//renderMesh(&s, V, P);
 
 			//TODO
-			DrawArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 0.1f);
+			renderer::bind(colourPassThroughEffect);
+			glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
+			//DrawArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 0.1f);
+			Util::renderArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 1.0f, 0.5f, P * V, colourPassThroughEffect);
 			glEnable(GL_DEPTH_TEST);
 		}
 	
@@ -1444,12 +1454,6 @@ texture loadTexture(string textureName, bool mipmaps, bool antisoptrics)
 texture loadTexture(string textureName)
 {
 	return loadTexture(textureName, false, false);
-}
-
-// Loads in a model and returns it
-geometry loadModel(string modelName)
-{
-	return geometry("..\\resources\\models\\" + modelName);
 }
 
 void main()

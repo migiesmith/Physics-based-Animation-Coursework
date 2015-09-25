@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "models", "models", "{2A7C62
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shaders", "shaders", "{2194805E-ABC9-4D12-A0CD-98C0073AEC73}"
 	ProjectSection(SolutionItems) = preProject
+		resources\shaders\colour_passthrough.frag = resources\shaders\colour_passthrough.frag
+		resources\shaders\colour_passthrough.vert = resources\shaders\colour_passthrough.vert
 		resources\shaders\depth_of_field.frag = resources\shaders\depth_of_field.frag
 		resources\shaders\glow_shader.frag = resources\shaders\glow_shader.frag
 		resources\shaders\greyscale.frag = resources\shaders\greyscale.frag

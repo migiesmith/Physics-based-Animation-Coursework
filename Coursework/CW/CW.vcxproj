@@ -102,8 +102,6 @@
     <ClInclude Include="Collider.h" />
     <ClInclude Include="CubeCollider.h" />
     <ClInclude Include="FrameBuffer.h" />
-    <ClInclude Include="helpergraphics.h" />
-    <ClInclude Include="helpermath.h" />
     <ClInclude Include="IntersectionData.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="SceneObject.h" />

@@ -16,6 +16,10 @@ using namespace glm;
 
 namespace Util
 {
+	// Loads in a model and returns it
+	geometry loadModel(string modelName);
+
+	void init();
 	float magnitude(vec3 v);
 	bool isZeroVec3(vec3 v);
 	vec3 rotate(vec3 v, vec3 axis, float degrees);
@@ -23,4 +27,5 @@ namespace Util
 	mat4 rotationMat4(vec3 axis, float degrees);
 	vec4 vec3ToVec4(vec3 v);
 	vec3 vec4ToVec3(vec4 v);
+	void renderArrow(vec3 start, vec3 end, float length, float radius, mat4 VP, effect currentEffect);
 }

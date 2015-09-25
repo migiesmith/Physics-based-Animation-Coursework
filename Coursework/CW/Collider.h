@@ -11,6 +11,7 @@ TODO
 #include <renderer.h>
 #include "IntersectionData.h"
 #include <math.h>
+#include "Util.h"
 
 using namespace std;
 using namespace graphics_framework;

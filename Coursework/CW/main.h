@@ -9,7 +9,6 @@
 
 #include "SphereCollider.h"
 #include "CubeCollider.h"
-#include "helpergraphics.h"
 
 //TODO
 
@@ -45,6 +44,7 @@ bool lensFlareEnabled = true;
 
 static effect mainEffect; // The main effect used
 static effect passThroughEffect; // The effect used for the skybox
+static effect colourPassThroughEffect; // The effect used for the skybox
 static effect fboEffect; // The effect used for the skybox
 static effect spotLightEffect; // The effect used for the spot light
 static effect grassEffect; // The effect used for the grass

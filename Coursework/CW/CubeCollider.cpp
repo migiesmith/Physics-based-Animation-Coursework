@@ -16,7 +16,9 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 
 	switch(other->colliderType){
 	case ColliderTypes::SPHERE : {
-			data = sphereToCubeCollision(dynamic_cast<SphereCollider*>(other), velocity);
+		data = sphereToCubeCollision(dynamic_cast<SphereCollider*>(other), velocity);
+		data.direction *= -1.0f;
+		data.amount *= -1.0f;
 			break;
 		}
 
@@ -25,6 +27,8 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 
 		if (colliderType == ColliderTypes::OBBCUBE){
 			data = obbCollision(dynamic_cast<CubeCollider*>(other), velocity);
+			data.direction *= -1.0f;
+			data.amount *= -1.0f;
 
 			} else {
 
@@ -35,8 +39,8 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 					if (abs(position.y - otherPos.y) < dimensions.y + otherDimen.y) {
 						if (abs(position.z - otherPos.z) < dimensions.z + otherDimen.z) {
 							data.doesIntersect = true;
-							data.direction = closestCollidingNormal(other);
-							data.amount = velocity;
+							data.direction = -closestCollidingNormal(other);
+							data.amount = -velocity;
 						}
 					}
 				}
@@ -46,8 +50,10 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 
 	case ColliderTypes::OBBCUBE :
 		{
-			data = obbCollision(dynamic_cast<CubeCollider*>(other), velocity);
-			break;
+		data = obbCollision(dynamic_cast<CubeCollider*>(other), velocity);
+		data.direction *= -1.0f;
+		data.amount *= -1.0f;
+		break;
 		}
 	}
 

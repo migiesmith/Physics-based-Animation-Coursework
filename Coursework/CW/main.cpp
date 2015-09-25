@@ -18,7 +18,7 @@ map<string, SceneObject> sceneObjects; // A map containing all of the main scene
 map<string, texture> texs; // A map containing all of the textures
 
 mesh skyBox[3]; // The meshs for the skybox
-spot_light spotLight; // spot_light object that stores information about the spot light
+
 
 bool isWireframe = false; // Whether or not to render in wireframe
 
@@ -29,7 +29,6 @@ double cursor_y = 0.0; // Stores the position Y of the cursor
 
 float totalTime = 0.0f; // Stores how much time has passed (used for time based events like model bobbing and light movement)
 
-bool spotLightEnabled = false; // Whether or not to render the spot light
 
 //TODO
 //SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
@@ -53,7 +52,7 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 		currentCamera = Camera::Free;
 	}
 	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS){
-		spotLightEnabled = !spotLightEnabled;
+		//TODO
 	}
 	else if (key == GLFW_KEY_F6 && action == GLFW_PRESS){
 		ssaoOnly = !ssaoOnly;
@@ -152,7 +151,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 							break;
 						case Buttons::Spot_Light:
 							// Toggle Spot Light mode
-							spotLightEnabled = !spotLightEnabled;
+							//TODO 
 							break;
 						case Buttons::Target_Cam:
 							// Change to the target camera
@@ -266,16 +265,7 @@ bool load_content()
 
 	texs["menuon"] = loadTexture("buttons\\buttons.png");
 	texs["menuoff"] = loadTexture("buttons\\off.png");
-
-	/*
-		Set spot light values
-	*/
-	spotLight.set_position(vec3(300, 200, 0)); // Set the position of the spot light
-	spotLight.set_light_colour(vec4(1.0f, 1.0f, 1.0f, 1.0f)); // Set the colour the spot light emits
-	spotLight.set_direction(normalize(vec3(0.0f, -1.0f, 0.0f))); // Set the direction of the spot light
-	spotLight.set_range(1000.0f); // Set the range of the spot light
-	spotLight.set_power(2.0f); // Set the power (intensity) of the spot light
-
+	
 
 	// Set up the scene
 	initSceneObjects();
@@ -301,53 +291,24 @@ void initShaders(){
 	mainEffect.add_shader("..\\resources\\shaders\\main_shader\\main_shader.vert", GL_VERTEX_SHADER);
 	mainEffect.add_shader("..\\resources\\shaders\\main_shader\\main_shader.frag", GL_FRAGMENT_SHADER);
 
-	passThroughEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	passThroughEffect.add_shader("..\\resources\\shaders\\texture_passthrough.frag", GL_FRAGMENT_SHADER);
-
-	spotLightEffect.add_shader("..\\resources\\shaders\\spot.vert", GL_VERTEX_SHADER);
-	spotLightEffect.add_shader("..\\resources\\shaders\\spot.frag", GL_FRAGMENT_SHADER);
-
-	motionBlurEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	motionBlurEffect.add_shader("..\\resources\\shaders\\motion_blur.frag", GL_FRAGMENT_SHADER);
-
-	glowEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	glowEffect.add_shader("..\\resources\\shaders\\glow_shader.frag", GL_FRAGMENT_SHADER);
-
-	ssaoEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	ssaoEffect.add_shader("..\\resources\\shaders\\ssao_shader.frag", GL_FRAGMENT_SHADER);
+	passThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
+	passThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.frag", GL_FRAGMENT_SHADER);
 
 	depthEffect.add_shader("..\\resources\\shaders\\depth_shader\\depth.vert", GL_VERTEX_SHADER);
 	depthEffect.add_shader("..\\resources\\shaders\\depth_shader\\depth.frag", GL_FRAGMENT_SHADER);
-
-	lensFlareEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	lensFlareEffect.add_shader("..\\resources\\shaders\\lens_flare.frag", GL_FRAGMENT_SHADER);
-
-	greyscaleEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	greyscaleEffect.add_shader("..\\resources\\shaders\\greyscale.frag", GL_FRAGMENT_SHADER);
-
-	vignetteEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	vignetteEffect.add_shader("..\\resources\\shaders\\vignette.frag", GL_FRAGMENT_SHADER);
-
-	dofEffect.add_shader("..\\resources\\shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	dofEffect.add_shader("..\\resources\\shaders\\depth_of_field.frag", GL_FRAGMENT_SHADER);
-
 	
-	colourPassThroughEffect.add_shader("..\\resources\\shaders\\colour_passthrough.vert", GL_VERTEX_SHADER);
-	colourPassThroughEffect.add_shader("..\\resources\\shaders\\colour_passthrough.frag", GL_FRAGMENT_SHADER);
+	colourPassThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\colour_passthrough.vert", GL_VERTEX_SHADER);
+	colourPassThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\colour_passthrough.frag", GL_FRAGMENT_SHADER);
+
+	postProcessingEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
+	postProcessingEffect.add_shader("..\\resources\\shaders\\post_processing_shader\\post_processing_shader.frag", GL_FRAGMENT_SHADER);//ssao_shader.frag", GL_FRAGMENT_SHADER);
 
 	// Build effect
 	mainEffect.build();
 	passThroughEffect.build();
-	spotLightEffect.build();
-	motionBlurEffect.build();
-	glowEffect.build();
-	ssaoEffect.build();
 	depthEffect.build();
-	lensFlareEffect.build();
-	greyscaleEffect.build();
-	vignetteEffect.build();
-	dofEffect.build();
 	colourPassThroughEffect.build();
+	postProcessingEffect.build();
 
 }
 
@@ -765,78 +726,6 @@ void renderMesh(SceneObject* sO, const mat4 &V, const mat4 &P){
 }
 
 // Renders a SceneObject and it's children
-void renderMeshSpotLight (SceneObject* sO, const mat4 &V, const mat4 &P){
-
-	mat4 M = sO->get_transform_with_parent().get_transform_matrix();
-
-	mat4 MVP = P * V * M;
-	// Set MVP matrix uniform
-	glUniformMatrix4fv(
-		spotLightEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(MVP)); // Pointer to matrix data
-
-	// Set the models transform matrix uniform
-	glUniformMatrix4fv(
-		spotLightEffect.get_uniform_location("M"),
-		1,
-		GL_FALSE,
-		value_ptr(M));
-
-
-	// If the object has a parent and wireframe is enabled then render the parent-child hierarchy
-	if (sO->_parent && isWireframe){
-		vec3 linePos = -sO->get_transform().position / sO->get_transform_with_parent().scale;
-
-		linePos = rotate(inverse(sO->get_transform().orientation), linePos);
-
-		renderer::bind(texs["solidRed"], 0);
-		renderer::bind(material(vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), 1), "mat");
-
-
-		glLineWidth(3);
-		glBegin(GL_LINES);
-		glVertex3f(0, 0, 0);
-		glVertex3f(linePos.x, linePos.y, linePos.z);
-		glEnd();
-		vec3 objScale = sO->get_transform_with_parent().scale;
-		vec3 linePosNorm = normalize(linePos) / objScale;
-		glLineWidth(100);
-		renderer::bind(texs["white"], 0);
-		glBegin(GL_LINES);
-		glVertex3f(0, 0, 0);
-		glVertex3f(linePosNorm.x, linePosNorm.y, linePosNorm.z);
-		glEnd();
-		glLineWidth(1);
-
-	}
-
-	// Pass wind uniforms
-	glUniform1f(spotLightEffect.get_uniform_location("windFactor"), sO->windFactor);
-
-	// Bind and set texture
-	renderer::bind(sO->get_texture(), 0);
-	glUniform1i(spotLightEffect.get_uniform_location("tex"), 0);
-
-	// Create a copy of the SceneObject's material, set the emmissive to black and then bind that material
-	material mat = sO->get_material();
-	mat.set_emissive(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-	// Bind the SceneObject's material
-	renderer::bind(mat, "mat");
-
-	// Render the current SceneObject
-	sO->render();
-
-	// Render the list of child SceneObjects
-	for (SceneObject& child : *(sO->get_children())){
-		renderMeshSpotLight(&child, V, P);
-	}
-
-}
-
-// Renders a SceneObject and it's children
 void renderMeshDepth(SceneObject* sO, const mat4 &V, const mat4 &P){
 
 	mat4 M = sO->get_transform_with_parent().get_transform_matrix();
@@ -936,122 +825,88 @@ bool render()
 	else
 		glPolygonMode(GL_FRONT, GL_FILL);
 
-	// Check if we are in spotlight mode
-	if (!spotLightEnabled){
-		// Render scene normally
 
-		// Set the skybox positions relative to the current camera
-		switch (currentCamera){
-		case Camera::Chase:
-			skyBox[0].get_transform().position = chaseCam.get_position();
-			skyBox[1].get_transform().position = chaseCam.get_position();
-			skyBox[2].get_transform().position = chaseCam.get_position();
-			break;
-		case Camera::Target:
-			skyBox[0].get_transform().position = targetCam.get_position();
-			skyBox[1].get_transform().position = targetCam.get_position();
-			skyBox[2].get_transform().position = targetCam.get_position();
-			break;
-		case Camera::Free:
-			skyBox[0].get_transform().position = freeCam.get_position();
-			skyBox[1].get_transform().position = freeCam.get_position();
-			skyBox[2].get_transform().position = freeCam.get_position();
-			break;
-		}
+	// Render scene normally
 
-		// Bind the passthrough shader
-		renderer::bind(passThroughEffect);
+	// Set the skybox positions relative to the current camera
+	switch (currentCamera){
+	case Camera::Chase:
+		skyBox[0].get_transform().position = chaseCam.get_position();
+		skyBox[1].get_transform().position = chaseCam.get_position();
+		skyBox[2].get_transform().position = chaseCam.get_position();
+		break;
+	case Camera::Target:
+		skyBox[0].get_transform().position = targetCam.get_position();
+		skyBox[1].get_transform().position = targetCam.get_position();
+		skyBox[2].get_transform().position = targetCam.get_position();
+		break;
+	case Camera::Free:
+		skyBox[0].get_transform().position = freeCam.get_position();
+		skyBox[1].get_transform().position = freeCam.get_position();
+		skyBox[2].get_transform().position = freeCam.get_position();
+		break;
+	}
 
-		// Disable depth testing
-		glDisable(GL_DEPTH_TEST);
+	// Bind the passthrough shader
+	renderer::bind(passThroughEffect);
 
-		// Render each sky box
-		for (int i = 0; i < 3; i++){
-			mat4 M = skyBox[i].get_transform().get_transform_matrix();
-			mat4 MVP = P * V * M;
-			glUniformMatrix4fv(
-				passThroughEffect.get_uniform_location("MVP"), // Location of uniform
-				1, // Number of values - 1 mat4
-				GL_FALSE, // Transpose the matrix?
-				value_ptr(MVP)); // Pointer to matrix data
+	// Disable depth testing
+	glDisable(GL_DEPTH_TEST);
 
+	// Render each sky box
+	for (int i = 0; i < 3; i++){
+		mat4 M = skyBox[i].get_transform().get_transform_matrix();
+		mat4 MVP = P * V * M;
+		glUniformMatrix4fv(
+			passThroughEffect.get_uniform_location("MVP"), // Location of uniform
+			1, // Number of values - 1 mat4
+			GL_FALSE, // Transpose the matrix?
+			value_ptr(MVP)); // Pointer to matrix data
 			renderer::bind(texs["skybox" + to_string(i)], 0);
-			glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-			renderer::render(skyBox[i]);
-		}
-		
-		// Re-enable depth testing
-		glEnable(GL_DEPTH_TEST);
-		
-
-		// Bind the main effect
-		renderer::bind(mainEffect);
-
-		// assign global uniform values
-		glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
-		glUniform3fv(mainEffect.get_uniform_location("eyeDir"), 1, value_ptr(camDir));
-		glUniform1f(mainEffect.get_uniform_location("totalTime"), totalTime);
-
-		// Bind the shadow map's depth
-		glActiveTexture(GL_TEXTURE0 + 3);
-		glBindTexture(GL_TEXTURE_2D, shadowFbo.get_depth());
-		glUniform1i(mainEffect.get_uniform_location("shadowMap"), 3);
-		// Set up the depth bias matrix (shifts the coords)
-		mat4 biasMatrix(
-			0.5, 0.0, 0.0, 0.0,
-			0.0, 0.5, 0.0, 0.0,
-			0.0, 0.0, 0.5, 0.0,
-			0.5, 0.5, 0.5, 1.0
-			);
-		glUniformMatrix4fv(mainEffect.get_uniform_location("depthBias"), 1, GL_FALSE, value_ptr(biasMatrix));
-		glUniformMatrix4fv(mainEffect.get_uniform_location("lightVP"), 1, GL_FALSE, value_ptr(depthProjectionMatrix*depthViewMatrix));
-
-		// Render the list of sorted child SceneObjects
-		for (SceneObject* mapObj : objectVector){
-			renderMesh(mapObj, V, P);
-		}
-
-		if (dataTODO.doesIntersect){
-			glDisable(GL_DEPTH_TEST);
-			SceneObject s = meshes["sphere"];//SceneObject(sceneObjects["sphereA"]);
-			s.set_texture(texs["island"]); // Sets the texture
-			s.set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-			s.get_transform().position = (dataTODO.intersection);
-			s.get_transform().scale = vec3(0.1,0.1,0.1);
-			s.update(0.0f);
-			cout << vec3ToString(s.get_transform().position) << endl;
-			s.get_transform().scale = vec3(0.2, 0.2, 0.2);
-			//renderMesh(&s, V, P);
-
-			//TODO
-			renderer::bind(colourPassThroughEffect);
-			glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-			//DrawArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 0.1f);
-			Util::renderArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 1.0f, 0.5f, P * V, colourPassThroughEffect);
-			glEnable(GL_DEPTH_TEST);
-		}
+		glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
+		renderer::render(skyBox[i]);
+	}
 	
+	// Re-enable depth testing
+	glEnable(GL_DEPTH_TEST);
+	
+	// Bind the main effect
+	renderer::bind(mainEffect);
+
+	// assign global uniform values
+	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
+	glUniform3fv(mainEffect.get_uniform_location("eyeDir"), 1, value_ptr(camDir));
+	glUniform1f(mainEffect.get_uniform_location("totalTime"), totalTime);
+
+	// Bind the shadow map's depth
+	glActiveTexture(GL_TEXTURE0 + 3);
+	glBindTexture(GL_TEXTURE_2D, shadowFbo.get_depth());
+	glUniform1i(mainEffect.get_uniform_location("shadowMap"), 3);
+	// Set up the depth bias matrix (shifts the coords)
+	mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+		);
+	glUniformMatrix4fv(mainEffect.get_uniform_location("depthBias"), 1, GL_FALSE, value_ptr(biasMatrix));
+	glUniformMatrix4fv(mainEffect.get_uniform_location("lightVP"), 1, GL_FALSE, value_ptr(depthProjectionMatrix*depthViewMatrix));
+
+	// Render the list of sorted child SceneObjects
+	for (SceneObject* mapObj : objectVector){
+		renderMesh(mapObj, V, P);
 	}
-	else{
 
-
-		// Bind spotlight effect
-		renderer::bind(spotLightEffect);
-
-		// Bind the spotlight
-		renderer::bind(spotLight, "spot");
-
-		// Send the camera's position to the shader
-		glUniform3fv(spotLightEffect.get_uniform_location("eye_pos"), 1, value_ptr(camPos));
-
-		// Render the list of sorted child SceneObjects
-		for (SceneObject* mapObj : objectVector){
-			renderMeshSpotLight(mapObj, V, P);
-		}
-
+	if (dataTODO.doesIntersect){
+		//TODO
+		glDisable(GL_DEPTH_TEST);
+		renderer::bind(colourPassThroughEffect);
+		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
+		Util::renderArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 1.0f, 0.5f, P * V, colourPassThroughEffect);
+		glEnable(GL_DEPTH_TEST);
 	}
 
-
+	
 	// Disable wireframe
 	glPolygonMode(GL_FRONT, GL_FILL);
 	
@@ -1088,260 +943,6 @@ void copyBackFBO(){
 	renderer::render(screenQuad);
 }
 
-void lensflare(){
-
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	// Bind the lens flare effect
-	renderer::bind(lensFlareEffect);
-
-	glUniformMatrix4fv(
-		lensFlareEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(lensFlareEffect.get_uniform_location("tex"), 0);
-
-	// Bind the lens flare dirt texture
-	renderer::bind(texs["lensflare"], 1);
-	glUniform1i(lensFlareEffect.get_uniform_location("dirt"), 1);
-
-	// Send the screen dimensions to the shader
-	glUniform1f(lensFlareEffect.get_uniform_location("screenWidth"), float(renderer::get_screen_width()));
-	glUniform1f(lensFlareEffect.get_uniform_location("screenHeight"), float(renderer::get_screen_height()));
-
-	// Set the number of ghosts and their dispersal
-	glUniform1i(lensFlareEffect.get_uniform_location("ghostCount"), 6);
-	glUniform1f(lensFlareEffect.get_uniform_location("ghostDispersal"), 0.15f);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-}
-
-void dof(){
-
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	renderer::bind(dofEffect);
-
-	glUniformMatrix4fv(
-		dofEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_2D, fbo.get_depth());
-	glUniform1i(dofEffect.get_uniform_location("depth"), 1);
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(dofEffect.get_uniform_location("tex"), 0);
-
-	// Send the screen dimensions to the shader
-	glUniform1f(dofEffect.get_uniform_location("screenWidth"), float(renderer::get_screen_width()));
-	glUniform1f(dofEffect.get_uniform_location("screenHeight"), float(renderer::get_screen_height()));
-
-	// Send the near and far values to the shader
-	glUniform1f(dofEffect.get_uniform_location("near"), MYNEAR);
-	glUniform1f(dofEffect.get_uniform_location("far"), MYFAR);
-
-	// Send the shader the focal length and stop value
-	glUniform1f(dofEffect.get_uniform_location("focalLength"), dofFocalLength);
-	glUniform1f(dofEffect.get_uniform_location("fstop"), dofFocalSize);
-	// Send the shader the degree of blurring (rings + samples per ring)
-	glUniform1i(dofEffect.get_uniform_location("rings"), 3);
-	glUniform1i(dofEffect.get_uniform_location("samples"), 3);
-
-	// Send the shader a bool to say whether or not to render in debug mode
-	glUniform1i(dofEffect.get_uniform_location("dofDebug"), dofDebug);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-}
-
-void vignette(){
-
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	// Bind the vignette effect
-	renderer::bind(vignetteEffect);
-
-	glUniformMatrix4fv(
-		vignetteEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(vignetteEffect.get_uniform_location("tex"), 0);
-
-	// Send the shader the vignette parameters (outer + inner radius and the intensity of the vignette)
-	glUniform1f(vignetteEffect.get_uniform_location("outerRadius"), vignetteOuterRadius);
-	glUniform1f(vignetteEffect.get_uniform_location("innerRadius"), vignetteInnerRadius);
-	glUniform1f(vignetteEffect.get_uniform_location("intensity"), vignetteIntensity);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-}
-
-void greyscale(){
-
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	// Bind the greyscale effect
-	renderer::bind(greyscaleEffect);
-
-	glUniformMatrix4fv(
-		greyscaleEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-	
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(greyscaleEffect.get_uniform_location("tex"), 0);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-}
-
-void motionBlur(){
-	
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	// Bind the motion blur effect
-	renderer::bind(motionBlurEffect);
-
-	glUniformMatrix4fv(
-		motionBlurEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the last frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_2D, prevFbo.get_texture());
-	glUniform1i(motionBlurEffect.get_uniform_location("prevTex"), 1);
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(motionBlurEffect.get_uniform_location("tex"), 0);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-}
-
-void glow(){
-	
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	// bind the glow effect
-	renderer::bind(glowEffect);
-
-	glUniformMatrix4fv(
-		glowEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(glowEffect.get_uniform_location("tex"), 0);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-}
-
-void ssao(){
-	
-	copyBackFBO();
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-
-	// Bind the Screen Space Ambient Occlusion effect
-	renderer::bind(ssaoEffect);
-
-	glUniformMatrix4fv(
-		ssaoEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_2D, fbo.get_depth());
-	glUniform1i(ssaoEffect.get_uniform_location("depth"), 1);
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
-	glUniform1i(ssaoEffect.get_uniform_location("tex"), 0);
-
-	// Send the screen dimensions to the shader
-	glUniform1f(ssaoEffect.get_uniform_location("screenWidth"), (float)renderer::get_screen_width());
-	glUniform1f(ssaoEffect.get_uniform_location("screenHeight"), (float)renderer::get_screen_height());
-
-	// Send the near and far values to the shader
-	glUniform1f(ssaoEffect.get_uniform_location("near"), MYNEAR);
-	glUniform1f(ssaoEffect.get_uniform_location("far"), MYFAR);
-
-
-	// Send the shader the degree of blurring (rings + samples per ring)
-	glUniform1i(ssaoEffect.get_uniform_location("samples"), 3);
-	glUniform1i(ssaoEffect.get_uniform_location("rings"), 3);
-
-	// Send the shader the ssao parameters
-	glUniform1f(ssaoEffect.get_uniform_location("aoRadius"), 1.0f);
-	glUniform1f(ssaoEffect.get_uniform_location("lumInfluence"), ssaoLumInfluence);
-	glUniform1f(ssaoEffect.get_uniform_location("selfShadowReduc"), ssaoSelfShadowReduc);
-	glUniform1f(ssaoEffect.get_uniform_location("gaussDisplace"), ssaoGaussDisplace);
-
-	// Tell the shader whether to use noise
-	glUniform1i(ssaoEffect.get_uniform_location("useNoise"), ssaoNoise);
-	// Tell the shader whether to use colour + ssao or just ssao
-	glUniform1i(ssaoEffect.get_uniform_location("renderOnlyAO"), ssaoOnly);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-}
-
 void postProcessing(){
 
 	// Disable Depth Testing
@@ -1370,14 +971,95 @@ void postProcessing(){
 	// Render the sceen quad
 	renderer::render(screenQuad);
 
-	// For each post processing effect, check if it is enabled and then apply it
-	if (ssaoEnabled) ssao();
-	if (dofEnabled) dof();
-	if (glowEnabled) glow();
-	if (lensFlareEnabled) lensflare();
-	if (motionBlurEnabled) motionBlur();
-	if (greyscaleEnabled) greyscale();
-	if (vignetteEnabled) vignette();
+	//------------------ Start post processing start ------------------------
+
+	copyBackFBO();
+
+	// Bind the front post processing framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
+
+	// Bind the Screen Space Ambient Occlusion effect
+	renderer::bind(postProcessingEffect);
+
+	glUniformMatrix4fv(
+		postProcessingEffect.get_uniform_location("MVP"), // Location of uniform
+		1, // Number of values - 1 mat4
+		GL_FALSE, // Transpose the matrix?
+		value_ptr(orthoMVP)); // Pointer to matrix data
+
+	// Bind the last frame buffer's texture - MOTIONBLUR
+	glActiveTexture(GL_TEXTURE0 + 3);
+	glBindTexture(GL_TEXTURE_2D, prevFbo.get_texture());
+	glUniform1i(postProcessingEffect.get_uniform_location("prevTex"), 3);
+
+	// Bind the lens flare dirt texture - LENSFLARE
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, texs["lensflare"].get_id());
+	glUniform1i(postProcessingEffect.get_uniform_location("dirt"), 2);
+
+	// Bind the frame buffer's texture
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_2D, fbo.get_depth());
+	glUniform1i(postProcessingEffect.get_uniform_location("depth"), 1);
+
+	// Bind the frame buffer's texture
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
+	glUniform1i(postProcessingEffect.get_uniform_location("tex"), 0);
+
+	// Send the screen dimensions to the shader
+	glUniform1f(postProcessingEffect.get_uniform_location("screenWidth"), (float)renderer::get_screen_width());
+	glUniform1f(postProcessingEffect.get_uniform_location("screenHeight"), (float)renderer::get_screen_height());
+
+	// Send the near and far values to the shader
+	glUniform1f(postProcessingEffect.get_uniform_location("near"), MYNEAR);
+	glUniform1f(postProcessingEffect.get_uniform_location("far"), MYFAR);
+
+	// Set the number of ghosts and their dispersal - LENSFLARE
+	glUniform1i(postProcessingEffect.get_uniform_location("ghostCount"), 6);
+	glUniform1f(postProcessingEffect.get_uniform_location("ghostDispersal"), 0.15f);
+
+	// Send the shader the vignette parameters (outer + inner radius and the intensity of the vignette) - VIGNETTE
+	glUniform1f(postProcessingEffect.get_uniform_location("outerRadius"), vignetteOuterRadius);
+	glUniform1f(postProcessingEffect.get_uniform_location("innerRadius"), vignetteInnerRadius);
+	glUniform1f(postProcessingEffect.get_uniform_location("intensity"), vignetteIntensity);
+
+	// Send the shader the degree of blurring (rings + samples per ring) - SSAO + DOF
+	glUniform1i(postProcessingEffect.get_uniform_location("samples"), 3);
+	glUniform1i(postProcessingEffect.get_uniform_location("rings"), 3);
+
+	// Send the shader the ssao parameters - SSAO
+	glUniform1f(postProcessingEffect.get_uniform_location("aoRadius"), 1.0f);
+	glUniform1f(postProcessingEffect.get_uniform_location("lumInfluence"), ssaoLumInfluence);
+	glUniform1f(postProcessingEffect.get_uniform_location("selfShadowReduc"), ssaoSelfShadowReduc);
+	glUniform1f(postProcessingEffect.get_uniform_location("gaussDisplace"), ssaoGaussDisplace);
+
+
+	// Send the shader the focal length and stop value - DOF
+	glUniform1f(postProcessingEffect.get_uniform_location("focalLength"), dofFocalLength);
+	glUniform1f(postProcessingEffect.get_uniform_location("fstop"), dofFocalSize);
+	// Send the shader a bool to say whether or not to render in debug  - DOF
+	glUniform1i(postProcessingEffect.get_uniform_location("dofDebug"), dofDebug);
+
+
+	// Pass toggles
+	glUniform1i(postProcessingEffect.get_uniform_location("ssaoEnabled"), ssaoEnabled);
+	glUniform1i(postProcessingEffect.get_uniform_location("glowEnabled"), glowEnabled);
+	glUniform1i(postProcessingEffect.get_uniform_location("lensFlareEnabled"), lensFlareEnabled);
+	glUniform1i(postProcessingEffect.get_uniform_location("motionBlurEnabled"), motionBlurEnabled);
+	glUniform1i(postProcessingEffect.get_uniform_location("greyscaleEnabled"), greyscaleEnabled);
+	glUniform1i(postProcessingEffect.get_uniform_location("vignetteEnabled"), vignetteEnabled);
+	glUniform1i(postProcessingEffect.get_uniform_location("dofEnabled"), dofEnabled);
+
+	// Tell the shader whether to use noise - SSAO
+	glUniform1i(postProcessingEffect.get_uniform_location("useNoise"), ssaoNoise);
+	// Tell the shader whether to use colour + ssao or just ssao - SSAO
+	glUniform1i(postProcessingEffect.get_uniform_location("renderOnlyAO"), ssaoOnly);
+
+	// Render the sceen quad
+	renderer::render(screenQuad);
+
+	//------------------ Start post processing start ------------------------
 
 	// Re-enable Depth Testing
 	glEnable(GL_DEPTH_TEST);

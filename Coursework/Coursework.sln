@@ -13,17 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shaders", "shaders", "{2194
 	ProjectSection(SolutionItems) = preProject
 		resources\shaders\colour_passthrough.frag = resources\shaders\colour_passthrough.frag
 		resources\shaders\colour_passthrough.vert = resources\shaders\colour_passthrough.vert
-		resources\shaders\depth_of_field.frag = resources\shaders\depth_of_field.frag
-		resources\shaders\glow_shader.frag = resources\shaders\glow_shader.frag
-		resources\shaders\greyscale.frag = resources\shaders\greyscale.frag
-		resources\shaders\lens_flare.frag = resources\shaders\lens_flare.frag
-		resources\shaders\motion_blur.frag = resources\shaders\motion_blur.frag
-		resources\shaders\spot.frag = resources\shaders\spot.frag
-		resources\shaders\spot.vert = resources\shaders\spot.vert
-		resources\shaders\ssao_shader.frag = resources\shaders\ssao_shader.frag
 		resources\shaders\texture_passthrough.frag = resources\shaders\texture_passthrough.frag
 		resources\shaders\texture_passthrough.vert = resources\shaders\texture_passthrough.vert
-		resources\shaders\vignette.frag = resources\shaders\vignette.frag
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "textures", "textures", "{CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}"
@@ -154,6 +145,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "silo", "silo", "{7462643C-1
 		resources\models\silo\silo.obj = resources\models\silo\silo.obj
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "post_processing_shader", "post_processing_shader", "{2BC0ED8C-0BCC-420E-B8E9-1C65FB0547DE}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\post_processing_shader\post_processing_shader.frag = resources\shaders\post_processing_shader\post_processing_shader.frag
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "passthrough_shaders", "passthrough_shaders", "{00FB0005-345A-47CF-B765-A4B838C534C0}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\colour_passthrough.frag = resources\shaders\colour_passthrough.frag
+		resources\shaders\colour_passthrough.vert = resources\shaders\colour_passthrough.vert
+		resources\shaders\texture_passthrough.frag = resources\shaders\texture_passthrough.frag
+		resources\shaders\texture_passthrough.vert = resources\shaders\texture_passthrough.vert
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -194,5 +198,7 @@ Global
 		{A8625D35-E832-4264-A672-274E341C4B67} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
 		{8A9A95CE-4D14-497D-997C-F93EFB18F259} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
 		{7462643C-14C6-4436-8A16-95ACFD64DB5F} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{2BC0ED8C-0BCC-420E-B8E9-1C65FB0547DE} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
+		{00FB0005-345A-47CF-B765-A4B838C534C0} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
 	EndGlobalSection
 EndGlobal

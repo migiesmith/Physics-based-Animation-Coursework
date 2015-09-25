@@ -46,18 +46,10 @@ static effect mainEffect; // The main effect used
 static effect passThroughEffect; // The effect used for the skybox
 static effect colourPassThroughEffect; // The effect used for the skybox
 static effect fboEffect; // The effect used for the skybox
-static effect spotLightEffect; // The effect used for the spot light
-static effect grassEffect; // The effect used for the grass
-static effect grassSpotEffect; // The effect used for the grass
-
-static effect motionBlurEffect; // The effect used for the motion blur post process
-static effect glowEffect; // The effect used for the glow post process
-static effect ssaoEffect; // The effect used for the ssao post process
-static effect greyscaleEffect; // The effect used for the greyscale post process
-static effect vignetteEffect; // The effect used for the vignette post process
-static effect dofEffect; // The effect used for the depth of field post process
 static effect depthEffect; // The effect used for the ssao post process
-static effect lensFlareEffect; // The effect used for blurring textures
+
+static effect postProcessingEffect; // The effect used for all of the post processes
+
 
 // Dof values
 float dofFocalLength = 300.0f; // The focal length of the camera

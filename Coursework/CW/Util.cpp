@@ -89,7 +89,7 @@ using namespace Util;
 		return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z);
 	}
 
-	void Util::renderArrow(vec3 start, vec3 end, float length, float radius, mat4 PV, effect currentEffect){
+	void Util::renderArrow(vec3 start, vec3 end, float length, float radius, mat4& PV, effect currentEffect){
 		// Calculate the rotation of the arrow
 		quat q;
 		vec3 a = cross(normalize(start - end), vec3(1,0,0));
@@ -114,4 +114,17 @@ using namespace Util;
 
 		// Render the arrow
 		renderer::render(arrowGeom);
+	}
+
+	vec3 Util::translationFromMat4(mat4& m){
+		return vec3(m[0][3], m[1][3], m[2][3]);
+	}
+
+	mat4 Util::translationMat4(vec3& v){
+		return mat4(
+			1, 0, 0, v.x,
+			0, 1, 0, v.y,
+			0, 0, 1, v.z,
+			0, 0, 0, 1
+			);
 	}

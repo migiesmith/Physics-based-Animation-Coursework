@@ -37,6 +37,13 @@ CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), Col
 CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 IntersectionData dataTODO;
 
+
+// IK constants
+int							numLinks = 7;		// How many links
+float						linkLength = 2.0f;		// Length of each link
+std::vector<Link*>			links;						// Array holding all our links
+//TODO
+
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
 	if (key == GLFW_KEY_F1 && action == GLFW_PRESS){
@@ -381,6 +388,13 @@ void initScreenQuads(){
 
 void initSceneObjects(){
 
+	//TODO IK INIT
+	for (int i = 0; i < numLinks; ++i){
+		float f = (float)i*0.2f;
+		links.push_back(new Link(vec3(0, 0, 1), f));
+	}
+
+
 	// ***************
 	// Set up SceneObjects
 	// ***************
@@ -609,10 +623,103 @@ void updateLighting(float delta_time)
 	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
 }
 
+
+void Reach(int i, const vec3& target){
+	vec3 end = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
+
+	//     +
+	//    / \
+	//   /   \
+	//  /     + end
+	// + vB    
+	//           @ target
+	// 
+	vec3 vB = Util::translationFromMat4(links[i]->m_base);
+	vec3 v0 = end - vB;
+	vec3 v1 = normalize(target - vB);
+
+
+	vec3 axis = normalize(cross(end - vB, v1));
+
+	float ax = dot(v0, v1) / Util::magnitude(end - vB);
+	ax = glm::min(1.0f, glm::max(ax, -1.0f));
+	ax = (float)acos(ax);
+
+	quat qCur = links[i]->axisAngle;
+	quat qDif = quat(-ax, axis);
+	quat qNew = qCur * qDif;
+
+	links[i]->axisAngle = qNew;
+}
+
+void UpdateHierarchy(){
+	for (int i = 0; i < links.size(); i++){
+		quat axAngle = links[i]->axisAngle;
+		vec3 axis = vec3(axAngle.x, axAngle.y, axAngle.z);
+		mat4 rotation = Util::rotationMat4(axis, axAngle.w);
+		mat4 translation = Util::translationMat4(vec3(linkLength, 0, 0));
+
+		links[i]->m_base = rotation * translation;
+		if (i > 0) links[i]->m_base *= links[i - 1]->m_base;
+
+
+
+	}
+}
+
+//TODO IK
+void updateIK(mat4 &proj, mat4 &view){
+
+
+	mat4 PV = proj*view;
+
+	vec3 target = sphereA.position;
+
+	for (int i = 0; i<(int)links.size(); i++)
+	{
+		// Update the whole hiearchy - however, we can optimize this
+		// to only update the section of the hierarchy or update the target
+		// based on the modified link transformation
+		UpdateHierarchy();
+
+		// We iteratively update the `target' based on
+		// the new position of the limb - so we don't have
+		// to keep updating the hierarchy - performance
+		// improvement 
+		Reach(i, target);
+	}
+
+	/*
+	for (int i = 0; i < links[0]->m_base.length(); i++){
+		for (int j = 0; j < links[0]->m_base[0].length(); j++){
+			cout << links[0]->m_base[i][j] << ", ";
+		}
+		cout << endl;
+	}
+	*/
+
+
+	// Loop over the list of links and draw them
+	for (int i = 0; i<(int)links.size(); ++i)
+	{
+		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
+
+		vec3 base = translationFromMat4(links[i]->m_base);
+		cout << "link base = " << vec3ToString(base) << endl;
+		vec3 end = vec4ToVec3(links[i]->m_base * vec4(linkLength, 0, 0, 1));
+
+		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
+	}
+
+}
+
+
+
+
 bool update(float delta_time)
 {
 	totalTime += delta_time;
-
+	
 	float velocity = 5.5f;
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
 		sphereA.translate(vec3(velocity, 0.0, 0.0)*delta_time);
@@ -897,14 +1004,22 @@ bool render()
 		renderMesh(mapObj, V, P);
 	}
 
+
+	// TODO --------------------
 	if (dataTODO.doesIntersect){
-		//TODO
 		glDisable(GL_DEPTH_TEST);
 		renderer::bind(colourPassThroughEffect);
 		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
 		Util::renderArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 1.0f, 0.5f, P * V, colourPassThroughEffect);
 		glEnable(GL_DEPTH_TEST);
 	}
+
+	// TODO IK
+	glDisable(GL_DEPTH_TEST);
+	renderer::bind(colourPassThroughEffect);
+	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
+	updateIK(P, V);
+	glEnable(GL_DEPTH_TEST);
 
 	
 	// Disable wireframe

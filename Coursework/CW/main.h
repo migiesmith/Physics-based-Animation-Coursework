@@ -7,6 +7,7 @@
 
 //TODO
 
+#include "Link.h"
 #include "SphereCollider.h"
 #include "CubeCollider.h"
 

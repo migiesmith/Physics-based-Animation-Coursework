@@ -9,7 +9,8 @@ class Link
 {
 public:
 
-	quat axisAngle;
+	vec3 m_axis;
+	float m_angle;
 	mat4 m_base;
 
 	Link(vec3 &axis, float &angle);

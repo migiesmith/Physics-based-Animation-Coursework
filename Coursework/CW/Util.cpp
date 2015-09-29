@@ -58,24 +58,24 @@ using namespace Util;
 		return vec3(rotatedVec3.x, rotatedVec3.y, rotatedVec3.z);
 	}
 
-	mat4 Util::rotationMat4(vec3 axis, float degrees){
-		// Convert the input degrees to radians
-		float angleInRad = radians(degrees);
-		// Calculate the rotation around each axis
-		float a = axis.x * angleInRad;
-		float b = axis.y * angleInRad;
-		float c = axis.z * angleInRad;
+	//TODO
+	mat4 Util::rotationMat4(vec3 axis, float angle){
+		float s = sin(angle);
+		float c = cos(angle);
+		float t = 1 - c;
 
-		// Create the rotation matrix using the angles a, b, and c
-		mat4 rotationMat = mat4(
-			cos(b)*cos(c), cos(c)*sin(a)*sin(b) - cos(a)*sin(c), cos(a)*cos(c)*sin(b) + sin(a)*sin(c), 0.0,
-			cos(b)*sin(c), cos(a)*cos(c) + sin(a)*sin(b)*sin(c), -cos(c)*sin(a) + cos(a)*sin(b)*sin(c), 0.0,
-			-sin(b), cos(b)*sin(a), cos(a)*cos(b), 0.0,
-			0.0, 0.0, 0.0, 1.0
-			);
+		vec3 ax = normalize(axis);
 
-		//Returns the rotation matrix
-		return rotationMat;
+		float x = ax.x;
+		float y = ax.y;
+		float z = ax.z;
+
+		mat4 rotate(t*x*x + c, t*x*y - s*z, t*x*z + s*y, 0,
+			t*y*x + s*z, t*y*y + c, t*y*z - s*x, 0,
+			t*z*x - s*y, t*z*y + s*x, t*z*z + c, 0,
+			0, 0, 0, 1);
+
+		return rotate;
 	}
 
 	vec4 Util::vec3ToVec4(vec3 v){
@@ -91,17 +91,14 @@ using namespace Util;
 
 	void Util::renderArrow(vec3 start, vec3 end, float length, float radius, mat4& PV, effect currentEffect){
 		// Calculate the rotation of the arrow
-		quat q;
-		vec3 a = cross(normalize(start - end), vec3(1,0,0));
-		q.x = a.x;
-		q.y = a.y;
-		q.z = a.z;
-		q.w = sqrtf((pow(magnitude(start - end), 2)) * (pow(magnitude(vec3(1, 0, 0)), 2))) + dot(start - end, vec3(-1, 0, 0));
+		float m = sqrt(2.f + 2.f * dot(vec3(1, 0, 0), normalize(end - start)));
+		vec3 w = (1.f / m) * cross(vec3(1, 0, 0), normalize(end - start));
+		quat q = quat(0.5f * m, w.x, w.y, w.z);
 
 		// Create a transform to store the rotation, translation and scale of the arrow
 		graphics_framework::transform t;
-		t.position = start + (end - start);
-		t.rotate(normalize(q));
+		t.rotate(q);
+		t.translate(start);
 		t.scale = vec3(length, radius, radius);
 
 		// Pass the transform matrix to the shader
@@ -116,15 +113,16 @@ using namespace Util;
 		renderer::render(arrowGeom);
 	}
 
+
 	vec3 Util::translationFromMat4(mat4& m){
-		return vec3(m[0][3], m[1][3], m[2][3]);
+		return vec3(m[3][0], m[3][1], m[3][2]);
 	}
 
 	mat4 Util::translationMat4(vec3& v){
 		return mat4(
-			1, 0, 0, v.x,
-			0, 1, 0, v.y,
-			0, 0, 1, v.z,
-			0, 0, 0, 1
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			v.x,v.y,v.z, 1
 			);
 	}

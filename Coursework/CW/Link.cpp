@@ -2,7 +2,9 @@
 
 
 Link::Link(vec3 &axis, float &angle){
-	axisAngle = quat(angle, axis);
+	//axisAngle = quat(angle, axis);
+	m_axis = axis;
+	m_angle = angle;
 }
 
 

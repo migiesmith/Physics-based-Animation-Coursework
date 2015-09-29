@@ -394,7 +394,6 @@ void initSceneObjects(){
 		links.push_back(new Link(vec3(0, 0, 1), f));
 	}
 
-
 	// ***************
 	// Set up SceneObjects
 	// ***************
@@ -624,8 +623,65 @@ void updateLighting(float delta_time)
 }
 
 
+vec3 Transform(const mat4& mat, const vec3& p)
+{
+	return vec3(
+		mat[0][0] * p.x +
+		mat[1][0] * p.y +
+		mat[2][0] * p.z,
+
+		mat[0][1] * p.x +
+		mat[1][1] * p.y +
+		mat[2][1] * p.z,
+
+		mat[0][2] * p.x +
+		mat[1][2] * p.y +
+		mat[2][2] * p.z
+		) + vec3(mat[3][0], mat[3][1], mat[3][2]);
+}
+
+quat FromAxisAngle(const vec3& v, float angle)
+{
+	angle *= 0.5f;
+	float sinAngle = std::sin(angle);
+
+	vec3 normVector = normalize(v);
+
+	return quat(normVector.x*sinAngle,
+		normVector.y*sinAngle,
+		normVector.z*sinAngle,
+		std::cos(angle));
+}
+
+float ToAxisAngle(const quat& q, vec3& v)
+{
+	// The quaternion representing the rotation is
+	//   q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k)
+
+	float sqrLength = q.x*q.x + q.y*q.y + q.z*q.z;
+	if (sqrLength > 0.0f)
+	{
+		float invLength = 1.0f / std::sqrt(sqrLength);
+
+		v.x = q.x*invLength;
+		v.y = q.y*invLength;
+		v.z = q.z*invLength;
+
+		return 2.f*std::acos(q.w);
+	}
+	else
+	{
+		// angle is 0 (mod 2*pi), so any axis will do.
+		v.x = 1.0f;
+		v.y = 0.0f;
+		v.z = 0.0f;
+
+		return 0.f;
+	}
+}
+
 void Reach(int i, const vec3& target){
-	vec3 end = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
+	vec3 end = Transform(links[links.size() - 1]->m_base, vec3(linkLength, 0, 0));//vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
 
 	//     +
 	//    / \
@@ -645,35 +701,41 @@ void Reach(int i, const vec3& target){
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
 
-	quat qCur = links[i]->axisAngle;
-	quat qDif = quat(-ax, axis);
+	quat qCur = FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
+
+	quat qDif = FromAxisAngle(axis, -ax);
+
 	quat qNew = qCur * qDif;
 
-	links[i]->axisAngle = qNew;
+	// Use slerp to avoid `snapping' to the target - if 
+	// we instead want to `gradually' interpolate to 
+	// towards the target
+	qNew = slerp(qCur, qNew, 0.001f);
+
+	// For 3D ball joint - we use an axis-angle combination
+	// could just store a quaternion
+	vec3 axis2;
+	float angle2 = ToAxisAngle(qNew, axis2);
+	links[i]->m_axis = axis2;
+	links[i]->m_angle = angle2;
 }
 
 void UpdateHierarchy(){
 	for (int i = 0; i < links.size(); i++){
-		quat axAngle = links[i]->axisAngle;
-		vec3 axis = vec3(axAngle.x, axAngle.y, axAngle.z);
-		mat4 rotation = Util::rotationMat4(axis, axAngle.w);
-		mat4 translation = Util::translationMat4(vec3(linkLength, 0, 0));
+		mat4 rot = Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
+		mat4 trans = Util::translationMat4(vec3(linkLength, 0, 0));
 
-		links[i]->m_base = rotation * translation;
+		links[i]->m_base = rot * trans;
 		if (i > 0) links[i]->m_base *= links[i - 1]->m_base;
-
-
-
 	}
 }
 
 //TODO IK
 void updateIK(mat4 &proj, mat4 &view){
 
-
 	mat4 PV = proj*view;
 
-	vec3 target = sphereA.position;
+	vec3 target = vec3(20, 0, 0);//sphereA.position;
 
 	for (int i = 0; i<(int)links.size(); i++)
 	{
@@ -686,7 +748,7 @@ void updateIK(mat4 &proj, mat4 &view){
 		// the new position of the limb - so we don't have
 		// to keep updating the hierarchy - performance
 		// improvement 
-		Reach(i, target);
+		//Reach(i, target);
 	}
 
 	/*
@@ -698,17 +760,30 @@ void updateIK(mat4 &proj, mat4 &view){
 	}
 	*/
 
-
 	// Loop over the list of links and draw them
-	for (int i = 0; i<(int)links.size(); ++i)
+	for (int i = 0; i<(int)links.size()-1; ++i)
 	{
 		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
 
 		vec3 base = translationFromMat4(links[i]->m_base);
 		cout << "link base = " << vec3ToString(base) << endl;
-		vec3 end = vec4ToVec3(links[i]->m_base * vec4(linkLength, 0, 0, 1));
-
+		vec3 end = translationFromMat4(links[i + 1]->m_base);//vec4ToVec3(links[i]->m_base * vec4(vec3(linkLength, 0, 0), 1));
 		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
+		mat4 MVP = PV ;
+		glUniformMatrix4fv(
+			colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
+			1, // Number of values - 1 mat4
+			GL_FALSE, // Transpose the matrix?
+			value_ptr(MVP)); // Pointer to matrix data
+		glBegin(GL_LINES);
+		glVertex3f(base.x,base.y,base.z);
+		glVertex3f(end.x,end.y,end.z);
+		glEnd();
+		if (i == 0){
+			glBegin(GL_POINTS);
+			glVertex3f(base.x,base.y,base.z);
+			glEnd();
+		}
 	}
 
 }

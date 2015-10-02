@@ -394,6 +394,8 @@ void initSceneObjects(){
 		links.push_back(new Link(vec3(0, 0, 1), f));
 	}
 
+	links[0]->origin = vec3(0, 100, 0);
+
 	// ***************
 	// Set up SceneObjects
 	// ***************
@@ -699,9 +701,12 @@ void Reach(int i, const vec3& target){
 	vec3 axis = normalize(cross(v0, v1));
 
 
-	float ax = dot(v0, v1) / Util::magnitude(end - target);
+	float ax = dot(v0, v1) / (end - vB).length();
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
+
+	cout << ax << endl;
+	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 
 	quat qCur = FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
 
@@ -727,7 +732,7 @@ void Reach(int i, const vec3& target){
 void UpdateHierarchy(){
 	for (int i = 0; i < (int)links.size(); i++){
 		mat4 rot = Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
-		mat4 trans = Util::translationMat4(vec3(linkLength, 0, 0));
+		mat4 trans = Util::translationMat4((vec3(linkLength, 0, 0) + links[i]->origin));
 
 		links[i]->m_base = mult(rot,trans);
 		if (i > 0) links[i]->m_base = mult(links[i]->m_base,links[i - 1]->m_base);

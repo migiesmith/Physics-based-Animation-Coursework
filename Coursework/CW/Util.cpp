@@ -59,10 +59,10 @@ using namespace Util;
 	}
 
 	//TODO
-	mat4 Util::rotationMat4(vec3 axis, float angle){
+	mat4 Util::rotationMat4(vec3& axis, float angle){
 		float s = sin(angle);
 		float c = cos(angle);
-		float t = 1 - c;
+		float t = 1.0f - c;
 
 		vec3 ax = normalize(axis);
 
@@ -113,6 +113,18 @@ using namespace Util;
 		renderer::render(arrowGeom);
 	}
 
+	mat4 Util::mult(const mat4& a, const mat4& b){
+		mat4 newMatrix;
+		for (int x = 0; x < 4; x++) { // Loop through rows
+			for (int y = 0; y < 4; y++) { // Loop through columns
+				newMatrix[x][y] = 0.0f;
+				for (int z = 0; z < 4; z++) { // Added elements
+					newMatrix[x][y] += a[x][z] * b[z][y];
+				}
+			}
+		}
+		return newMatrix;
+	}
 
 	vec3 Util::translationFromMat4(mat4& m){
 		return vec3(m[3][0], m[3][1], m[3][2]);

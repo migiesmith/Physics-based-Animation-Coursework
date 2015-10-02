@@ -1,4 +1,4 @@
-#version 440
+#version 330
 
 // Input colour
 uniform vec4 colour;

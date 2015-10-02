@@ -1,4 +1,4 @@
-#version 440
+#version 330
 
 uniform sampler2D tex; // Texture of the captured scene
 uniform sampler2D depth; // Texture of the depth of the captured scene

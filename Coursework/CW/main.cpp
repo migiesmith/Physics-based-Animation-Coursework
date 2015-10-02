@@ -643,14 +643,14 @@ vec3 Transform(const mat4& mat, const vec3& p)
 quat FromAxisAngle(const vec3& v, float angle)
 {
 	angle *= 0.5f;
-	float sinAngle = std::sin(angle);
+	float sinAngle = sin(angle);
 
 	vec3 normVector = normalize(v);
 
-	return quat(normVector.x*sinAngle,
+	return quat(cos(angle),normVector.x*sinAngle,
 		normVector.y*sinAngle,
-		normVector.z*sinAngle,
-		std::cos(angle));
+		normVector.z*sinAngle
+		);
 }
 
 float ToAxisAngle(const quat& q, vec3& v)
@@ -710,7 +710,7 @@ void Reach(int i, const vec3& target){
 	// Use slerp to avoid `snapping' to the target - if 
 	// we instead want to `gradually' interpolate to 
 	// towards the target
-	qNew = slerp(qCur, qNew, 0.001f);
+	qNew = slerp(qCur, qNew, 0.01f);
 
 	// For 3D ball joint - we use an axis-angle combination
 	// could just store a quaternion
@@ -720,13 +720,15 @@ void Reach(int i, const vec3& target){
 	links[i]->m_angle = angle2;
 }
 
+
+
 void UpdateHierarchy(){
-	for (int i = 0; i < links.size(); i++){
+	for (int i = 0; i < (int)links.size(); i++){
 		mat4 rot = Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
 		mat4 trans = Util::translationMat4(vec3(linkLength, 0, 0));
 
-		links[i]->m_base = rot * trans;
-		if (i > 0) links[i]->m_base *= links[i - 1]->m_base;
+		links[i]->m_base = mult(rot,trans);
+		if (i > 0) links[i]->m_base = mult(links[i]->m_base,links[i - 1]->m_base);
 	}
 }
 
@@ -735,7 +737,7 @@ void updateIK(mat4 &proj, mat4 &view){
 
 	mat4 PV = proj*view;
 
-	vec3 target = vec3(20, 0, 0);//sphereA.position;
+	vec3 target = sphereA.position;
 
 	for (int i = 0; i<(int)links.size(); i++)
 	{
@@ -748,7 +750,7 @@ void updateIK(mat4 &proj, mat4 &view){
 		// the new position of the limb - so we don't have
 		// to keep updating the hierarchy - performance
 		// improvement 
-		//Reach(i, target);
+		Reach(i, target);
 	}
 
 	/*
@@ -766,24 +768,8 @@ void updateIK(mat4 &proj, mat4 &view){
 		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
 
 		vec3 base = translationFromMat4(links[i]->m_base);
-		cout << "link base = " << vec3ToString(base) << endl;
-		vec3 end = translationFromMat4(links[i + 1]->m_base);//vec4ToVec3(links[i]->m_base * vec4(vec3(linkLength, 0, 0), 1));
+		vec3 end = Transform(links[i]->m_base, vec3(linkLength, 0, 0));
 		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
-		mat4 MVP = PV ;
-		glUniformMatrix4fv(
-			colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
-			1, // Number of values - 1 mat4
-			GL_FALSE, // Transpose the matrix?
-			value_ptr(MVP)); // Pointer to matrix data
-		glBegin(GL_LINES);
-		glVertex3f(base.x,base.y,base.z);
-		glVertex3f(end.x,end.y,end.z);
-		glEnd();
-		if (i == 0){
-			glBegin(GL_POINTS);
-			glVertex3f(base.x,base.y,base.z);
-			glEnd();
-		}
 	}
 
 }

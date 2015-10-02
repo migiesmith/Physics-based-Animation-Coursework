@@ -1,4 +1,4 @@
-#version 440
+#version 330
 
 // Sampler used to get texture colour
 uniform sampler2D tex;

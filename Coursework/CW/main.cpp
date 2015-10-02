@@ -647,9 +647,10 @@ quat FromAxisAngle(const vec3& v, float angle)
 
 	vec3 normVector = normalize(v);
 
-	return quat(cos(angle),normVector.x*sinAngle,
-		normVector.y*sinAngle,
-		normVector.z*sinAngle
+	return quat(cos(angle),
+		vec3(normVector.x*sinAngle,
+				normVector.y*sinAngle,
+				normVector.z*sinAngle)
 		);
 }
 
@@ -661,7 +662,7 @@ float ToAxisAngle(const quat& q, vec3& v)
 	float sqrLength = q.x*q.x + q.y*q.y + q.z*q.z;
 	if (sqrLength > 0.0f)
 	{
-		float invLength = 1.0f / std::sqrt(sqrLength);
+		float invLength = 1.0f / sqrt(sqrLength);
 
 		v.x = q.x*invLength;
 		v.y = q.y*invLength;
@@ -695,9 +696,10 @@ void Reach(int i, const vec3& target){
 	vec3 v1 = normalize(target - vB);
 
 
-	vec3 axis = normalize(cross(end - vB, v1));
+	vec3 axis = normalize(cross(v0, v1));
 
-	float ax = dot(v0, v1) / Util::magnitude(end - vB);
+
+	float ax = dot(v0, v1) / Util::magnitude(end - target);
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
 
@@ -710,7 +712,7 @@ void Reach(int i, const vec3& target){
 	// Use slerp to avoid `snapping' to the target - if 
 	// we instead want to `gradually' interpolate to 
 	// towards the target
-	qNew = slerp(qCur, qNew, 0.01f);
+	qNew = slerp(qCur, qNew, 0.05f);
 
 	// For 3D ball joint - we use an axis-angle combination
 	// could just store a quaternion
@@ -763,7 +765,7 @@ void updateIK(mat4 &proj, mat4 &view){
 	*/
 
 	// Loop over the list of links and draw them
-	for (int i = 0; i<(int)links.size()-1; ++i)
+	for (int i = 0; i<(int)links.size(); ++i)
 	{
 		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
 

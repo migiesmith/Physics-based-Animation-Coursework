@@ -1,4 +1,4 @@
-#version 330
+#version 440
 
 // Incoming texture coordinate
 layout(location = 0) in vec2 tex_coord;

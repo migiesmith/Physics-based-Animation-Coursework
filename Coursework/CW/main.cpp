@@ -684,8 +684,7 @@ float ToAxisAngle(const quat& q, vec3& v)
 }
 
 void Reach(int i, const vec3& target){
-	vec3 end = Transform(links[links.size() - 1]->m_base, vec3(linkLength, 0, 0));//vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
-
+	vec3 end = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
 	//     +
 	//    / \
 	//   /   \
@@ -697,22 +696,23 @@ void Reach(int i, const vec3& target){
 	vec3 v0 = end - vB;
 	vec3 v1 = normalize(target - vB);
 
+	if (pow(magnitude(target - end), 2.0f) < 1.0f) return;
 
 	vec3 axis = normalize(cross(v0, v1));
-
 
 	float ax = dot(v0, v1) / (end - vB).length();
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
 
-	cout << ax << endl;
+	if (abs(ax) < 0.1f) return;
+
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 
 	quat qCur = FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
 
 	quat qDif = FromAxisAngle(axis, -ax);
 
-	quat qNew = qCur * qDif;
+	quat qNew = qDif * qCur;
 
 	// Use slerp to avoid `snapping' to the target - if 
 	// we instead want to `gradually' interpolate to 
@@ -723,10 +723,57 @@ void Reach(int i, const vec3& target){
 	// could just store a quaternion
 	vec3 axis2;
 	float angle2 = ToAxisAngle(qNew, axis2);
+	
 	links[i]->m_axis = axis2;
 	links[i]->m_angle = angle2;
 }
 
+void Reach2(int i, const vec3& target){
+	vec3 endVec = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
+	//     +
+	//    / \
+	//   /   \
+	//  /     + end
+	// + vB    
+	//           @ target
+	// 
+	vec3 currVec = Util::translationFromMat4(links[i]->m_base);
+
+	vec3 curToEnd = normalize(endVec - currVec);
+	vec3 curToTarget = normalize(target - currVec);
+
+	if (pow(magnitude(target - endVec), 2.0f) < 0.001f) return;
+
+
+	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
+
+	float angle = acos(dot(curToEnd, curToTarget));
+	float ax = dot(curToEnd, curToTarget) / (magnitude(curToEnd) * magnitude(curToTarget));
+	ax = glm::min(1.0f, glm::max(ax, -1.0f));
+	ax = (float)acos(ax);
+
+	if (abs(ax) < 0.001f) return;
+
+	quat qCur = FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
+
+	quat qDif = FromAxisAngle(axis, -ax);
+
+	quat qNew = normalize(qDif * qCur);
+
+	qNew = slerp(qCur, qNew, 0.04f);
+
+
+	vec3 axis2;
+	float angle2 = ToAxisAngle(qNew, axis2);
+
+
+	if (target.x < 0.0f){
+		//cout << vec3ToString(axis2) << endl;
+	}
+
+	links[i]->m_axis = axis2;
+	links[i]->m_angle = angle2;
+}
 
 
 void UpdateHierarchy(){
@@ -746,7 +793,44 @@ void updateIK(mat4 &proj, mat4 &view){
 
 	vec3 target = sphereA.position;
 
-	for (int i = 0; i<(int)links.size(); i++)
+	// Loop over the list of links and draw them
+	for (int i = 0; i<(int)links.size(); ++i)
+	{
+		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
+
+		vec3 base = translationFromMat4(links[i]->m_base);
+		vec3 end = Transform(links[i]->m_base, vec3(linkLength, 0, 0));
+		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
+		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
+
+
+		glUniformMatrix4fv(
+			colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
+			1, // Number of values - 1 mat4
+			GL_FALSE, // Transpose the matrix?
+			value_ptr(PV)); // Pointer to matrix data
+
+		vec3 endVec = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
+		vec3 currVec = Util::translationFromMat4(links[i]->m_base);
+		vec3 curToEnd = normalize(endVec - currVec);
+		vec3 curToTarget = normalize(target - currVec);
+
+		glDisable(GL_DEPTH_TEST);
+		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
+		glLineWidth(1.0f);
+		glBegin(GL_LINES);
+		glVertex3f(currVec.x, currVec.y, currVec.z);
+		glVertex3f(currVec.x + curToEnd.x, currVec.y + curToEnd.y, currVec.z + curToEnd.z);
+		glEnd();
+		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 1, 0, 1)));
+		glBegin(GL_LINES);
+		glVertex3f(currVec.x, currVec.y, currVec.z);
+		glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
+		glEnd();
+		glEnable(GL_DEPTH_TEST);
+	}
+	//for (int i = 0; i<(int)links.size(); i++)
+	for (int i = (int)links.size()-1; i >= 0; i--)
 	{
 		// Update the whole hiearchy - however, we can optimize this
 		// to only update the section of the hierarchy or update the target
@@ -757,7 +841,11 @@ void updateIK(mat4 &proj, mat4 &view){
 		// the new position of the limb - so we don't have
 		// to keep updating the hierarchy - performance
 		// improvement 
-		Reach(i, target);
+
+		
+		Reach2(i, target);
+
+
 	}
 
 	/*
@@ -769,15 +857,6 @@ void updateIK(mat4 &proj, mat4 &view){
 	}
 	*/
 
-	// Loop over the list of links and draw them
-	for (int i = 0; i<(int)links.size(); ++i)
-	{
-		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
-
-		vec3 base = translationFromMat4(links[i]->m_base);
-		vec3 end = Transform(links[i]->m_base, vec3(linkLength, 0, 0));
-		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
-	}
 
 }
 

@@ -90,14 +90,19 @@ using namespace Util;
 	}
 
 	void Util::renderArrow(vec3 start, vec3 end, float length, float radius, mat4& PV, effect currentEffect){
-		// Calculate the rotation of the arrow
-		float m = sqrt(2.f + 2.f * dot(vec3(1, 0, 0), normalize(end - start)));
-		vec3 w = (1.f / m) * cross(vec3(1, 0, 0), normalize(end - start));
-		quat q = quat(0.5f * m, w.x, w.y, w.z);
-
 		// Create a transform to store the rotation, translation and scale of the arrow
 		graphics_framework::transform t;
-		t.rotate(q);
+
+		if (abs(dot(vec3(1, 0, 0), normalize(end - start))) == 1.0f)assert("Parrallel Vectors");
+		
+		if (abs(dot(vec3(1, 0, 0), normalize(end - start))) != 1.0f){
+			// Calculate the rotation of the arrow
+			float m = sqrt(2.f + 2.f * dot(vec3(1, 0, 0), normalize(end - start)));
+			vec3 w = (1.f / m) * cross(vec3(1, 0, 0), normalize(end - start));
+			quat q = quat(0.5f * m, w.x, w.y, w.z);
+			t.rotate(q);
+		}
+
 		t.translate(start);
 		t.scale = vec3(length, radius, radius);
 
@@ -136,5 +141,28 @@ using namespace Util;
 			0, 1, 0, 0,
 			0, 0, 1, 0,
 			v.x,v.y,v.z, 1
+			);
+	}
+
+	mat4 Util::quatToMat4(quat& inQuat){
+		quat q = normalize(inQuat);
+		return mat4(
+			1.0f - 2.0f*q.y*q.y - 2.0f*q.z*q.z, 2.0f*q.x*q.y - 2.0f*q.z*q.w, 2.0f*q.x*q.z + 2.0f*q.y*q.w, 0.0f,
+			2.0f*q.x*q.y + 2.0f*q.z*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.z*q.z, 2.0f*q.y*q.z - 2.0f*q.x*q.w, 0.0f,
+			2.0f*q.x*q.z - 2.0f*q.y*q.w, 2.0f*q.y*q.z + 2.0f*q.x*q.w, 1.0f - 2.0f*q.x*q.x - 2.0f*q.y*q.y, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
+	quat Util::FromAxisAngle(const vec3& v, float angle)
+	{
+		angle *= 0.5f;
+		float sinAngle = sin(angle);
+
+		vec3 normVector = normalize(v);
+
+		return quat(cos(angle),
+			vec3(normVector.x*sinAngle,
+			normVector.y*sinAngle,
+			normVector.z*sinAngle)
 			);
 	}

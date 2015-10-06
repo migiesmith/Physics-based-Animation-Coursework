@@ -31,7 +31,9 @@ namespace Util
 	mat4 mult(const mat4& a, const mat4& b);
 	vec3 translationFromMat4(mat4& m);
 	mat4 translationMat4(vec3& v);
-	
+	mat4 quatToMat4(quat& q);
+	quat FromAxisAngle(const vec3& v, float angle);
+
 	/* TODO
 	vec3 GetMousePosition2Dto3D();
 	*/

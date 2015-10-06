@@ -624,111 +624,7 @@ void updateLighting(float delta_time)
 	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
 }
 
-
-vec3 Transform(const mat4& mat, const vec3& p)
-{
-	return vec3(
-		mat[0][0] * p.x +
-		mat[1][0] * p.y +
-		mat[2][0] * p.z,
-
-		mat[0][1] * p.x +
-		mat[1][1] * p.y +
-		mat[2][1] * p.z,
-
-		mat[0][2] * p.x +
-		mat[1][2] * p.y +
-		mat[2][2] * p.z
-		) + vec3(mat[3][0], mat[3][1], mat[3][2]);
-}
-
-quat FromAxisAngle(const vec3& v, float angle)
-{
-	angle *= 0.5f;
-	float sinAngle = sin(angle);
-
-	vec3 normVector = normalize(v);
-
-	return quat(cos(angle),
-		vec3(normVector.x*sinAngle,
-				normVector.y*sinAngle,
-				normVector.z*sinAngle)
-		);
-}
-
-float ToAxisAngle(const quat& q, vec3& v)
-{
-	// The quaternion representing the rotation is
-	//   q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k)
-
-	float sqrLength = q.x*q.x + q.y*q.y + q.z*q.z;
-	if (sqrLength > 0.0f)
-	{
-		float invLength = 1.0f / sqrt(sqrLength);
-
-		v.x = q.x*invLength;
-		v.y = q.y*invLength;
-		v.z = q.z*invLength;
-
-		return 2.f*std::acos(q.w);
-	}
-	else
-	{
-		// angle is 0 (mod 2*pi), so any axis will do.
-		v.x = 1.0f;
-		v.y = 0.0f;
-		v.z = 0.0f;
-
-		return 0.f;
-	}
-}
-
 void Reach(int i, const vec3& target){
-	vec3 end = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
-	//     +
-	//    / \
-	//   /   \
-	//  /     + end
-	// + vB    
-	//           @ target
-	// 
-	vec3 vB = Util::translationFromMat4(links[i]->m_base);
-	vec3 v0 = end - vB;
-	vec3 v1 = normalize(target - vB);
-
-	if (pow(magnitude(target - end), 2.0f) < 1.0f) return;
-
-	vec3 axis = normalize(cross(v0, v1));
-
-	float ax = dot(v0, v1) / (end - vB).length();
-	ax = glm::min(1.0f, glm::max(ax, -1.0f));
-	ax = (float)acos(ax);
-
-	if (abs(ax) < 0.1f) return;
-
-	ax = glm::min(1.0f, glm::max(ax, -1.0f));
-
-	quat qCur = FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
-
-	quat qDif = FromAxisAngle(axis, -ax);
-
-	quat qNew = qDif * qCur;
-
-	// Use slerp to avoid `snapping' to the target - if 
-	// we instead want to `gradually' interpolate to 
-	// towards the target
-	qNew = slerp(qCur, qNew, 0.05f);
-
-	// For 3D ball joint - we use an axis-angle combination
-	// could just store a quaternion
-	vec3 axis2;
-	float angle2 = ToAxisAngle(qNew, axis2);
-	
-	links[i]->m_axis = axis2;
-	links[i]->m_angle = angle2;
-}
-
-void Reach2(int i, const vec3& target){
 	vec3 endVec = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
 	//     +
 	//    / \
@@ -752,33 +648,24 @@ void Reach2(int i, const vec3& target){
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
 
+	ax = glm::min(.5f, glm::max(ax, -0.5f));
+
 	if (abs(ax) < 0.001f) return;
 
-	quat qCur = FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
+	quat qCur = links[i]->m_rotation;//FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
 
 	quat qDif = FromAxisAngle(axis, -ax);
 
-	quat qNew = normalize(qDif * qCur);
+	quat qNew = normalize(qCur * qDif);
 
-	qNew = slerp(qCur, qNew, 0.04f);
-
-
-	vec3 axis2;
-	float angle2 = ToAxisAngle(qNew, axis2);
-
-
-	if (target.x < 0.0f){
-		//cout << vec3ToString(axis2) << endl;
-	}
-
-	links[i]->m_axis = axis2;
-	links[i]->m_angle = angle2;
+	//qNew = slerp(qCur, qNew, 0.04f);
+	
+	links[i]->m_rotation = qNew;
 }
-
 
 void UpdateHierarchy(){
 	for (int i = 0; i < (int)links.size(); i++){
-		mat4 rot = Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
+		mat4 rot = quatToMat4(links[i]->m_rotation);//Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
 		mat4 trans = Util::translationMat4((vec3(linkLength, 0, 0) + links[i]->origin));
 
 		links[i]->m_base = mult(rot,trans);
@@ -799,7 +686,7 @@ void updateIK(mat4 &proj, mat4 &view){
 		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
 
 		vec3 base = translationFromMat4(links[i]->m_base);
-		vec3 end = Transform(links[i]->m_base, vec3(linkLength, 0, 0));
+		vec3 end = vec4ToVec3(links[i]->m_base * vec4(linkLength, 0, 0, 1));
 		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
 		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
 
@@ -829,6 +716,7 @@ void updateIK(mat4 &proj, mat4 &view){
 		glEnd();
 		glEnable(GL_DEPTH_TEST);
 	}
+
 	//for (int i = 0; i<(int)links.size(); i++)
 	for (int i = (int)links.size()-1; i >= 0; i--)
 	{
@@ -841,21 +729,10 @@ void updateIK(mat4 &proj, mat4 &view){
 		// the new position of the limb - so we don't have
 		// to keep updating the hierarchy - performance
 		// improvement 
-
-		
-		Reach2(i, target);
-
+		Reach(i, target);
 
 	}
 
-	/*
-	for (int i = 0; i < links[0]->m_base.length(); i++){
-		for (int j = 0; j < links[0]->m_base[0].length(); j++){
-			cout << links[0]->m_base[i][j] << ", ";
-		}
-		cout << endl;
-	}
-	*/
 
 
 }

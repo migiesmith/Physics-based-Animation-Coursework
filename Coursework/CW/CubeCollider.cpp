@@ -179,7 +179,7 @@ IntersectionData CubeCollider::oBBCollision(CubeCollider other, vector<vec3> nor
 		int minPos = 0;
 		float minVal = std::numeric_limits<float>::max();
 		for (int i = 0; i < axis.size(); i++){
-			if (abs(depth.at(i)) < minVal){ minVal = depth.at(i); minPos = i; cout << "min pos = " << i << endl; }
+			if (abs(depth.at(i)) < minVal){ minVal = depth.at(i); minPos = i;}
 		}
 
 		data.doesIntersect = true;

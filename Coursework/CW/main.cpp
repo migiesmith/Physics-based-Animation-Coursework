@@ -39,9 +39,8 @@ IntersectionData dataTODO;
 
 
 // IK constants
-int							numLinks = 7;		// How many links
-float						linkLength = 2.0f;		// Length of each link
-std::vector<Link*>			links;						// Array holding all our links
+int							numLinks = 30;		// How many links
+Link			links = Link(vec3(0, 0, 1), 0.2f, 2.0f);						// Array holding all our links
 //TODO
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -223,6 +222,7 @@ bool load_content()
 	// Load in models
 	// *************
 	meshes["island"] = Util::loadModel("island\\island.obj");
+	/*
 	meshes["barn"] = Util::loadModel("barn\\barn.obj");
 	meshes["character"] = Util::loadModel("character\\character.3ds");
 	meshes["hay"] = Util::loadModel("hay\\hay.3ds");
@@ -233,6 +233,7 @@ bool load_content()
 	meshes["silo"] = Util::loadModel("silo\\silo.obj");
 	meshes["farmhouse"] = Util::loadModel("farmhouse\\farmhouse.obj");
 	meshes["glass"] = Util::loadModel("glass\\glass.obj");
+	*/
 	meshes["sphere"] = Util::loadModel("sphere\\sphere.obj");
 	meshes["cube"] = Util::loadModel("cube\\cube.obj");
 
@@ -389,12 +390,17 @@ void initScreenQuads(){
 void initSceneObjects(){
 
 	//TODO IK INIT
-	for (int i = 0; i < numLinks; ++i){
-		float f = (float)i*0.2f;
-		links.push_back(new Link(vec3(0, 0, 1), f));
+	float f = 0.2f;
+	float l = 2.0f;
+
+	links.setParent(new Link(vec3(0, 0, 1), f, l));
+	Link* parent = links.parent;
+	for (int i = 0; i < numLinks; i++){
+		parent->setParent(new Link(vec3(0, 0, 1), f, 1.0f + i/10.0f));
+		parent = parent->parent;
 	}
 
-	links[0]->origin = vec3(0, 100, 0);
+	links.getRoot()->origin = vec3(0,100,0);
 
 	// ***************
 	// Set up SceneObjects
@@ -624,53 +630,21 @@ void updateLighting(float delta_time)
 	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
 }
 
-void Reach(int i, const vec3& target){
-	vec3 endVec = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
-	//     +
-	//    / \
-	//   /   \
-	//  /     + end
-	// + vB    
-	//           @ target
-	// 
-	vec3 currVec = Util::translationFromMat4(links[i]->m_base);
-
-	vec3 curToEnd = normalize(endVec - currVec);
-	vec3 curToTarget = normalize(target - currVec);
-
-	if (pow(magnitude(target - endVec), 2.0f) < 0.001f) return;
-
-
-	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
-
-	float angle = acos(dot(curToEnd, curToTarget));
-	float ax = dot(curToEnd, curToTarget) / (magnitude(curToEnd) * magnitude(curToTarget));
-	ax = glm::min(1.0f, glm::max(ax, -1.0f));
-	ax = (float)acos(ax);
-
-	ax = glm::min(.5f, glm::max(ax, -0.5f));
-
-	if (abs(ax) < 0.001f) return;
-
-	quat qCur = links[i]->m_rotation;//FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
-
-	quat qDif = FromAxisAngle(axis, -ax);
-
-	quat qNew = normalize(qCur * qDif);
-
-	//qNew = slerp(qCur, qNew, 0.04f);
-	
-	links[i]->m_rotation = qNew;
+void Reach(Link& currLink, const vec3& target){
 }
 
 void UpdateHierarchy(){
+
+
+	/*
 	for (int i = 0; i < (int)links.size(); i++){
 		mat4 rot = quatToMat4(links[i]->m_rotation);//Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
-		mat4 trans = Util::translationMat4((vec3(linkLength, 0, 0) + links[i]->origin));
+		mat4 trans = Util::translationMat4((vec3(links[i]->m_length, 0, 0) + links[i]->origin));
 
 		links[i]->m_base = mult(rot,trans);
-		if (i > 0) links[i]->m_base = mult(links[i]->m_base,links[i - 1]->m_base);
+		if (i > 0) links[i]->m_base = mult(links[i]->m_base, links[i - 1]->m_base);
 	}
+	*/
 }
 
 //TODO IK
@@ -680,45 +654,14 @@ void updateIK(mat4 &proj, mat4 &view){
 
 	vec3 target = sphereA.position;
 
-	// Loop over the list of links and draw them
-	for (int i = 0; i<(int)links.size(); ++i)
-	{
-		//DrawSphere(Matrix4::GetTranslation(links[i]->m_base), 0.1f, 0.5f, 0.5f, 0.9f);
 
-		vec3 base = translationFromMat4(links[i]->m_base);
-		vec3 end = vec4ToVec3(links[i]->m_base * vec4(linkLength, 0, 0, 1));
-		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
-		Util::renderArrow(base, end, linkLength, 0.4f, PV, colourPassThroughEffect);
+	Link* l = links.getRoot();
+	l->update(links, target);
+	l->render(PV, colourPassThroughEffect, links, target);
 
-
-		glUniformMatrix4fv(
-			colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
-			1, // Number of values - 1 mat4
-			GL_FALSE, // Transpose the matrix?
-			value_ptr(PV)); // Pointer to matrix data
-
-		vec3 endVec = vec4ToVec3(links[links.size() - 1]->m_base * vec4(linkLength, 0, 0, 1));
-		vec3 currVec = Util::translationFromMat4(links[i]->m_base);
-		vec3 curToEnd = normalize(endVec - currVec);
-		vec3 curToTarget = normalize(target - currVec);
-
-		glDisable(GL_DEPTH_TEST);
-		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-		glLineWidth(1.0f);
-		glBegin(GL_LINES);
-		glVertex3f(currVec.x, currVec.y, currVec.z);
-		glVertex3f(currVec.x + curToEnd.x, currVec.y + curToEnd.y, currVec.z + curToEnd.z);
-		glEnd();
-		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 1, 0, 1)));
-		glBegin(GL_LINES);
-		glVertex3f(currVec.x, currVec.y, currVec.z);
-		glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
-		glEnd();
-		glEnable(GL_DEPTH_TEST);
-	}
-
-	//for (int i = 0; i<(int)links.size(); i++)
-	for (int i = (int)links.size()-1; i >= 0; i--)
+	/*
+	for (int i = 0; i<(int)links.size(); i++)
+	//for (int i = (int)links.size()-1; i >= 0; i--)
 	{
 		// Update the whole hiearchy - however, we can optimize this
 		// to only update the section of the hierarchy or update the target
@@ -729,9 +672,10 @@ void updateIK(mat4 &proj, mat4 &view){
 		// the new position of the limb - so we don't have
 		// to keep updating the hierarchy - performance
 		// improvement 
-		Reach(i, target);
+		Reach(target);
 
 	}
+	*/
 
 
 

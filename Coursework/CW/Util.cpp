@@ -89,12 +89,10 @@ using namespace Util;
 		return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z);
 	}
 
-	void Util::renderArrow(vec3 start, vec3 end, float length, float radius, mat4& PV, effect currentEffect){
+	void Util::renderArrow(vec3& start, vec3& end, float length, float radius, mat4& PV, effect& currentEffect){
 		// Create a transform to store the rotation, translation and scale of the arrow
 		graphics_framework::transform t;
-
-		if (abs(dot(vec3(1, 0, 0), normalize(end - start))) == 1.0f)assert("Parrallel Vectors");
-		
+				
 		if (abs(dot(vec3(1, 0, 0), normalize(end - start))) != 1.0f){
 			// Calculate the rotation of the arrow
 			float m = sqrt(2.f + 2.f * dot(vec3(1, 0, 0), normalize(end - start)));

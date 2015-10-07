@@ -27,7 +27,7 @@ namespace Util
 	mat4 rotationMat4(vec3& axis, float degrees);
 	vec4 vec3ToVec4(vec3 v);
 	vec3 vec4ToVec3(vec4 v);
-	void renderArrow(vec3 start, vec3 end, float length, float radius, mat4& VP, effect currentEffect);
+	void renderArrow(vec3& start, vec3& end, float length, float radius, mat4& VP, effect& currentEffect);
 	mat4 mult(const mat4& a, const mat4& b);
 	vec3 translationFromMat4(mat4& m);
 	mat4 translationMat4(vec3& v);

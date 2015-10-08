@@ -29,6 +29,7 @@ double cursor_y = 0.0; // Stores the position Y of the cursor
 
 float totalTime = 0.0f; // Stores how much time has passed (used for time based events like model bobbing and light movement)
 
+IntersectionData rayTest;
 
 //TODO
 //SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
@@ -75,6 +76,14 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 void mouseListener(GLFWwindow* window, int button, int action, int mods){
 
 	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
+
+		//pair<vec3, vec3> posAndDir = Util::screenToWorld
+		vec3 pos = freeCam.get_position();
+		vec3 camDir = normalize(freeCam.get_target() - freeCam.get_position());
+		
+		//TODO screenPosToWorldPos
+		rayTest = sphereA.rayCast(pos, camDir);
+
 
 		if (toggleDebugMenu){
 			// Get the current mouse pos
@@ -981,6 +990,24 @@ bool render()
 		Util::renderArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 1.0f, 0.5f, P * V, colourPassThroughEffect);
 		glEnable(GL_DEPTH_TEST);
 	}
+
+	glDisable(GL_DEPTH_TEST);
+	renderer::bind(colourPassThroughEffect);
+	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
+	Util::renderArrow(vec3(0, 100, 0.0f), vec3(0, 100, -1.0f), 1.0f, 0.5f, P * V, colourPassThroughEffect);
+
+	glPointSize(6.0f);
+	// Set MVP matrix uniform
+	glUniformMatrix4fv(
+		colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
+		1, // Number of values - 1 mat4
+		GL_FALSE, // Transpose the matrix?
+		value_ptr(P * V)); // Pointer to matrix data
+	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
+	glBegin(GL_POINTS);
+	glVertex3f(rayTest.intersection.x, rayTest.intersection.y, rayTest.intersection.z);
+	glEnd();
+	glEnable(GL_DEPTH_TEST);
 
 	// TODO IK
 	glDisable(GL_DEPTH_TEST);

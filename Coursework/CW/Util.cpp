@@ -164,3 +164,8 @@ using namespace Util;
 			normVector.z*sinAngle)
 			);
 	}
+
+	pair<vec3, vec3> Util::rayFromScreen(vec3& camPos, vec2& clickPos){
+
+		return pair<vec3, vec3>(vec3(0,0,0), vec3(0,0,0));
+	}

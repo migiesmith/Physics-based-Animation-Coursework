@@ -28,6 +28,7 @@ public:
 	
 
 	IntersectionData intersects(Collider* other, float velocity);
+
 	~SphereCollider();
 };
 

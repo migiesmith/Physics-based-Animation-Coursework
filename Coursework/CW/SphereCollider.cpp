@@ -43,6 +43,9 @@ IntersectionData SphereCollider::intersects(Collider* other, float velocity){
 	return data;
 }
 
+
+
+
 SphereCollider::~SphereCollider()
 {
 }

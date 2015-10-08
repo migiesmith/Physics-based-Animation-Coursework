@@ -34,6 +34,8 @@ namespace Util
 	mat4 quatToMat4(quat& q);
 	quat FromAxisAngle(const vec3& v, float angle);
 
+	pair<vec3, vec3> rayFromScreen(vec3& camPos, vec2& clickPos);
+
 	/* TODO
 	vec3 GetMousePosition2Dto3D();
 	*/

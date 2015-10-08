@@ -50,6 +50,9 @@ public:
 	bool testSphereObb(SphereCollider* sphere, CubeCollider obb, vec3 pt);
 	vec3 closestPtOnOBB(vec3 v);
 
+	IntersectionData rayCast(vec3& start, vec3& direction);
+	IntersectionData rayCast(vec3& start, vec3& direction, float distance);
+
 	// Returns AABB Min
 	vec3 getMin();
 	// Returns AABB Max

@@ -29,6 +29,7 @@ namespace Util
 	vec3 vec4ToVec3(vec4 v);
 	void renderArrow(vec3& start, vec3& end, float length, float radius, mat4& VP, effect& currentEffect);
 	mat4 mult(const mat4& a, const mat4& b);
+	quat mult(quat q0, quat q1);
 	vec3 translationFromMat4(mat4& m);
 	mat4 translationMat4(vec3& v);
 	mat4 quatToMat4(quat& q);

@@ -47,33 +47,39 @@ void Link::reach(Link& endLink, vec3& target){
 	vec3 curToEnd = normalize(endVec - currVec);
 	vec3 curToTarget = normalize(target - currVec);
 
-	if (pow(magnitude(target - endVec), 2.0f) < 0.001f) return;
+	//if (pow(magnitude(target - endVec), 2.0f) < 0.1f) return;
 
 	// These lines are perpendicular, no axis of rotation can be found
-	if (abs(dot(normalize(curToEnd), normalize(curToTarget))) == 1.0f) return;
+	if (abs(dot(normalize(curToEnd), curToTarget)) == 1.0f) return;
 
-	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
+	vec3 axis = normalize(cross(curToEnd, curToTarget));
 
 	float angle = acos(dot(curToEnd, curToTarget));
-	float ax = dot(curToEnd, curToTarget) / (magnitude(curToEnd) * magnitude(curToTarget));
+	float ax = dot(curToEnd, curToTarget);// / (magnitude(curToEnd) * magnitude(curToTarget));
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
 
 	ax = glm::min(.5f, glm::max(ax, -0.5f));
 
-	if (abs(ax) < 0.01f) return;
+	//if (abs(ax) < 0.01f) return;
 
 
 	quat qCur = m_rotation;//FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
 
 	quat qDif = FromAxisAngle(axis, -ax);
 
-	quat qNew = normalize(qCur * qDif);
+	float s0 = qCur.w;
+	float s1 = qDif.w;
+	vec3 v0 = vec3(qCur.x, qCur.y, qCur.z);
+	vec3 v1 = vec3(qDif.x, qDif.y, qDif.z);
+	quat qNew = normalize(mult(qCur, qDif));//normalize(qCur * qDif);
 
-	qNew = slerp(qCur, qNew, 0.04f);
+	qNew = slerp(qCur, qNew, 0.06f);
 
 	m_rotation = qNew;
 }
+
+
 
 void Link::update(Link& endLink, vec3& target){
 
@@ -83,12 +89,9 @@ void Link::update(Link& endLink, vec3& target){
 	m_base = mult(rot, trans);
 	if (parent != NULL) m_base = mult(m_base, parent->m_base);
 
-
-
 	for (int i = 0; i < children.size(); i++){
 		children[i]->update(endLink, target);
 	}
-
 
 	reach(endLink, target);
 }
@@ -127,7 +130,15 @@ void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 	glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
 	glEnd();
 	glEnable(GL_DEPTH_TEST);
-	
+	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
+
+	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
+	glBegin(GL_LINES);
+	glVertex3f(currVec.x, currVec.y, currVec.z);
+	glVertex3f(currVec.x + axis.x, currVec.y + axis.y, currVec.z + axis.z);
+	glEnd();
+	glEnable(GL_DEPTH_TEST);
+
 }
 
 Link::~Link()

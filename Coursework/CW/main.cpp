@@ -40,7 +40,7 @@ IntersectionData dataTODO;
 
 
 // IK constants
-int							numLinks = 30;		// How many links
+int							numLinks = 0;		// How many links
 Link			links = Link(vec3(0, 0, 1), 0.2f, 2.0f);						// Array holding all our links
 //TODO
 
@@ -405,7 +405,7 @@ void initSceneObjects(){
 	links.setParent(new Link(vec3(0, 0, 1), f, l));
 	Link* parent = links.parent;
 	for (int i = 0; i < numLinks; i++){
-		parent->setParent(new Link(vec3(0, 0, 1), f, 1.0f + i/10.0f));
+		parent->setParent(new Link(vec3(0, 0, 1), f, 1.0f + i));
 		parent = parent->parent;
 	}
 
@@ -697,6 +697,8 @@ bool update(float delta_time)
 {
 	totalTime += delta_time;
 	
+
+
 	float velocity = 5.5f;
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
 		sphereA.translate(vec3(velocity, 0.0, 0.0)*delta_time);
@@ -706,6 +708,13 @@ bool update(float delta_time)
 		sphereA.translate(vec3(0.0, 0.0, velocity)*delta_time);
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
 		sphereA.translate(vec3(0.0, 0.0, -velocity)*delta_time);
+
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
+		sphereA.translate(vec3(0.0, velocity, 0.0)*delta_time);
+
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
+		sphereA.translate(vec3(0.0, -velocity, 0.0)*delta_time);
+
 	
 	dataTODO = sphereA.intersects(&sphereB, magnitude(vec3(0.0, 0.0, -velocity))*delta_time);
 	//sphereA.translate(vec3(0.0,0.0,0.01));

@@ -129,6 +129,14 @@ using namespace Util;
 		return newMatrix;
 	}
 
+	quat Util::mult(quat q0, quat q1){
+		float s0 = q0.w;
+		float s1 = q1.w;
+		vec3 v0 = vec3(q0.x, q0.y, q0.z);
+		vec3 v1 = vec3(q1.x, q1.y, q1.z);
+		return quat(s0*s1 - dot(v0, v1), cross(v0, v1) + s0*v1 + s1*v0);
+	}
+
 	vec3 Util::translationFromMat4(mat4& m){
 		return vec3(m[3][0], m[3][1], m[3][2]);
 	}

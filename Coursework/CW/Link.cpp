@@ -43,14 +43,14 @@ void Link::reach(Link& endLink, vec3& target){
 	//           @ target
 	// 
 	vec3 currVec = Util::translationFromMat4(m_base);
-
+	
 	vec3 curToEnd = normalize(endVec - currVec);
 	vec3 curToTarget = normalize(target - currVec);
 
-	//if (pow(magnitude(target - endVec), 2.0f) < 0.1f) return;
+	if (pow(magnitude(target - endVec), 2.0f) < 0.1f) return;
 
 	// These lines are perpendicular, no axis of rotation can be found
-	if (abs(dot(normalize(curToEnd), curToTarget)) == 1.0f) return;
+	if (abs(dot(curToEnd, curToTarget)) == 1.0f) return;
 
 	vec3 axis = normalize(cross(curToEnd, curToTarget));
 
@@ -61,22 +61,29 @@ void Link::reach(Link& endLink, vec3& target){
 
 	ax = glm::min(.5f, glm::max(ax, -0.5f));
 
-	//if (abs(ax) < 0.01f) return;
+	if (abs(ax) < 0.01f) return;
+	
+	quat qCur = m_rotation;
 
-
-	quat qCur = m_rotation;//FromAxisAngle(links[i]->m_axis, links[i]->m_angle);
-
-	quat qDif = FromAxisAngle(axis, -ax);
+	quat qDif = angleAxis(-ax, axis);
 
 	float s0 = qCur.w;
 	float s1 = qDif.w;
 	vec3 v0 = vec3(qCur.x, qCur.y, qCur.z);
 	vec3 v1 = vec3(qDif.x, qDif.y, qDif.z);
-	quat qNew = normalize(mult(qCur, qDif));//normalize(qCur * qDif);
-
+	quat qNew = normalize(qCur * qDif);//normalize(qCur * qDif);
+	
+	if (this == &endLink)cout << " | " << qNew.w << ", " << qNew.x << ", " << qNew.y << ", " << qNew.z << endl;
 	qNew = slerp(qCur, qNew, 0.06f);
-
 	m_rotation = qNew;
+
+
+
+	/*
+	float m = sqrt(2.f + 2.f * dot(curToEnd, curToTarget));
+	vec3 w = (1.f / m) * cross(curToEnd, curToTarget);
+	m_rotation = quat(0.5f * m, w.x, w.y, w.z);
+	*/
 }
 
 

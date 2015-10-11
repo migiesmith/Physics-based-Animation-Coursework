@@ -159,20 +159,6 @@ using namespace Util;
 			0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
-	quat Util::FromAxisAngle(const vec3& v, float angle)
-	{
-		angle *= 0.5f;
-		float sinAngle = sin(angle);
-
-		vec3 normVector = normalize(v);
-
-		return quat(cos(angle),
-			vec3(normVector.x*sinAngle,
-			normVector.y*sinAngle,
-			normVector.z*sinAngle)
-			);
-	}
-
 	pair<vec3, vec3> Util::rayFromScreen(vec3& camPos, vec2& clickPos){
 
 		return pair<vec3, vec3>(vec3(0,0,0), vec3(0,0,0));

@@ -40,7 +40,7 @@ IntersectionData dataTODO;
 
 
 // IK constants
-int							numLinks = 0;		// How many links
+int							numLinks = 1;		// How many links
 Link			links = Link(vec3(0, 0, 1), 0.2f, 2.0f);						// Array holding all our links
 //TODO
 
@@ -409,7 +409,7 @@ void initSceneObjects(){
 		parent = parent->parent;
 	}
 
-	links.getRoot()->origin = vec3(0,100,0);
+	links.getRoot()->m_base = Util::translationMat4(vec3(0, 100, 0));
 
 	// ***************
 	// Set up SceneObjects
@@ -463,7 +463,7 @@ void initCameras(){
 	targetCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 
 	// Free Camera
-	freeCam.set_position(vec3(0.0f, 85.0f, 0.0f));
+	freeCam.set_position(vec3(0.0f, 120.0f, 15.0f));
 	freeCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 	
 	// MVP for post processing (Orthographics projection)

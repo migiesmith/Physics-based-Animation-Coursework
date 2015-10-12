@@ -12,14 +12,15 @@ class Link
 public:
 
 	mat4 m_base;
-	quat m_rotation;
+	//quat m_rotation;
 	float m_length;
 	vec3 origin;
+
+	mat4 m_local;
 
 	Link* parent;
 	vector<Link*> children;
 
-	Link(vec3& axis, float angle);
 	Link(vec3& axis, float angle, float length);
 
 	void addChild(Link* l);

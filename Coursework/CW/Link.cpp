@@ -1,13 +1,11 @@
 #include "Link.h"
 
 
-Link::Link(vec3 &axis, float angle){
-	origin = vec3(0, 0, 0);
-	m_rotation = quat(1, 0, 0, 0);//Util::FromAxisAngle(axis, angle);
-}
-
-Link::Link(vec3 &axis, float angle, float length) : Link(axis, angle){
+Link::Link(vec3 &axis, float angle, float length){
 	m_length = length;
+	origin = vec3(0, 0, 0);
+	//m_rotation = quat(1, 0, 0, 0);//Util::FromAxisAngle(axis, angle);
+	m_local = mat4();
 }
 
 void Link::addChild(Link* l){
@@ -47,37 +45,36 @@ void Link::reach(Link& endLink, vec3& target){
 	vec3 curToEnd = normalize(endVec - currVec);
 	vec3 curToTarget = normalize(target - currVec);
 
-	if (pow(magnitude(target - endVec), 2.0f) < 0.1f) return;
 
 	// These lines are perpendicular, no axis of rotation can be found
-	if (abs(dot(curToEnd, curToTarget)) == 1.0f) return;
 
-	vec3 axis = normalize(cross(curToEnd, curToTarget));
+	vec3 axis = cross(curToEnd, curToTarget);
+	if (magnitude(axis) < 0.1f) return;
+	axis = normalize(axis);
+	//axis.y = -axis.y;
 
-	float angle = acos(dot(curToEnd, curToTarget));
 	float ax = dot(curToEnd, curToTarget);// / (magnitude(curToEnd) * magnitude(curToTarget));
 	ax = glm::min(1.0f, glm::max(ax, -1.0f));
 	ax = (float)acos(ax);
 
-	ax = glm::min(.5f, glm::max(ax, -0.5f));
+	//ax = glm::min(.5f, glm::max(ax, -0.5f));
 
-	if (abs(ax) < 0.01f) return;
 	
-	quat qCur = m_rotation;
+	//quat qCur = m_rotation;
 
-	quat qDif = angleAxis(-ax, axis);
+	//quat qDif = angleAxis(-ax, axis);
 
-	float s0 = qCur.w;
-	float s1 = qDif.w;
-	vec3 v0 = vec3(qCur.x, qCur.y, qCur.z);
-	vec3 v1 = vec3(qDif.x, qDif.y, qDif.z);
-	quat qNew = normalize(qCur * qDif);//normalize(qCur * qDif);
+	//quat qNew = normalize(qCur * qDif);//normalize(qCur * qDif);
 	
-	if (this == &endLink)cout << " | " << qNew.w << ", " << qNew.x << ", " << qNew.y << ", " << qNew.z << endl;
-	qNew = slerp(qCur, qNew, 0.06f);
-	m_rotation = qNew;
 
+	//if (this == &endLink)cout << " | " << qNew.w << ", " << qNew.x << ", " << qNew.y << ", " << qNew.z << endl;
+	//qNew = slerp(qCur, qNew, 0.1f);
+	//m_rotation = qNew;
 
+	mat4 mDif;
+	mDif = glm::rotate(mDif, ax*0.1f, axis);
+
+	m_local = mDif * m_local;
 
 	/*
 	float m = sqrt(2.f + 2.f * dot(curToEnd, curToTarget));
@@ -90,17 +87,17 @@ void Link::reach(Link& endLink, vec3& target){
 
 void Link::update(Link& endLink, vec3& target){
 
-	mat4 rot = quatToMat4(m_rotation);//Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
-	mat4 trans = Util::translationMat4((vec3(m_length, 0, 0) + origin));
+	if (parent != NULL){
+		m_base = parent->m_base * translationMat4(vec3(m_length, 0, 0) + origin) * m_local;
+	}
 
-	m_base = mult(rot, trans);
-	if (parent != NULL) m_base = mult(m_base, parent->m_base);
+	cout << vec3ToString(translationFromMat4(m_base)) << endl;
 
 	for (int i = 0; i < children.size(); i++){
 		children[i]->update(endLink, target);
 	}
-
 	reach(endLink, target);
+
 }
 
 void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
@@ -137,7 +134,8 @@ void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 	glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
 	glEnd();
 	glEnable(GL_DEPTH_TEST);
-	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
+
+	vec3 axis = normalize(cross(curToEnd, curToTarget));
 
 	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
 	glBegin(GL_LINES);
@@ -146,6 +144,9 @@ void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 	glEnd();
 	glEnable(GL_DEPTH_TEST);
 
+	glBegin(GL_POINTS);
+	glVertex3f(end.x, end.y, end.z);
+	glEnd();
 }
 
 Link::~Link()

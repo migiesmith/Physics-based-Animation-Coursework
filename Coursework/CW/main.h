@@ -96,7 +96,7 @@ mat4 orthoMVP; // MVP used for postprocessing
 
 bool movingCam = false;
 
-int currentCamera = 1; // Default to Target Camera
+int currentCamera = 2; // Default to Target Camera
 short targetCamDirection = -1; // The direction that the targetCam rotates
 
 static material grassMat; // The material for the grass

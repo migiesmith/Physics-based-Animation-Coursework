@@ -17,6 +17,8 @@ public:
 	float m_length;
 	vec3 origin;
 
+	int linkReach = -1; // Determines how many links this link can affect
+
 	Link* parent;
 	vector<Link*> children;
 
@@ -28,10 +30,13 @@ public:
 	void setParent(Link* l);
 	Link* getRoot();
 
-	void reach(Link& endLink, vec3& target);
+	void reach(vec3& target);
 	void update(Link& endLink, vec3& target);
 	void render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target);
 
 	~Link();
+
+private:
+	void privateReach(Link& endLink, vec3& target);
 };
 

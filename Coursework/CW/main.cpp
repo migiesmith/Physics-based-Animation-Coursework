@@ -40,8 +40,7 @@ IntersectionData dataTODO;
 
 
 // IK constants
-int							numLinks = 6;		// How many links
-Link			links = Link(vec3(0, 0, 1), 0.2f, 2.0f);						// Array holding all our links
+Link links = Link(vec3(0, 0, 1), 0.0f, 0.5f);
 //TODO
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -399,15 +398,13 @@ void initScreenQuads(){
 void initSceneObjects(){
 
 	//TODO IK INIT
-	float f = 0.2f;
-	float l = 2.0f;
+	float f = 0.0f;
+	float l = 0.5f;
 
-	links.setParent(new Link(vec3(0, 0, 1), f, l));
+	links.setParent(new Link(vec3(0, 0, 1), f, 1.0f));
 	Link* parent = links.parent;
-	for (int i = 0; i < numLinks; i++){
-		parent->setParent(new Link(vec3(0, 0, 1), f, 1.0f + i));
-		parent = parent->parent;
-	}
+	parent->setParent(new Link(vec3(0, 0, -1), f, l));
+	parent->parent->setParent(new Link(vec3(0, 0, -1), half_pi<float>(), l));
 
 	links.getRoot()->origin = vec3(0,100,0);
 
@@ -639,54 +636,16 @@ void updateLighting(float delta_time)
 	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
 }
 
-void Reach(Link& currLink, const vec3& target){
-}
-
-void UpdateHierarchy(){
-
-
-	/*
-	for (int i = 0; i < (int)links.size(); i++){
-		mat4 rot = quatToMat4(links[i]->m_rotation);//Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
-		mat4 trans = Util::translationMat4((vec3(links[i]->m_length, 0, 0) + links[i]->origin));
-
-		links[i]->m_base = mult(rot,trans);
-		if (i > 0) links[i]->m_base = mult(links[i]->m_base, links[i - 1]->m_base);
-	}
-	*/
-}
-
 //TODO IK
 void updateIK(mat4 &proj, mat4 &view){
 
 	mat4 PV = proj*view;
-
 	vec3 target = sphereA.position;
-
-
+	
 	Link* l = links.getRoot();
 	l->update(links, target);
+	links.reach(target);
 	l->render(PV, colourPassThroughEffect, links, target);
-
-	/*
-	for (int i = 0; i<(int)links.size(); i++)
-	//for (int i = (int)links.size()-1; i >= 0; i--)
-	{
-		// Update the whole hiearchy - however, we can optimize this
-		// to only update the section of the hierarchy or update the target
-		// based on the modified link transformation
-		UpdateHierarchy();
-
-		// We iteratively update the `target' based on
-		// the new position of the limb - so we don't have
-		// to keep updating the hierarchy - performance
-		// improvement 
-		Reach(target);
-
-	}
-	*/
-
-
 
 }
 

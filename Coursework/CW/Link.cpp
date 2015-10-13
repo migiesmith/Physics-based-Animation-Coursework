@@ -34,7 +34,7 @@ Link* Link::getRoot(){
 	return parent != NULL ? parent->getRoot() : this;
 }
 
-void Link::reach(Link& endLink, vec3& target){
+void Link::privateReach(Link& endLink, vec3& target){
 	vec3 endVec = vec4ToVec3(endLink.m_base * vec4(endLink.m_length, 0, 0, 1));
 	//     +
 	//    / \
@@ -122,9 +122,21 @@ void Link::reach(Link& endLink, vec3& target){
 
 
 
+void Link::reach(vec3& target){
+	privateReach(*this, target);
+
+	Link* p = parent;
+	int linksUpdated = 0;
+	while (p != NULL && (linksUpdated < linkReach || linkReach == -1)){
+		p->privateReach(*this, target);
+		p = p->parent;
+		linksUpdated++;
+	}
+
+}
+
+
 void Link::update(Link& endLink, vec3& target){
-
-
 
 	mat4 R1 = transpose(glm::mat4_cast(m_quat));
 
@@ -142,7 +154,6 @@ void Link::update(Link& endLink, vec3& target){
 		children[i]->update(endLink, target);
 	}
 
-	reach(endLink, target);
 }
 
 void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){

@@ -3,7 +3,8 @@
 
 Link::Link(vec3 &axis, float angle){
 	origin = vec3(0, 0, 0);
-	m_rotation = quat(1, 0, 0, 0);//Util::FromAxisAngle(axis, angle);
+	m_quat = angleAxis(angle, axis);//Util::FromAxisAngle(axis, angle);
+	m_qWorld = quat();
 }
 
 Link::Link(vec3 &axis, float angle, float length) : Link(axis, angle){
@@ -42,59 +43,100 @@ void Link::reach(Link& endLink, vec3& target){
 	// + vB    
 	//           @ target
 	// 
-	vec3 currVec = Util::translationFromMat4(m_base);
-	
-	vec3 curToEnd = normalize(endVec - currVec);
-	vec3 curToTarget = normalize(target - currVec);
-
-	if (pow(magnitude(target - endVec), 2.0f) < 0.1f) return;
-
-	// These lines are perpendicular, no axis of rotation can be found
-	if (abs(dot(curToEnd, curToTarget)) == 1.0f) return;
-
-	vec3 axis = normalize(cross(curToEnd, curToTarget));
-
-	float angle = acos(dot(curToEnd, curToTarget));
-	float ax = dot(curToEnd, curToTarget);// / (magnitude(curToEnd) * magnitude(curToTarget));
-	ax = glm::min(1.0f, glm::max(ax, -1.0f));
-	ax = (float)acos(ax);
-
-	ax = glm::min(.5f, glm::max(ax, -0.5f));
-
-	if (abs(ax) < 0.01f) return;
-	
-	quat qCur = m_rotation;
-
-	quat qDif = angleAxis(-ax, axis);
-
-	float s0 = qCur.w;
-	float s1 = qDif.w;
-	vec3 v0 = vec3(qCur.x, qCur.y, qCur.z);
-	vec3 v1 = vec3(qDif.x, qDif.y, qDif.z);
-	quat qNew = normalize(qCur * qDif);//normalize(qCur * qDif);
-	
-	if (this == &endLink)cout << " | " << qNew.w << ", " << qNew.x << ", " << qNew.y << ", " << qNew.z << endl;
-	qNew = slerp(qCur, qNew, 0.06f);
-	m_rotation = qNew;
+	vec3 vB = translationFromMat4(m_base);
 
 
+	vec3 v0 = (endVec - vB);
+	vec3 v1 = (target - vB);
 
-	/*
-	float m = sqrt(2.f + 2.f * dot(curToEnd, curToTarget));
-	vec3 w = (1.f / m) * cross(curToEnd, curToTarget);
-	m_rotation = quat(0.5f * m, w.x, w.y, w.z);
-	*/
+	v0 = normalize(v0);
+	v1 = normalize(v1);
+
+	vec3 axis = cross(v0, v1);
+
+	//axis.y *= -1;
+
+	if (axis.length() < 0.01f) return;
+
+
+	axis = normalize(axis);
+
+	float angle = dot(v0, v1);
+
+	if (angle < -1) angle = -1;
+	if (angle > 1) angle = 1;
+
+	angle = (float)std::acos(angle);
+
+	quat qDif = angleAxis(-angle, axis);
+	qDif = normalize(qDif);
+
+	quat qCur = quat();
+	//Quaternion qCur2 = Quaternion::FromRotationMatrix( links[i]->m_base );
+	qCur = m_qWorld;
+	qCur = normalize(qCur);
+
+	quat qPar = quat();
+	if (parent)
+	{
+		//Quaternion qPar2 = Quaternion::FromRotationMatrix( links[i]->m_parent->m_base );
+		qPar = parent->m_qWorld;
+		qPar = normalize(qPar);
+	}
+
+
+	//Quaternion qLocal = Quaternion::Conjugate(qPar) * qCur;
+	quat qLocal = qCur * conjugate(qPar);
+
+
+	// Check code - ensure our local-world calculation is correct
+	// the dot product should be 1.0!!! - or something went wrong
+	float qd = dot(qLocal, m_quat);
+
+
+	// 
+	// Magic code - we apply the `correcton' to the world orientation
+	// - but most importantly convert the corrected world orientation
+	// back to local space
+	//
+	quat qNew = (qCur * qDif) * conjugate(qPar);
+	qNew = normalize(qNew);
+
+
+	static float val = 0.1f;
+
+	// Use slerp to avoid `snapping' to the target - if 
+	// we instead want to `gradually' interpolate to 
+	// towards the target
+	qNew = slerp(m_quat, qNew, val);
+	qNew = normalize(qNew);
+
+	// For 3D ball joint - we use an axis-angle combination
+	// could just store a quaternion
+	//Vector3 axis2;
+	//float angle2 = Quaternion::ToAxisAngle(qNew, axis2);
+	//links[i]->m_axis  = axis2;
+	//links[i]->m_angle = angle2;
+	m_quat = qNew;
 }
 
 
 
 void Link::update(Link& endLink, vec3& target){
 
-	mat4 rot = quatToMat4(m_rotation);//Util::rotationMat4(links[i]->m_axis, links[i]->m_angle);
-	mat4 trans = Util::translationMat4((vec3(m_length, 0, 0) + origin));
 
-	m_base = mult(rot, trans);
-	if (parent != NULL) m_base = mult(m_base, parent->m_base);
+
+	mat4 R1 = transpose(glm::mat4_cast(m_quat));
+
+	mat4 T1 = translationMat4(vec3(m_length, 0, 0) + origin);
+	m_base = T1 * R1;
+
+	m_qWorld = m_quat;
+
+	if (parent) m_base = parent->m_base * m_base;
+
+	if (parent) m_qWorld = m_quat * parent->m_qWorld;
+	m_qWorld = normalize(m_qWorld);
 
 	for (int i = 0; i < children.size(); i++){
 		children[i]->update(endLink, target);

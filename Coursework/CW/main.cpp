@@ -40,7 +40,7 @@ IntersectionData dataTODO;
 
 
 // IK constants
-int							numLinks = 0;		// How many links
+int							numLinks = 4;		// How many links
 Link			links = Link(vec3(0, 0, 1), 0.2f, 2.0f);						// Array holding all our links
 //TODO
 

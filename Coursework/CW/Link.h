@@ -12,7 +12,8 @@ class Link
 public:
 
 	mat4 m_base;
-	quat m_rotation;
+	quat  m_quat;
+	quat  m_qWorld;
 	float m_length;
 	vec3 origin;
 

@@ -40,7 +40,7 @@ IntersectionData dataTODO;
 
 
 // IK constants
-int							numLinks = 4;		// How many links
+int							numLinks = 6;		// How many links
 Link			links = Link(vec3(0, 0, 1), 0.2f, 2.0f);						// Array holding all our links
 //TODO
 
@@ -1002,8 +1002,6 @@ bool render()
 
 	glDisable(GL_DEPTH_TEST);
 	renderer::bind(colourPassThroughEffect);
-	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-	Util::renderArrow(vec3(0, 100, 0.0f), vec3(0, 100, -1.0f), 1.0f, 0.5f, P * V, colourPassThroughEffect);
 
 	glPointSize(6.0f);
 	// Set MVP matrix uniform

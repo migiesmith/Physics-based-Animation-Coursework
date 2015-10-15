@@ -34,101 +34,70 @@ Link* Link::getRoot(){
 	return parent != NULL ? parent->getRoot() : this;
 }
 
-void Link::privateReach(Link& endLink, vec3& target){
+void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
+	// The position of the end of the end link
 	vec3 endVec = vec4ToVec3(endLink.m_base * vec4(endLink.m_length, 0, 0, 1));
 	//     +
 	//    / \
 	//   /   \
 	//  /     + end
-	// + vB    
+	// + curr    
 	//           @ target
-	// 
-	vec3 vB = translationFromMat4(m_base);
+	//
 
-
-	vec3 v0 = (endVec - vB);
-	vec3 v1 = (target - vB);
-
-	v0 = normalize(v0);
-	v1 = normalize(v1);
-
-	vec3 axis = cross(v0, v1);
-
-	//axis.y *= -1;
-
+	// Get the vectors required for rotating the link
+	vec3 currPos = translationFromMat4(m_base);
+	vec3 currToEnd = normalize(endVec - currPos);
+	vec3 currToTarget = normalize(target - currPos);
+	
+	// Calculate the axis of rotation
+	vec3 axis = cross(currToEnd, currToTarget);
+	// Check if the axis of rotation is valid
 	if (axis.length() < 0.01f) return;
-
-
+	// Normalize the axis
 	axis = normalize(axis);
 
-	float angle = dot(v0, v1);
+	// Calculate the rotation angle
+	float angle = acos( fmin(fmax(dot(currToEnd, currToTarget), -1.0f), 1.0f) );
+	
+	// Calculate the quaternian of the rotation
+	quat qDif = normalize( angleAxis(-angle, axis) );
 
-	if (angle < -1) angle = -1;
-	if (angle > 1) angle = 1;
+	// Get the current orientation
+	quat qCur = normalize(m_qWorld);
 
-	angle = (float)std::acos(angle);
-
-	quat qDif = angleAxis(-angle, axis);
-	qDif = normalize(qDif);
-
-	quat qCur = quat();
-	//Quaternion qCur2 = Quaternion::FromRotationMatrix( links[i]->m_base );
-	qCur = m_qWorld;
-	qCur = normalize(qCur);
-
+	// Get the parent's orientation (if there is a parent)
 	quat qPar = quat();
 	if (parent)
 	{
-		//Quaternion qPar2 = Quaternion::FromRotationMatrix( links[i]->m_parent->m_base );
-		qPar = parent->m_qWorld;
-		qPar = normalize(qPar);
+		qPar = normalize(parent->m_qWorld);
 	}
 
-
-	//Quaternion qLocal = Quaternion::Conjugate(qPar) * qCur;
+	// Get the local space orientation
 	quat qLocal = qCur * conjugate(qPar);
-
 
 	// Check code - ensure our local-world calculation is correct
 	// the dot product should be 1.0!!! - or something went wrong
-	float qd = dot(qLocal, m_quat);
+	//float qd = dot(qLocal, m_quat);
 
-
-	// 
-	// Magic code - we apply the `correcton' to the world orientation
-	// - but most importantly convert the corrected world orientation
-	// back to local space
-	//
-	quat qNew = (qCur * qDif) * conjugate(qPar);
-	qNew = normalize(qNew);
-
-
-	static float val = 0.1f;
+	// Convert world orientation to local space
+	quat qNew = normalize( (qCur * qDif) * conjugate(qPar) );
 
 	// Use slerp to avoid `snapping' to the target - if 
 	// we instead want to `gradually' interpolate to 
 	// towards the target
-	qNew = slerp(m_quat, qNew, val);
-	qNew = normalize(qNew);
-
-	// For 3D ball joint - we use an axis-angle combination
-	// could just store a quaternion
-	//Vector3 axis2;
-	//float angle2 = Quaternion::ToAxisAngle(qNew, axis2);
-	//links[i]->m_axis  = axis2;
-	//links[i]->m_angle = angle2;
-	m_quat = qNew;
+	m_quat = normalize(slerp(m_quat, qNew, physicsTimeStep));
 }
 
 
 
-void Link::reach(vec3& target){
-	privateReach(*this, target);
+void Link::reach(vec3& target, float physicsTimeStep){
+	privateReach(*this, target, physicsTimeStep);
 
 	Link* p = parent;
 	int linksUpdated = 0;
 	while (p != NULL && (linksUpdated < linkReach || linkReach == -1)){
-		p->privateReach(*this, target);
+		p->privateReach(*this, target, physicsTimeStep);
 		p = p->parent;
 		linksUpdated++;
 	}

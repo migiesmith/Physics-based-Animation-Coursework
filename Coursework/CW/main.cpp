@@ -644,7 +644,8 @@ void updateIK(mat4 &proj, mat4 &view){
 	
 	Link* l = links.getRoot();
 	l->update(links, target);
-	links.reach(target);
+	float physicsTimeStep = 0.1f;
+	links.reach(target, physicsTimeStep);
 	l->render(PV, colourPassThroughEffect, links, target);
 
 }

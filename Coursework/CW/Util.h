@@ -22,6 +22,9 @@ namespace Util
 	void init();
 	float magnitude(vec3 v);
 	bool isZeroVec3(vec3 v);
+	bool equals(vec3 v0, vec3 v1);
+
+	float ToAxisAngle(const quat& q, vec3& v);
 	vec3 rotate(vec3 v, vec3 axis, float degrees);
 	string vec3ToString(vec3 v);
 	mat4 rotationMat4(vec3& axis, float degrees);

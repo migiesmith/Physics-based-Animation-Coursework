@@ -6,29 +6,40 @@ Link::Link(vec3 &axis, float angle){
 	m_quat = angleAxis(angle, axis);//Util::FromAxisAngle(axis, angle);
 	m_qWorld = quat();
 	m_length = 1.0f;
+	angleLimits = { vec3(-pi<float>(), -pi<float>(), -pi<float>()), vec3(pi<float>(), pi<float>(), pi<float>()) };
 }
 
 Link::Link(vec3 &axis, float angle, float length) : Link(axis, angle){
 	m_length = length;
 }
 
-void Link::addChild(Link* l){
-	children.push_back(l);
+void Link::setAngleLimits(vec3& min, vec3& max){
+	angleLimits[0] = min;
+	angleLimits[1] = max;
+}
+
+void Link::addChild(string s, Link* l){
+	if (l->parent)
+		l->parent->removeChild(l);
+
+	l->parent = this;
+	children[s] = l;
+}
+
+void Link::removeChild(string s){
+	children[s]->~Link();
+	//children.erase(std::remove(children.begin(), children.end(), l), children.end());
 }
 
 void Link::removeChild(Link* l){
-	children.erase(std::remove(children.begin(), children.end(), l), children.end());
+	
 }
 
-void Link::setParent(Link* l){
-	if (parent == NULL){
-		parent = l;
-		parent->addChild(this);
-	}else{
+void Link::setParent(string childName, Link* l){
+	if (parent)
 		parent->removeChild(this);
-		parent = l;
-		parent->addChild(this);
-	}
+	parent = l;
+	parent->addChild(childName, this);
 }
 
 Link* Link::getRoot(){
@@ -60,9 +71,13 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 
 	// Calculate the rotation angle
 	float angle = acos( fmin(fmax(dot(currToEnd, currToTarget), -1.0f), 1.0f) );
+
+	angle *= priority;
+	if (angle == 0.0f) return;
 	
 	// Calculate the quaternian of the rotation
-	quat qDif = normalize( angleAxis(-angle, axis) );
+	quat qDif = normalize(angleAxis(-angle, axis));
+
 
 	// Get the current orientation
 	quat qCur = normalize(m_qWorld);
@@ -83,6 +98,24 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 
 	// Convert world orientation to local space
 	quat qNew = normalize( (qCur * qDif) * conjugate(qPar) );
+
+	/*
+	vec3 newAx;
+	newAx.x = fmin(fmax(qNew.x, angleLimits[0].x), angleLimits[1].x);
+	newAx.y = fmin(fmax(qNew.y, angleLimits[0].y), angleLimits[1].y);
+	newAx.z = fmin(fmax(qNew.z, angleLimits[0].z), angleLimits[1].z);
+	qNew = qNew;
+
+	vec3 newAx;
+	float newAng = ToAxisAngle(qNew, newAx);
+	newAx *= newAng;
+	newAx.x = clamp(newAx.x, angleLimits[0].x, angleLimits[1].x);
+	newAx.y = clamp(newAx.y, angleLimits[0].y, angleLimits[1].y);
+	newAx.z = clamp(newAx.z, angleLimits[0].z, angleLimits[1].z);
+	qNew = normalize(angleAxis(newAng, newAx));
+	cout << vec3ToString(newAx) << endl;
+	*/
+
 
 	// Use slerp to avoid `snapping' to the target - if 
 	// we instead want to `gradually' interpolate to 
@@ -120,56 +153,57 @@ void Link::update(){
 	if (parent) m_qWorld = m_quat * parent->m_qWorld;
 	m_qWorld = normalize(m_qWorld);
 
-
-	for (int i = 0; i < children.size(); i++){
-		children[i]->update();
+	for (auto& child : children){
+		child.second->update();
 	}
-
 }
 
 void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
+	if (toRender){
+		vec3 base = translationFromMat4(m_base);
+		vec3 end = vec4ToVec3(m_base * vec4(m_length, 0, 0, 1));
+		glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
+		Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect); //Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect);
 
-	vec3 base = translationFromMat4(m_base);
-	vec3 end = vec4ToVec3(m_base * vec4(m_length, 0, 0, 1));
-	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
-	Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect); //Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect);
+		if (debugRender){
+			glUniformMatrix4fv(
+				currentEffect.get_uniform_location("MVP"), // Location of uniform
+				1, // Number of values - 1 mat4
+				GL_FALSE, // Transpose the matrix?
+				value_ptr(PV)); // Pointer to matrix data
+			vec3 endVec = vec4ToVec3(endLink.m_base * vec4(endLink.m_length, 0, 0, 1));
+			vec3 currVec = Util::translationFromMat4(m_base);
+			vec3 curToEnd = normalize(endVec - currVec);
+			vec3 curToTarget = normalize(target - currVec);
 
-	for (int i = 0; i < children.size(); i++){
-		children[i]->render(PV, currentEffect, endLink, target);
+			glDisable(GL_DEPTH_TEST);
+			glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
+			glLineWidth(1.0f);
+			glBegin(GL_LINES);
+			glVertex3f(currVec.x, currVec.y, currVec.z);
+			glVertex3f(currVec.x + curToEnd.x, currVec.y + curToEnd.y, currVec.z + curToEnd.z);
+			glEnd();
+			glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 1, 0, 1)));
+			glBegin(GL_LINES);
+			glVertex3f(currVec.x, currVec.y, currVec.z);
+			glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
+			glEnd();
+
+			if (equals(curToEnd, curToTarget)){
+				vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
+				glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
+				glBegin(GL_LINES);
+				glVertex3f(currVec.x, currVec.y, currVec.z);
+				glVertex3f(currVec.x + axis.x, currVec.y + axis.y, currVec.z + axis.z);
+				glEnd();
+			}
+			glEnable(GL_DEPTH_TEST);
+		}
 	}
-	
-	glUniformMatrix4fv(
-		currentEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(PV)); // Pointer to matrix data
-	vec3 endVec = vec4ToVec3(endLink.m_base * vec4(endLink.m_length, 0, 0, 1));
-	vec3 currVec = Util::translationFromMat4(m_base);
-	vec3 curToEnd = normalize(endVec - currVec);
-	vec3 curToTarget = normalize(target - currVec);
 
-	glDisable(GL_DEPTH_TEST);
-	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-	glLineWidth(1.0f);
-	glBegin(GL_LINES);
-	glVertex3f(currVec.x, currVec.y, currVec.z);
-	glVertex3f(currVec.x + curToEnd.x, currVec.y + curToEnd.y, currVec.z + curToEnd.z);
-	glEnd();
-	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 1, 0, 1)));
-	glBegin(GL_LINES);
-	glVertex3f(currVec.x, currVec.y, currVec.z);
-	glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
-	glEnd();
-	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
-
-	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
-	glBegin(GL_LINES);
-	glVertex3f(currVec.x, currVec.y, currVec.z);
-	glVertex3f(currVec.x + axis.x, currVec.y + axis.y, currVec.z + axis.z);
-	glEnd();
-
-	glEnable(GL_DEPTH_TEST);
-
+	for (auto& child : children){
+		child.second->render(PV, currentEffect, endLink, target);
+	}
 }
 
 Link::~Link()

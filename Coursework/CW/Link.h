@@ -17,17 +17,25 @@ public:
 	float m_length;
 	vec3 origin;
 
+	bool toRender = true;
+	bool debugRender = false;
+	float priority = 1.0f;
+	vector<vec3> angleLimits;
+
 	int linkReach = -1; // Determines how many links this link can affect
 
 	Link* parent;
-	vector<Link*> children;
+	map<string, Link*> children;
 
 	Link(vec3& axis, float angle);
 	Link(vec3& axis, float angle, float length);
 
-	void addChild(Link* l);
+	void setAngleLimits(vec3& min, vec3& max);
+
+	void addChild(string name, Link* l);
+	void removeChild(string name);
 	void removeChild(Link* l);
-	void setParent(Link* l);
+	void setParent(string childName, Link* l);
 	Link* getRoot();
 
 	void reach(vec3& target, float physicsTimeStep);

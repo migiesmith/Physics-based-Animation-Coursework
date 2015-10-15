@@ -33,7 +33,37 @@ using namespace Util;
 	bool Util::isZeroVec3(vec3 v){
 		return v.x == 0.0 && v.y == 0.0 && v.z == 0.0;
 	}
-	
+
+	bool Util::equals(vec3 v0, vec3 v1){
+		return v0.x == v1.x && v0.y == v1.y && v0.z == v1.z;
+	}
+
+	float Util::ToAxisAngle(const quat& q, vec3& v)
+	{
+		// The quaternion representing the rotation is
+		//   q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k)
+
+		float sqrLength = q.x*q.x + q.y*q.y + q.z*q.z;
+		if (sqrLength > 0.0f)
+		{
+			float invLength = 1.0f / std::sqrt(sqrLength);
+
+			v.x = q.x*invLength;
+			v.y = q.y*invLength;
+			v.z = q.z*invLength;
+
+			return 2.f*std::acos(q.w);
+		}
+		else
+		{
+			// angle is 0 (mod 2*pi), so any axis will do.
+			v.x = 1.0f;
+			v.y = 0.0f;
+			v.z = 0.0f;
+
+			return 0.f;
+		}
+	}
 
 	// Returns the result of this vector rotated by degrees around axis
 	vec3 Util::rotate(vec3 v, vec3 axis, float degrees){

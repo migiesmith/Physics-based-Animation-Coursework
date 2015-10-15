@@ -92,17 +92,18 @@ using namespace Util;
 	void Util::renderArrow(vec3& start, vec3& end, float length, float radius, mat4& PV, effect& currentEffect){
 		// Create a transform to store the rotation, translation and scale of the arrow
 		graphics_framework::transform t;
-				
+
 		if (abs(dot(vec3(1, 0, 0), normalize(end - start))) != 1.0f){
 			// Calculate the rotation of the arrow
 			float m = sqrt(2.f + 2.f * dot(vec3(1, 0, 0), normalize(end - start)));
 			vec3 w = (1.f / m) * cross(vec3(1, 0, 0), normalize(end - start));
 			quat q = quat(0.5f * m, w.x, w.y, w.z);
-			t.rotate(q);
+			t.rotate(normalize(q));
 		}
 
-		t.translate(start);
 		t.scale = vec3(length, radius, radius);
+		t.translate(start);
+
 
 		// Pass the transform matrix to the shader
 		mat4 MVP = PV * t.get_transform_matrix();

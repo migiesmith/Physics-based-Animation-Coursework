@@ -31,7 +31,7 @@ public:
 	Link* getRoot();
 
 	void reach(vec3& target, float physicsTimeStep);
-	void update(Link& endLink, vec3& target);
+	void update();
 	void render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target);
 
 	~Link();

@@ -34,13 +34,13 @@ IntersectionData rayTest;
 //TODO
 //SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
 //SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
-CubeCollider sphereB = CubeCollider(vec3(0, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-CubeCollider sphereA = CubeCollider(vec3(0, 100, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereB = CubeCollider(vec3(30, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereA = CubeCollider(vec3(40, 110, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 IntersectionData dataTODO;
 
 
 // IK constants
-Link links = Link(vec3(0, 0, 1), 0.0f, 0.5f);
+vector<Link*> endLinks;
 //TODO
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -124,12 +124,12 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 							break;
 						case Buttons::Depth_of_Field:
 							// Toggle Depth of Field
-							dofEnabled = !dofEnabled;
+							//dofEnabled = !dofEnabled;
 							break;
 						case Buttons::DoF_Debug:
 							// Toggle Dof Debug
-							dofEnabled = true;
-							dofDebug = !dofDebug;
+							//dofEnabled = true;
+							//dofDebug = !dofDebug;
 							break;
 						case Buttons::Free_Cam:
 							// Change to the free camera
@@ -141,13 +141,13 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 								ssaoOnly = true;
 								ssaoEnabled = true;
 								glowEnabled = false;
-								dofEnabled = false;
+								//dofEnabled = false;
 								lensFlareEnabled = false;
 							}
 							else{
 								ssaoOnly = false;
 								glowEnabled = true;
-								dofEnabled = true;
+								//dofEnabled = true;
 								lensFlareEnabled = true;
 							}
 							break;
@@ -201,8 +201,7 @@ bool initialise()
 	glfwGetCursorPos(renderer::get_window(), &cursor_x, &cursor_y);
 
 	// Set up the required Frame buffers
-	frontPostProcessingFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
-	backPostProcessingFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
+	postProcessingFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
 	fbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
 	prevFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
 	shadowFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
@@ -400,13 +399,23 @@ void initSceneObjects(){
 	//TODO IK INIT
 	float f = 0.0f;
 	float l = 0.5f;
-
-	links.setParent(new Link(vec3(0, 0, 1), f, 1.0f));
-	Link* parent = links.parent;
+	endLinks.push_back(new Link(vec3(0, 0, 1), 0.0f, l));
+	endLinks[0]->setParent(new Link(vec3(0, 0, 1), f, l));
+	Link* parent = endLinks[0]->parent;
 	parent->setParent(new Link(vec3(0, 0, -1), f, l));
 	parent->parent->setParent(new Link(vec3(0, 0, -1), half_pi<float>(), l));
 
-	links.getRoot()->origin = vec3(0,100,0);
+	endLinks[0]->getRoot()->origin = vec3(40, 100, 0);
+	endLinks[0]->getRoot()->m_length = 2.0f;
+	endLinks[0]->linkReach = -1;
+
+	endLinks.push_back(new Link(vec3(0, 0, 1), 0.0f, l));
+	Link* ll = new Link(vec3(0, 0, 1), 0.0f, l);
+	ll->setParent(endLinks[0]->parent->parent->parent);
+	endLinks[1]->setParent(ll);
+	endLinks[1]->linkReach = -1;
+
+	cout << "Root length " << endLinks[0]->getRoot()->m_length << endl;
 
 	// ***************
 	// Set up SceneObjects
@@ -642,12 +651,16 @@ void updateIK(mat4 &proj, mat4 &view){
 	mat4 PV = proj*view;
 	vec3 target = sphereA.position;
 	
-	Link* l = links.getRoot();
-	l->update(links, target);
+	Link* l = endLinks[0]->getRoot();
+	l->update();
 	float physicsTimeStep = 0.1f;
-	links.reach(target, physicsTimeStep);
-	l->render(PV, colourPassThroughEffect, links, target);
+	endLinks[0]->reach(target, physicsTimeStep);
+	l->render(PV, colourPassThroughEffect, *endLinks[0], target);
+	endLinks[1]->reach(sphereB.position, physicsTimeStep);
 
+	
+
+	sphereB.position = vec3(40, 101, sin(totalTime)*20.0f);
 }
 
 
@@ -691,7 +704,7 @@ bool update(float delta_time)
 
 
 	// Write the fps to the console
-	cout << int(1.0f / delta_time) << " fps          " << '\r';
+	//cout << int(1.0f / delta_time) << " fps          " << '\r';
 
 	for (auto &e : sceneObjects)
 	{
@@ -705,9 +718,9 @@ bool update(float delta_time)
 }
 
 // Renders a SceneObject and it's children
-void renderMesh(SceneObject* sO, const mat4 &V, const mat4 &P){
+void renderMesh(SceneObject& sO, const mat4 &V, const mat4 &P){
 
-	mat4 M = sO->get_transform_with_parent().get_transform_matrix();
+	mat4 M = sO.get_transform_with_parent().get_transform_matrix();
 
 	mat4 MVP = P * V * M;
 	// Set MVP matrix uniform
@@ -720,9 +733,9 @@ void renderMesh(SceneObject* sO, const mat4 &V, const mat4 &P){
 	glUniformMatrix4fv(mainEffect.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
 
 	// Check if the SceneObject has a normal map
-	if (sO->_normal){
+	if (sO._normal){
 		// Bind the normal
-		renderer::bind(*(sO->_normal), 1);
+		renderer::bind(*(sO._normal), 1);
 		glUniform1i(mainEffect.get_uniform_location("hasNormalMap"), true);
 		glUniform1i(mainEffect.get_uniform_location("normalTex"), 1);
 	}
@@ -731,12 +744,11 @@ void renderMesh(SceneObject* sO, const mat4 &V, const mat4 &P){
 	}
 
 	// If the object has a parent and wireframe is enabled then render the parent-child hierarchy
-	if (sO->_parent && isWireframe){
+	if (sO._parent && isWireframe){
 		// Pass wind uniforms
-		glUniform1f(mainEffect.get_uniform_location("windFactor"), 0.0f);
-		vec3 linePos = -sO->get_transform().position / sO->get_transform_with_parent().scale;
+		vec3 linePos = -sO.get_transform().position / sO.get_transform_with_parent().scale;
 
-		linePos = rotate(inverse(sO->get_transform().orientation), linePos);
+		linePos = rotate(inverse(sO.get_transform().orientation), linePos);
 
 		renderer::bind(texs["solidRed"], 0);
 		renderer::bind(material(vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), 1), "mat");
@@ -746,7 +758,7 @@ void renderMesh(SceneObject* sO, const mat4 &V, const mat4 &P){
 			glVertex3f(0, 0, 0);
 			glVertex3f(linePos.x, linePos.y, linePos.z);
 		glEnd();
-		vec3 objScale = sO->get_transform_with_parent().scale;
+		vec3 objScale = sO.get_transform_with_parent().scale;
 		vec3 linePosNorm = normalize(linePos) / objScale;
 		glLineWidth(10);
 		renderer::bind(texs["white"], 0);
@@ -757,31 +769,28 @@ void renderMesh(SceneObject* sO, const mat4 &V, const mat4 &P){
 		glLineWidth(1);
 
 	}
-
-	// Pass wind uniforms
-	glUniform1f(mainEffect.get_uniform_location("windFactor"), sO->windFactor);
-
+	
 	// Bind and set texture
-	renderer::bind((sO->get_texture()), 0);
+	renderer::bind((sO.get_texture()), 0);
 	glUniform1i(mainEffect.get_uniform_location("tex"), 0);
 
 	// Bind the SceneObject's material
-	renderer::bind(sO->get_material(), "mat");
+	renderer::bind(sO.get_material(), "mat");
 
 	// Render the current SceneObject
-	sO->render();
+	sO.render();
 
 	// Render the list of child SceneObjects
-	for (SceneObject& child : *(sO->get_children())){
-		renderMesh(&child, V, P);
+	for (SceneObject& child : *(sO.get_children())){
+		renderMesh(child, V, P);
 	}
 
 }
 
 // Renders a SceneObject and it's children
-void renderMeshDepth(SceneObject* sO, const mat4 &V, const mat4 &P){
+void renderMeshDepth(SceneObject& sO, const mat4 &V, const mat4 &P){
 
-	mat4 M = sO->get_transform_with_parent().get_transform_matrix();
+	mat4 M = sO.get_transform_with_parent().get_transform_matrix();
 
 	mat4 MVP = P * V * M;
 	// Set MVP matrix uniform
@@ -790,16 +799,13 @@ void renderMeshDepth(SceneObject* sO, const mat4 &V, const mat4 &P){
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
 		value_ptr(MVP)); // Pointer to matrix data
-
-	// Pass wind uniforms
-	glUniform1f(depthEffect.get_uniform_location("windFactor"), sO->windFactor);
-
+	
 	// Render the current SceneObject
-	sO->render();
+	sO.render();
 
 	// Render the list of child SceneObjects
-	for (SceneObject& child : *(sO->get_children())){
-		renderMeshDepth(&child, V, P);
+	for (SceneObject& child : *(sO.get_children())){
+		renderMeshDepth(child, V, P);
 	}
 
 }
@@ -810,12 +816,6 @@ bool render()
 	//------------ Start Shadow Map ------------//
 
 	// Sort the SceneObjects into furthest from camera rendered first
-	vector<SceneObject*> objectVector;
-	for (auto &sObj : sceneObjects)
-	{
-		objectVector.push_back(&sObj.second);
-	}
-	sort(objectVector.begin(), objectVector.end(), orderByDistance);
 
 	// Bind the shadow framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFbo.get_buffer());
@@ -837,8 +837,8 @@ bool render()
 	glUniform1f(depthEffect.get_uniform_location("near"), MYNEAR);
 	glUniform1f(depthEffect.get_uniform_location("far"), MYFAR);
 	// Render the list of sorted child SceneObjects
-	for (SceneObject* mapObj : objectVector){
-		renderMeshDepth(mapObj, depthViewMatrix, depthProjectionMatrix);
+	for (auto& mapObj : sceneObjects){
+		renderMeshDepth(mapObj.second, depthViewMatrix, depthProjectionMatrix);
 	}
 
 	// Change the culling back to back face
@@ -946,8 +946,8 @@ bool render()
 	glUniformMatrix4fv(mainEffect.get_uniform_location("lightVP"), 1, GL_FALSE, value_ptr(depthProjectionMatrix*depthViewMatrix));
 
 	// Render the list of sorted child SceneObjects
-	for (SceneObject* mapObj : objectVector){
-		renderMesh(mapObj, V, P);
+	for (auto& mapObj : sceneObjects){
+		renderMesh(mapObj.second, V, P);
 	}
 
 
@@ -989,35 +989,11 @@ bool render()
 	
 	// Apply post processing effects
 	postProcessing();
-
+	
 	// Finish rendering this frame
 	finishFrame();
 
 	return true;
-}
-
-// Copies the contents of the Front post processing buffer to the back post processing buffer
-void copyBackFBO(){
-
-	// Bind the back post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, backPostProcessingFbo.get_buffer());
-	glClear(GL_COLOR_BUFFER_BIT);
-	// Bind the passthrough effect
-	renderer::bind(passThroughEffect);
-
-	glUniformMatrix4fv(
-		passThroughEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the post processing frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, frontPostProcessingFbo.get_texture());
-	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
 }
 
 void postProcessing(){
@@ -1025,35 +1001,10 @@ void postProcessing(){
 	// Disable Depth Testing
 	glDisable(GL_DEPTH_TEST);
 
-	/*
-		Copy the contents of the scene fbo onto the front post processing fbo
-	*/
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
-	
-	// Set the current shader to the pass-through shader
-	renderer::bind(passThroughEffect);
-	
-	glUniformMatrix4fv(
-		passThroughEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the frame buffer's texture
-	glBindTexture(GL_TEXTURE_2D, fbo.get_texture());
-	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
 	//------------------ Start post processing start ------------------------
 
-	copyBackFBO();
-
 	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frontPostProcessingFbo.get_buffer());
+	glBindFramebuffer(GL_FRAMEBUFFER, postProcessingFbo.get_buffer());
 
 	// Bind the Screen Space Ambient Occlusion effect
 	renderer::bind(postProcessingEffect);
@@ -1081,7 +1032,7 @@ void postProcessing(){
 
 	// Bind the frame buffer's texture
 	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, backPostProcessingFbo.get_texture());
+	glBindTexture(GL_TEXTURE_2D, fbo.get_texture());
 	glUniform1i(postProcessingEffect.get_uniform_location("tex"), 0);
 
 	// Send the screen dimensions to the shader
@@ -1111,14 +1062,6 @@ void postProcessing(){
 	glUniform1f(postProcessingEffect.get_uniform_location("selfShadowReduc"), ssaoSelfShadowReduc);
 	glUniform1f(postProcessingEffect.get_uniform_location("gaussDisplace"), ssaoGaussDisplace);
 
-
-	// Send the shader the focal length and stop value - DOF
-	glUniform1f(postProcessingEffect.get_uniform_location("focalLength"), dofFocalLength);
-	glUniform1f(postProcessingEffect.get_uniform_location("fstop"), dofFocalSize);
-	// Send the shader a bool to say whether or not to render in debug  - DOF
-	glUniform1i(postProcessingEffect.get_uniform_location("dofDebug"), dofDebug);
-
-
 	// Pass toggles
 	glUniform1i(postProcessingEffect.get_uniform_location("ssaoEnabled"), ssaoEnabled);
 	glUniform1i(postProcessingEffect.get_uniform_location("glowEnabled"), glowEnabled);
@@ -1126,7 +1069,6 @@ void postProcessing(){
 	glUniform1i(postProcessingEffect.get_uniform_location("motionBlurEnabled"), motionBlurEnabled);
 	glUniform1i(postProcessingEffect.get_uniform_location("greyscaleEnabled"), greyscaleEnabled);
 	glUniform1i(postProcessingEffect.get_uniform_location("vignetteEnabled"), vignetteEnabled);
-	glUniform1i(postProcessingEffect.get_uniform_location("dofEnabled"), dofEnabled);
 
 	// Tell the shader whether to use noise - SSAO
 	glUniform1i(postProcessingEffect.get_uniform_location("useNoise"), ssaoNoise);
@@ -1158,7 +1100,7 @@ void finishFrame(){
 
 
 	// Render the finished frame to the previous frame fbo
-	glBindTexture(GL_TEXTURE_2D, frontPostProcessingFbo.get_texture());
+	glBindTexture(GL_TEXTURE_2D, postProcessingFbo.get_texture());
 	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, prevFbo.get_buffer());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

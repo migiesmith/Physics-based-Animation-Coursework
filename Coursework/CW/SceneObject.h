@@ -41,7 +41,6 @@ public:
 	SceneObject *_parent = NULL; // The parent of this object
 	texture *_normal = NULL; // The normal map of this object
 
-	float windFactor = 0.0f; // How much this object is affected by wind
 	vec3 orbitRotation = vec3(); // Stores what direction (and speed) that the object will orbit around it's origin
 
 	SceneObject();

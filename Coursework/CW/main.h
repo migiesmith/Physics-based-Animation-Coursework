@@ -40,7 +40,6 @@ bool glowEnabled = true;
 bool ssaoEnabled = true;
 bool greyscaleEnabled = false;
 bool vignetteEnabled = true;
-bool dofEnabled = false;
 bool lensFlareEnabled = true;
 
 static effect mainEffect; // The main effect used
@@ -50,12 +49,6 @@ static effect fboEffect; // The effect used for the skybox
 static effect depthEffect; // The effect used for the ssao post process
 
 static effect postProcessingEffect; // The effect used for all of the post processes
-
-
-// Dof values
-float dofFocalLength = 300.0f; // The focal length of the camera
-float dofFocalSize = 10.0f; // The focal size (size in depth)
-bool dofDebug = false;
 
 // SSAO values
 bool ssaoNoise = true;
@@ -69,8 +62,7 @@ float vignetteOuterRadius = 0.65f;
 float vignetteInnerRadius = 0.4f;
 float vignetteIntensity = 0.3f;
 
-FrameBuffer frontPostProcessingFbo;
-FrameBuffer backPostProcessingFbo;
+FrameBuffer postProcessingFbo;
 FrameBuffer fbo;
 FrameBuffer prevFbo;
 FrameBuffer shadowFbo;

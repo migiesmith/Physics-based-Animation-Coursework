@@ -5,6 +5,7 @@ Link::Link(vec3 &axis, float angle){
 	origin = vec3(0, 0, 0);
 	m_quat = angleAxis(angle, axis);//Util::FromAxisAngle(axis, angle);
 	m_qWorld = quat();
+	m_length = 1.0f;
 }
 
 Link::Link(vec3 &axis, float angle, float length) : Link(axis, angle){
@@ -105,13 +106,13 @@ void Link::reach(vec3& target, float physicsTimeStep){
 }
 
 
-void Link::update(Link& endLink, vec3& target){
+void Link::update(){
 
 	mat4 R1 = transpose(glm::mat4_cast(m_quat));
 
-	mat4 T1 = translationMat4(vec3(m_length, 0, 0) + origin);
+	mat4 T1 = translationMat4(origin + (parent ? vec3(parent->m_length,0,0) : vec3(0,0,0)));
 	m_base = T1 * R1;
-
+	
 	m_qWorld = m_quat;
 
 	if (parent) m_base = parent->m_base * m_base;
@@ -119,8 +120,9 @@ void Link::update(Link& endLink, vec3& target){
 	if (parent) m_qWorld = m_quat * parent->m_qWorld;
 	m_qWorld = normalize(m_qWorld);
 
+
 	for (int i = 0; i < children.size(); i++){
-		children[i]->update(endLink, target);
+		children[i]->update();
 	}
 
 }
@@ -130,7 +132,7 @@ void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 	vec3 base = translationFromMat4(m_base);
 	vec3 end = vec4ToVec3(m_base * vec4(m_length, 0, 0, 1));
 	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
-	Util::renderArrow(base, end, children.size() != 0 ? children[0]->m_length : m_length, 0.4f, PV, currentEffect); //Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect);
+	Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect); //Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect);
 
 	for (int i = 0; i < children.size(); i++){
 		children[i]->render(PV, currentEffect, endLink, target);
@@ -158,7 +160,6 @@ void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 	glVertex3f(currVec.x, currVec.y, currVec.z);
 	glVertex3f(currVec.x + curToTarget.x, currVec.y + curToTarget.y, currVec.z + curToTarget.z);
 	glEnd();
-	glEnable(GL_DEPTH_TEST);
 	vec3 axis = normalize(cross(normalize(curToEnd), normalize(curToTarget)));
 
 	glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
@@ -166,6 +167,7 @@ void Link::render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 	glVertex3f(currVec.x, currVec.y, currVec.z);
 	glVertex3f(currVec.x + axis.x, currVec.y + axis.y, currVec.z + axis.z);
 	glEnd();
+
 	glEnable(GL_DEPTH_TEST);
 
 }

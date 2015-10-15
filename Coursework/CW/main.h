@@ -20,6 +20,10 @@
 #include "SceneObject.h"
 #include "FrameBuffer.h"
 
+//TODO TEXT RENDERING
+#include <ftgl\src\FTGL\FTGLPixmapFont.h>
+
+
 class SceneObject;
 
 using namespace std;

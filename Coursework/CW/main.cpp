@@ -717,6 +717,12 @@ void updateIK(mat4 &proj, mat4 &view){
 	endLinks["rightHand"]->reach(sphereA.position, physicsTimeStep);
 
 	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
+
+	/*
+	FTGLPixmapFont font = FTFont("Arial.ttf");
+	font.FaceSize(72);
+	font.Render("Hello World!");
+	*/
 }
 
 

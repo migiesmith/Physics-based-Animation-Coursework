@@ -719,8 +719,8 @@ void updateIK(mat4 &proj, mat4 &view){
 	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
 
 	
-	FTGLfont *font = ftglCreatePixmapFont("/home/user/Arial.ttf");
-	FTGLPixmapFont font = FTFont("Arial.ttf");
+	FTGLPixmapFont font("Arial.ttf");
+	font.
 	font.FaceSize(72);
 	font.Render("Hello World!");
 	

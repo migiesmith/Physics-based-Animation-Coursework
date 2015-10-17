@@ -63,6 +63,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;glew32.lib;glfw3dll.lib;FreeImage.lib;assimp.lib;tinyxml.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -97,6 +98,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SphereCollider.cpp" />
+    <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +110,8 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SphereCollider.h" />
+    <ClInclude Include="TextRendChar.h" />
+    <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

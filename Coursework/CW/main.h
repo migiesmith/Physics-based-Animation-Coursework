@@ -21,9 +21,7 @@
 #include "FrameBuffer.h"
 
 //TODO TEXT RENDERING
-#include <FTGL\src\FTGL\ftgl.h>
-#include <FTGL\src\FTGL\\FTGLPixmapFont.h>
-
+#include "TextRenderer.h"
 
 class SceneObject;
 

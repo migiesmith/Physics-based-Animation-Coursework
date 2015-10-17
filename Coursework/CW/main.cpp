@@ -220,6 +220,8 @@ bool initialise()
 
 	Util::init();
 
+	TextRenderer texRen = TextRenderer("font");
+
 	return true;
 }
 
@@ -251,35 +253,35 @@ bool load_content()
 	// ***************
 	// Load in textures
 	// ***************
-	texs["barn"] = loadTexture("barn\\barn.jpg");
-	texs["barn-Normal"] = loadTexture("barn\\barn-Normal.jpg");
-	texs["island"] = loadTexture("island\\island.jpg");
-	texs["island-Normal"] = loadTexture("island\\island-normal.jpg");
-	texs["rock"] = loadTexture("rock\\rock.jpg");
-	texs["rock-Normal"] = loadTexture("rock\\rock-normal.jpg");
-	texs["farmhouse"] = loadTexture("farmhouse\\farmhouse.jpg");
-	texs["farmhouse-Normal"] = loadTexture("farmhouse\\farmhouse-Normal.jpg");
-	texs["silo"] = loadTexture("silo\\silo.jpg");
-	texs["silo-Normal"] = loadTexture("silo\\silo-Normal.jpg");
+	texs["barn"] = Util::loadTexture("barn\\barn.jpg");
+	texs["barn-Normal"] = Util::loadTexture("barn\\barn-Normal.jpg");
+	texs["island"] = Util::loadTexture("island\\island.jpg");
+	texs["island-Normal"] = Util::loadTexture("island\\island-normal.jpg");
+	texs["rock"] = Util::loadTexture("rock\\rock.jpg");
+	texs["rock-Normal"] = Util::loadTexture("rock\\rock-normal.jpg");
+	texs["farmhouse"] = Util::loadTexture("farmhouse\\farmhouse.jpg");
+	texs["farmhouse-Normal"] = Util::loadTexture("farmhouse\\farmhouse-Normal.jpg");
+	texs["silo"] = Util::loadTexture("silo\\silo.jpg");
+	texs["silo-Normal"] = Util::loadTexture("silo\\silo-Normal.jpg");
 
-	texs["hay"] = loadTexture("hay\\hay.png");
-	texs["character"] = loadTexture("character\\character.jpg");
-	texs["brown"] = loadTexture("brown.jpg");
-	texs["orb"] = loadTexture("orb.png");
+	texs["hay"] = Util::loadTexture("hay\\hay.png");
+	texs["character"] = Util::loadTexture("character\\character.jpg");
+	texs["brown"] = Util::loadTexture("brown.jpg");
+	texs["orb"] = Util::loadTexture("orb.png");
 
-	texs["glass"] = loadTexture("glass\\glass.png");
+	texs["glass"] = Util::loadTexture("glass\\glass.png");
 
-	texs["skybox0"] = loadTexture("skybox\\skybox_texture.jpg");
-	texs["skybox1"] = loadTexture("skybox\\skybox_clouds0.png");
-	texs["skybox2"] = loadTexture("skybox\\skybox_clouds1.png");
+	texs["skybox0"] = Util::loadTexture("skybox\\skybox_texture.jpg");
+	texs["skybox1"] = Util::loadTexture("skybox\\skybox_clouds0.png");
+	texs["skybox2"] = Util::loadTexture("skybox\\skybox_clouds1.png");
 
-	texs["solidRed"] = loadTexture("solidRed.jpg");
-	texs["white"] = loadTexture("white.jpg");
+	texs["solidRed"] = Util::loadTexture("solidRed.jpg");
+	texs["white"] = Util::loadTexture("white.jpg");
 
-	texs["lensflare"] = loadTexture("lensflare\\lensflare.jpg");
+	texs["lensflare"] = Util::loadTexture("lensflare\\lensflare.jpg");
 
-	texs["menuon"] = loadTexture("buttons\\buttons.png");
-	texs["menuoff"] = loadTexture("buttons\\off.png");
+	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
+	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
 	
 
 	// Set up the scene
@@ -717,12 +719,10 @@ void updateIK(mat4 &proj, mat4 &view){
 	endLinks["rightHand"]->reach(sphereA.position, physicsTimeStep);
 
 	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
-
 	
-	FTGLPixmapFont font("Arial.ttf");
-	font.
-	font.FaceSize(72);
-	font.Render("Hello World!");
+	//FTGLPixmapFont font("Arial.ttf");
+	//font.FaceSize(72);
+	//font.Render("Hello World!");
 	
 }
 
@@ -1206,18 +1206,6 @@ bool orderByDistance(SceneObject* sObj1, SceneObject* sObj2){
 		+ pow((camPos.z - sObj2->get_transform_with_parent().position.z), 2));
 
 	return dist1 > dist2;
-}
-
-// Loads in a texture and returns it
-texture loadTexture(string textureName, bool mipmaps, bool antisoptrics)
-{
-	return texture("..\\resources\\textures\\" + textureName, mipmaps, antisoptrics);
-}
-
-// Loads in a texture and returns it
-texture loadTexture(string textureName)
-{
-	return loadTexture(textureName, false, false);
 }
 
 void main()

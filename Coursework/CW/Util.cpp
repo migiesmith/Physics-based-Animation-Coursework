@@ -24,6 +24,12 @@ using namespace Util;
 	// Loads in a model and returns it
 	geometry Util::loadModel(string modelName){ return geometry("..\\resources\\models\\" + modelName); }
 
+	// Loads in a texture and returns it
+	texture Util::loadTexture(string textureName, bool mipmaps, bool antisoptrics){ return texture("..\\resources\\textures\\" + textureName, mipmaps, antisoptrics); }
+
+	// Loads in a texture and returns it
+	texture Util::loadTexture(string textureName){ return loadTexture(textureName, false, false); }
+
 	//Returns the magnitude vec3 v
 	float Util::magnitude(vec3 v){
 		return sqrtf(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));

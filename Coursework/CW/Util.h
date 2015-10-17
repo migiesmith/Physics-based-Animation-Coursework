@@ -18,6 +18,10 @@ namespace Util
 {
 	// Loads in a model and returns it
 	geometry loadModel(string modelName);
+	// Loads in a texture and returns it
+	texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);
+	// Loads in a texture and returns it
+	texture loadTexture(string textureName);
 
 	void init();
 	float magnitude(vec3 v);

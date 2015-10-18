@@ -18,14 +18,21 @@ class TextRenderer
 {
 public:
 
-	texture* tex;
+	texture tex;
 	map<char, TextRendChar*> characters;
 
+	float fontScale = 1.0f;
+
+	bool isReady = false;
+
+	TextRenderer();
 	TextRenderer(string fontPath);
 
 	void loadFontTexture(const char* fontPath);
 	void loadCharacterMapping(const char* fontPath);
+	void render(const string text);
 
 	~TextRenderer();
+
 };
 

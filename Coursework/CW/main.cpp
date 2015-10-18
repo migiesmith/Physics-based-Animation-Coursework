@@ -220,7 +220,7 @@ bool initialise()
 
 	Util::init();
 
-	TextRenderer texRen = TextRenderer("font");
+	
 
 	return true;
 }
@@ -283,6 +283,8 @@ bool load_content()
 	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
 	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
 	
+	textRen = TextRenderer("Coder's Crux\\font");//TextRenderer("Quikhand\\font");
+	textRen.fontScale = 0.3f;
 
 	// Set up the scene
 	initSceneObjects();
@@ -719,11 +721,7 @@ void updateIK(mat4 &proj, mat4 &view){
 	endLinks["rightHand"]->reach(sphereA.position, physicsTimeStep);
 
 	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
-	
-	//FTGLPixmapFont font("Arial.ttf");
-	//font.FaceSize(72);
-	//font.Render("Hello World!");
-	
+
 }
 
 
@@ -1189,6 +1187,10 @@ void finishFrame(){
 	}
 	glUniform1i(passThroughEffect.get_uniform_location("tex"), 2);
 	renderer::render(menuQuad);
+
+
+	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
+	textRen.render("Hello World!");
 
 	glEnable(GL_DEPTH_TEST);
 }

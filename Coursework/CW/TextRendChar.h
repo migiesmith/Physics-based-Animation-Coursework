@@ -21,7 +21,6 @@ public:
 	TextRendChar(int id, int xPos, int yPos, int width, int height, int xOffset, int yOffset, int xAdvance, int page, int channel){
 		this->id = id;
 		this->xPos = xPos;
-		this->id = id;
 		this->yPos = yPos;
 		this->width = width;
 		this->height = height;

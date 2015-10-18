@@ -94,8 +94,7 @@ bool movingCam = false;
 int currentCamera = 1; // Default to Target Camera
 short targetCamDirection = -1; // The direction that the targetCam rotates
 
-static material grassMat; // The material for the grass
-
+TextRenderer textRen;
 
 texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);
 texture loadTexture(string textureName);

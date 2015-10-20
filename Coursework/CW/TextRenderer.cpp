@@ -39,7 +39,7 @@ void TextRenderer::loadCharacterMapping(const char* fontPath){
 
 				characters[(char)id] = new TextRendChar(id, x, y, width, height, xOffset, yOffset, xAdvance, page, channel);
 				pParm = pParm->NextSiblingElement("char");
-				cout << characters[(char)id]->toString() << endl;
+				//cout << characters[(char)id]->toString() << endl;
 			}
 		}
 		

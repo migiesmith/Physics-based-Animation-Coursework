@@ -285,6 +285,7 @@ bool load_content()
 	
 	textRen = TextRenderer("Coder's Crux\\font");//TextRenderer("Quikhand\\font");
 	textRen.fontScale = 0.3f;
+	renderText = "Hello World!";
 
 	// Set up the scene
 	initSceneObjects();
@@ -730,7 +731,8 @@ void updateIK(mat4 &proj, mat4 &view){
 bool update(float delta_time)
 {
 	totalTime += delta_time;
-	
+	int fps = (int)1.0f / delta_time;
+	renderText = "Hello World! " + to_string(fps) + "fps";
 
 
 	float velocity = 5.5f;
@@ -1190,7 +1192,7 @@ void finishFrame(){
 
 
 	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-	textRen.render("Hello World!");
+	textRen.render(renderText);
 
 	glEnable(GL_DEPTH_TEST);
 }

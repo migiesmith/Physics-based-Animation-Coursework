@@ -20,7 +20,6 @@
 #include "SceneObject.h"
 #include "FrameBuffer.h"
 
-//TODO TEXT RENDERING
 #include "TextRenderer.h"
 
 class SceneObject;
@@ -95,6 +94,7 @@ int currentCamera = 1; // Default to Target Camera
 short targetCamDirection = -1; // The direction that the targetCam rotates
 
 TextRenderer textRen;
+string renderText;
 
 texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);
 texture loadTexture(string textureName);

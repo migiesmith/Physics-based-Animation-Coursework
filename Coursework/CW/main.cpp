@@ -38,6 +38,8 @@ CubeCollider sphereB = CubeCollider(vec3(30, 101, 0.0f), vec3(1.0, 1.0, 1.0), Co
 CubeCollider sphereA = CubeCollider(vec3(40, 110, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 IntersectionData dataTODO;
 
+//TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
+ParticleEmitter partic = ParticleEmitter(vec3(0, 140, 0), 20000, vec3(200, 80, 0), 15.0f);
 
 // IK constants
 map<string, Link*> endLinks;
@@ -49,7 +51,7 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 		isWireframe = !isWireframe;
 	}
 	else  if (key == GLFW_KEY_F2 && action == GLFW_PRESS){
-		currentCamera = Camera::Chase;
+		//currentCamera = Camera::Chase;
 	}
 	else if (key == GLFW_KEY_F3 && action == GLFW_PRESS){
 		currentCamera = Camera::Target;
@@ -173,7 +175,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 							break;
 						case Buttons::Chase_Cam:
 							// Change to the chase camera
-							currentCamera = Camera::Chase;
+							//currentCamera = Camera::Chase;
 							break;
 						}
 					}
@@ -723,6 +725,8 @@ void updateIK(mat4 &proj, mat4 &view){
 
 	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
 
+	partic.update(0.01f);
+
 }
 
 
@@ -1013,6 +1017,12 @@ bool render()
 		renderMesh(mapObj.second, V, P);
 	}
 
+	glUniformMatrix4fv(
+		mainEffect.get_uniform_location("MVP"), // Location of uniform
+		1, // Number of values - 1 mat4
+		GL_FALSE, // Transpose the matrix?
+		value_ptr(P*V)); // Pointer to matrix data
+	partic.render();
 
 	// TODO --------------------
 	if (dataTODO.doesIntersect){

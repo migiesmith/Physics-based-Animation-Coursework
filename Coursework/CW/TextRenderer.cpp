@@ -1,7 +1,5 @@
 #include "TextRenderer.h"
 
-TextRenderer::TextRenderer(){}
-
 TextRenderer::TextRenderer(string fontPath)
 {
 	loadFontTexture(("fonts\\" + fontPath + ".png").c_str());
@@ -21,6 +19,8 @@ void TextRenderer::loadCharacterMapping(const char* fontPath){
 
 		pRoot = doc.FirstChildElement("font");
 		if (pRoot){
+			invInFontSize = 1.0f / stof(pRoot->FirstChildElement("info")->Attribute("size"));
+
 			pParm = pRoot->FirstChildElement("chars");
 			cout << "LOG - " << pParm->Attribute("count") << " characters loaded from " << fontPath << endl;
 			pParm = pParm->FirstChildElement("char");
@@ -46,7 +46,8 @@ void TextRenderer::loadCharacterMapping(const char* fontPath){
 	}
 }
 
-void TextRenderer::render(const string text){
+// Renders text to the screen at x, y where x and y are coordinates in the ran 0 to 1
+void TextRenderer::render(const string text, float x, float y){
 	if (!isReady) return;
 
 	int xOffset = 0;
@@ -57,23 +58,25 @@ void TextRenderer::render(const string text){
 	for (char c : text){
 		if (c == ' '){
 			// If the current character is a space, just increment the xOffset
-			xOffset += (characters['!']->width + characters['!']->xAdvance) * fontScale * 2.0f;
+			xOffset += (int)((characters['!']->width + characters['!']->xAdvance) * fontSize * 2.0f);
 		}else{
 			// Get the next character using the current char
 			TextRendChar* character = characters[c];
 
 			// Get the size of the quad we need to make
-			float quadX = character->width * fontScale;
-			float quadY = character->height * fontScale;
+			float quadX = character->width * fontSize;
+			float quadY = character->height * fontSize;
+			float xPos = (renderer::get_screen_width() / 2.0f) - quadX - (x*renderer::get_screen_width());
+			float yPos = -(renderer::get_screen_height() / 2.0f) + quadY + (y*renderer::get_screen_height());
 
 			// Push the current character's quad onto the positions vector
-			positions.push_back(vec3(-quadX + xOffset, quadY, 0.0f));
-			positions.push_back(vec3(quadX + xOffset, -quadY, 0.0f));
-			positions.push_back(vec3(quadX + xOffset, quadY, 0.0f));
+			positions.push_back(vec3(-quadX + xOffset - xPos, quadY - yPos, 0.0f));
+			positions.push_back(vec3(quadX + xOffset - xPos, -quadY - yPos, 0.0f));
+			positions.push_back(vec3(quadX + xOffset - xPos, quadY - yPos, 0.0f));
 
-			positions.push_back(vec3(-quadX + xOffset, quadY, 0.0f));
-			positions.push_back(vec3(-quadX + xOffset, -quadY, 0.0f));
-			positions.push_back(vec3(quadX + xOffset, -quadY, 0.0f));
+			positions.push_back(vec3(-quadX + xOffset - xPos, quadY - yPos, 0.0f));
+			positions.push_back(vec3(-quadX + xOffset - xPos, -quadY - yPos, 0.0f));
+			positions.push_back(vec3(quadX + xOffset - xPos, -quadY - yPos, 0.0f));
 
 			// Get the tex coord values for the current character quad
 			float xCoord = (float)character->xPos / (float)tex.get_width();
@@ -91,7 +94,7 @@ void TextRenderer::render(const string text){
 			texCoords.push_back(vec3(xCoord + w, yCoord + h, 0.0f));
 
 			// Increment the xOffset to move the character along
-			xOffset += (characters[c]->width + characters[c]->xAdvance) * fontScale;
+			xOffset += (int)((characters[c]->width + characters[c]->xAdvance) * fontSize);
 		}
 	}
 
@@ -103,6 +106,12 @@ void TextRenderer::render(const string text){
 	renderer::bind(tex, 0);
 	renderer::render(screenQuadGeom);
 	
+}
+
+// Takes in a pt size for the font and sets the fontSize value determined by the screen size and the size of the font from the file
+void TextRenderer::setFontSize(const float sizeInPt){
+	fontSize = (float)renderer::get_screen_width() / (float)renderer::get_screen_height();
+	fontSize *= sizeInPt * invInFontSize;
 }
 
 TextRenderer::~TextRenderer()

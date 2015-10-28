@@ -17,10 +17,11 @@ using namespace glm;
 class Particle : public vec3
 {
 private:
-	float invMass, lifeTime;
+	float invMass;
 
 public:
 
+	float lifeTime;
 	bool isAlive;
 	vec3 velocity, force; // Velocity and Force
 

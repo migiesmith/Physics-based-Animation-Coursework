@@ -33,6 +33,7 @@ void Particle::update(const float delta_time){
 	setPosition(*this + velocity * delta_time);
 
 	force = vec3(0,0,0);
+	acceleration *= 0.9f;
 
 	lifeTime -= delta_time;
 	if (lifeTime <= 0.0) isAlive = false;
@@ -42,12 +43,12 @@ void Particle::update(const float delta_time){
 void Particle::render(){
 	if (!isAlive) return;
 	glBegin(GL_POINTS);
-	glVertex3d(x,y,z);
+	glVertex3f(x,y,z);
 	glEnd();
 }
 
 void Particle::setLifeTime(const float t){
-	lifeTime = t;
+	lifeTime = t - fmod(rand(), t*0.1f) / 100.0f;
 	isAlive = true;
 }
 

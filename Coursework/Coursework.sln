@@ -152,6 +152,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "arrow", "arrow", "{5B5AB4E4
 		resources\models\arrow\arrow.obj = resources\models\arrow\arrow.obj
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "particle_shader", "particle_shader", "{45087103-443D-449C-91AB-E805FFB2F2E1}"
+	ProjectSection(SolutionItems) = preProject
+		resources\shaders\particle_shader\particle_shader.frag = resources\shaders\particle_shader\particle_shader.frag
+		resources\shaders\particle_shader\particle_shader.geo = resources\shaders\particle_shader\particle_shader.geo
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "particles", "particles", "{69C95B15-8072-4651-82FD-4AE0411D63A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -201,5 +209,7 @@ Global
 		{2BC0ED8C-0BCC-420E-B8E9-1C65FB0547DE} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
 		{00FB0005-345A-47CF-B765-A4B838C534C0} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
 		{5B5AB4E4-5DFA-4B28-B779-9CA0CEDDC298} = {2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}
+		{45087103-443D-449C-91AB-E805FFB2F2E1} = {2194805E-ABC9-4D12-A0CD-98C0073AEC73}
+		{69C95B15-8072-4651-82FD-4AE0411D63A8} = {CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}
 	EndGlobalSection
 EndGlobal

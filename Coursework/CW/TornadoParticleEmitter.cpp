@@ -1,7 +1,7 @@
 #include "TornadoParticleEmitter.h"
 
 
-TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime) : ParticleEmitter(v, particleCount, force, lifeTime)
+TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const string texturePath, const int columns, const int rows) : ParticleEmitter(v, particleCount, force, lifeTime, texturePath, columns, rows)
 {
 }
 
@@ -10,10 +10,8 @@ void TornadoParticleEmitter::update(const float delta_time){
 		if (p->isAlive){
 			if (!Util::isZeroVec3(*this - *p)){
 				vec3 offset = normalize(*this - *p);
-				vec3 dir = cross(offset, normalize(force));
-				offset.y = 0;
-				offset = normalize(offset);
-				p->addForce(force + dir);
+				vec3 dir = -cross(offset, normalize(force));
+				p->addForce(force + dir*4.0f);
 			}
 			p->update(delta_time);
 		}

@@ -16,7 +16,7 @@
 #include "SphereCollider.h"
 #include "CubeCollider.h"
 #include "TextRenderer.h"
-#include "TornadoParticleEmitter.h"
+#include "ParticleEmitterManager.h"
 
 class SceneObject;
 

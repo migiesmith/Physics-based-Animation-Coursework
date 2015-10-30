@@ -99,6 +99,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
+    <ClCompile Include="ParticleEmitterManager.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SphereCollider.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleEmitter.h" />
+    <ClInclude Include="ParticleEmitterManager.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="TextRendChar.h" />

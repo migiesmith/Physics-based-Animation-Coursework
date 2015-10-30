@@ -39,7 +39,7 @@ CubeCollider sphereA = CubeCollider(vec3(40, 110, 2.0f), vec3(1.0, 1.0, 1.0), Co
 IntersectionData dataTODO;
 
 //TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
-ParticleEmitter* partic;
+ParticleEmitterManager* particManager;
 
 // IK constants
 map<string, Link*> endLinks;
@@ -288,8 +288,13 @@ bool load_content()
 
 
 	//TODO
-	partic = new TornadoParticleEmitter(vec3(0, 140, 0), 2000, vec3(0,15, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3);
-	partic->setColour(vec4(0.1325,0.35,0.523,1));
+	particManager = new ParticleEmitterManager();
+	particManager->add("tornado", new TornadoParticleEmitter(vec3(0, 140, 0), 2000, vec3(0, 15, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 140, 0), 2000, vec3(150, 15, 150), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("therosie", new ParticleEmitter(vec3(30, 140, 0), 2000, vec3(150, 3000, 150), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	//particManager->remove("particles");
+	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
+	particManager->getEmitter("therosie")->setColour(vec4(235.0f / 255.0f, 155.0f / 255.0f, 228.0f / 255.0f, 1));
 
 	textRen = new TextRenderer("Coder's Crux\\font");//TextRenderer("Quikhand\\font");
 	textRen->setFontSize(12.0f);
@@ -731,7 +736,7 @@ void updateIK(mat4 &proj, mat4 &view){
 
 	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
 
-	partic->update(0.01f);
+	particManager->update(0.01f);
 
 }
 
@@ -1024,7 +1029,7 @@ bool render()
 	}
 
 
-	partic->render(P*V);
+	particManager->render(P*V);
 
 	// TODO --------------------
 	if (dataTODO.doesIntersect){

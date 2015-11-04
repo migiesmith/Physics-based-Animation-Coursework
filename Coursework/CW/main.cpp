@@ -421,7 +421,7 @@ void initSceneObjects(){
 	// Create a bipedal hierarchy
 	endLinks["root"] = new Link(vec3(0, 0, 1), -half_pi<float>(), 1.0f*scale);
 	endLinks["root"]->origin = vec3(40, 100, 0);
-	//endLinks["root"]->toRender = false;
+	endLinks["root"]->toRender = false;
 
 	endLinks["root"]->addChild("waist", new Link(vec3(0, 0, 1), 0.0f, 0.8f*scale));
 	endLinks["root"]->children["waist"]->addChild("chest", new Link(vec3(0, 0, 1), 0.0f, 1.4f*scale));
@@ -465,10 +465,15 @@ void initSceneObjects(){
 	endLinks["leftFoot"]->linkReach = 3;
 	endLinks["rightFoot"]->linkReach = 3;
 	endLinks["leftHand"]->linkReach = 3;
-	endLinks["rightHand"]->linkReach = 3;
+	endLinks["rightHand"]->linkReach = 5;
 
 	// IK Angle Limits
-	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->setAngleLimits(vec3(-pi<float>(), -quarter_pi<float>(), -pi<float>()), vec3(pi<float>(), quarter_pi<float>(), pi<float>()));
+	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
+
+	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
+
+	endLinks["head"]->parent->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
+	endLinks["head"]->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
 
 	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->priority = 0.2f;
 	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->priority = 0.5f;
@@ -732,9 +737,10 @@ void updateIK(mat4 &proj, mat4 &view){
 	endLinks["root"]->render(PV, colourPassThroughEffect, *endLinks["root"], target);
 
 	//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
-	endLinks["rightHand"]->reach(sphereA.position, physicsTimeStep);
+	endLinks["rightHand"]->reach(sphereB.position, physicsTimeStep);
+	endLinks["head"]->reach(sphereA.position, physicsTimeStep);
 
-	sphereB.position = vec3(50, 101, sin(totalTime)*8.0f);
+	sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
 
 	particManager->update(0.01f);
 

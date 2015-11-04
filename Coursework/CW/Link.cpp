@@ -120,7 +120,16 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 	// Use slerp to avoid `snapping' to the target - if 
 	// we instead want to `gradually' interpolate to 
 	// towards the target
-	m_quat = normalize(slerp(m_quat, qNew, physicsTimeStep));
+
+	qNew = normalize(slerp(m_quat, qNew, physicsTimeStep));
+
+	float roll = atan2(2 * qNew.y*qNew.w - 2 * qNew.x*qNew.z, 1 - 2 * qNew.y*qNew.y - 2 * qNew.z*qNew.z);
+	float pitch = atan2(2 * qNew.x*qNew.w - 2 * qNew.y*qNew.z, 1 - 2 * qNew.x*qNew.x - 2 * qNew.z*qNew.z);
+	float yaw = asin(2 * qNew.x*qNew.y + 2 * qNew.z*qNew.w);
+
+	if (clamp(roll, angleLimits[0].x, angleLimits[1].x) == roll && clamp(pitch, angleLimits[0].y, angleLimits[1].y) == pitch && clamp(yaw, angleLimits[0].z, angleLimits[1].z) == yaw)
+		m_quat = qNew;
+	
 }
 
 
@@ -142,7 +151,6 @@ void Link::reach(vec3& target, float physicsTimeStep){
 void Link::update(){
 
 	mat4 R1 = transpose(glm::mat4_cast(m_quat));
-
 	mat4 T1 = translationMat4(origin + (parent ? vec3(parent->m_length,0,0) : vec3(0,0,0)));
 	m_base = T1 * R1;
 	

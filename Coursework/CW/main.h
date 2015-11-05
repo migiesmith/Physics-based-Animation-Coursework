@@ -15,6 +15,7 @@
 #include "Link.h"
 #include "SphereCollider.h"
 #include "CubeCollider.h"
+#include "LineCollider.h"
 #include "GraphRenderer.h"
 #include "ParticleEmitterManager.h"
 

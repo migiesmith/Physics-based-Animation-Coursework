@@ -757,7 +757,7 @@ void updateIK(mat4 &proj, mat4 &view){
 bool update(float delta_time)
 {
 	totalTime += delta_time;
-	int fps = (int)(1.0f / delta_time);
+	float fps = 1.0f / delta_time;
 	//renderText = to_string(fps) + "fps";
 	graphRen->pushData(fps);
 
@@ -910,7 +910,7 @@ bool render()
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFbo.get_buffer());
 	// Clear the shadow framebuffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	// Change culling to front face
 	glCullFace(GL_FRONT);
 
@@ -919,7 +919,7 @@ bool render()
 	float farOrtho = MYFAR*orthoScale;
 	mat4 depthProjectionMatrix = ortho<float>(-farOrtho, farOrtho, -farOrtho, farOrtho, -farOrtho, farOrtho);
 	mat4 depthViewMatrix = lookAt(normalize(ambientLightPosition), normalize(-ambientLightPosition), vec3(0, 1, 0));
-	
+
 	// Bind the depth shader
 	renderer::bind(depthEffect);
 	glUniform1f(depthEffect.get_uniform_location("totalTime"), totalTime);
@@ -1004,14 +1004,14 @@ bool render()
 			1, // Number of values - 1 mat4
 			GL_FALSE, // Transpose the matrix?
 			value_ptr(MVP)); // Pointer to matrix data
-			renderer::bind(texs["skybox" + to_string(i)], 0);
+		renderer::bind(texs["skybox" + to_string(i)], 0);
 		glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
 		renderer::render(skyBox[i]);
 	}
-	
+
 	// Re-enable depth testing
 	glEnable(GL_DEPTH_TEST);
-	
+
 	// Bind the main effect
 	renderer::bind(mainEffect);
 
@@ -1065,7 +1065,32 @@ bool render()
 	glBegin(GL_POINTS);
 	glVertex3f(rayTest.intersection.x, rayTest.intersection.y, rayTest.intersection.z);
 	glEnd();
+
+
+	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
+	LineCollider* lineA = new LineCollider(vec3(0, 0, -1), vec3(0, 1, 0), 1.0f);
+	LineCollider* lineB = new LineCollider(vec3(0, 0.5f, 1), vec3(0, 0.5f, -1), 1.0f);
+
+	glBegin(GL_LINES);
+	glVertex3f(lineA->position.x, lineA->position.y, lineA->position.z);
+	glVertex3f(lineA->endPosition.x, lineA->endPosition.y, lineA->endPosition.z);
+	glVertex3f(lineB->position.x, lineB->position.y, lineB->position.z);
+	glVertex3f(lineB->endPosition.x, lineB->endPosition.y, lineB->endPosition.z);
+	glEnd();
+
 	glEnable(GL_DEPTH_TEST);
+
+	// TODO
+	IntersectionData lineIntersectionData = lineA->intersects(lineB, 0.0f);
+	if (lineIntersectionData.doesIntersect){
+		mat4 rot = mat4();
+
+		vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
+		textRen->render3D((P * V), right, "Vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", vec3(0, 0, 0));
+		quat rHandQuat = endLinks["rightHand"]->m_qWorld;
+		textRen->render3D((P * V), right, "quat(" + to_string(rHandQuat.w) + ", " + to_string(rHandQuat.x) + ", " + to_string(rHandQuat.y) + ", " + to_string(rHandQuat.z) + ")", translationFromMat4(endLinks["rightHand"]->m_base));
+	}
+
 
 	// TODO IK
 	glDisable(GL_DEPTH_TEST);
@@ -1077,6 +1102,9 @@ bool render()
 	
 	// Disable wireframe
 	glPolygonMode(GL_FRONT, GL_FILL);
+
+
+
 	
 	// Apply post processing effects
 	postProcessing();

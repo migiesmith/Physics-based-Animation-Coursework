@@ -13,6 +13,7 @@
 using namespace std;
 using namespace graphics_framework;
 using namespace glm;
+using namespace Util;
 
 class TextRenderer
 {
@@ -42,7 +43,8 @@ public:
 	void loadFontTexture(const char* fontPath);
 	void loadCharacterMapping(const char* fontPath);
 	void render(const mat4& orthoMVP, const string text, float x, float y);
-
+	void render3D(const mat4& MVP, const vec3& right, const string text, vec3& pos);
+	
 	float getFontHeight();
 	float getStringWidth(const string& text);
 	void setFontSize(const float sizeInPt);

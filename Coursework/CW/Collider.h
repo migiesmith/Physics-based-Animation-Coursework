@@ -21,7 +21,8 @@ using namespace glm;
 enum class ColliderTypes :short{
 	CUBE,
 	SPHERE,
-	OBBCUBE
+	OBBCUBE,
+	LINE
 };
 
 class Collider

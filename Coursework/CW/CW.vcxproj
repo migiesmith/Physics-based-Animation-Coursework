@@ -96,6 +96,7 @@
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GraphRenderer.cpp" />
     <ClCompile Include="IntersectionData.cpp" />
+    <ClCompile Include="LineCollider.cpp" />
     <ClCompile Include="Link.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GraphRenderer.h" />
     <ClInclude Include="IntersectionData.h" />
+    <ClInclude Include="LineCollider.h" />
     <ClInclude Include="Link.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Particle.h" />

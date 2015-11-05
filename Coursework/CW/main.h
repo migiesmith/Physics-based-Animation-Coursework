@@ -15,7 +15,7 @@
 #include "Link.h"
 #include "SphereCollider.h"
 #include "CubeCollider.h"
-#include "TextRenderer.h"
+#include "GraphRenderer.h"
 #include "ParticleEmitterManager.h"
 
 class SceneObject;
@@ -90,6 +90,7 @@ int currentCamera = 1; // Default to Target Camera
 short targetCamDirection = -1; // The direction that the targetCam rotates
 
 TextRenderer* textRen;
+GraphRenderer* graphRen;
 string renderText;
 
 texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);

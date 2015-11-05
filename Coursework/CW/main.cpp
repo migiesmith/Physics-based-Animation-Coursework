@@ -296,9 +296,14 @@ bool load_content()
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 	particManager->getEmitter("therosie")->setColour(vec4(235.0f / 255.0f, 155.0f / 255.0f, 228.0f / 255.0f, 1));
 
-	textRen = new TextRenderer("Coder's Crux\\font");//TextRenderer("Quikhand\\font");
-	textRen->setFontSize(12.0f);
+	textRen = new TextRenderer("Quikhand\\font", &passThroughEffect);
+	textRen->setFontSize(10.0f);
 	renderText = "";
+	graphRen = new GraphRenderer(textRen, &colourPassThroughEffect, 200.0f, 100.0f);
+	graphRen->setText("fps", "time");
+	graphRen->setLimit(80);
+	graphRen->setBarColour(vec4(1, 1, 1, 1));
+	graphRen->setLineColour(vec4(1, 0.3f, 0.3f, 1));
 
 	// Set up the scene
 	initSceneObjects();
@@ -380,13 +385,13 @@ void initScreenQuads(){
 	geometry cornerCamQuadGeom = geometry();
 	vector<vec3> positionsCornerCam
 	{
-		vec3(-halfW, halfH, 0.0f),
-		vec3(-halfW + halfW * cornerCamScale, halfH - halfH * cornerCamScale, 0.0f),
-		vec3(-halfW + halfW * cornerCamScale, halfH, 0.0f),
+		vec3(halfW*cornerCamScale, halfH, 0.0f),
+		vec3(halfW*cornerCamScale + halfW * cornerCamScale, halfH - halfH * cornerCamScale, 0.0f),
+		vec3(halfW*cornerCamScale + halfW * cornerCamScale, halfH, 0.0f),
 
-		vec3(-halfW, halfH, 0.0f),
-		vec3(-halfW, halfH - halfH * cornerCamScale, 0.0f),
-		vec3(-halfW + halfW * cornerCamScale, halfH - halfH * cornerCamScale, 0.0f)
+		vec3(halfW*cornerCamScale, halfH, 0.0f),
+		vec3(halfW*cornerCamScale, halfH - halfH * cornerCamScale, 0.0f),
+		vec3(halfW*cornerCamScale + halfW * cornerCamScale, halfH - halfH * cornerCamScale, 0.0f)
 	};
 	// Create the mesh for rendering the corner cam to
 	cornerCamQuadGeom.add_buffer(positionsCornerCam, BUFFER_INDEXES::POSITION_BUFFER);
@@ -753,8 +758,8 @@ bool update(float delta_time)
 {
 	totalTime += delta_time;
 	int fps = (int)(1.0f / delta_time);
-	renderText = to_string(fps) + "fps";
-
+	//renderText = to_string(fps) + "fps";
+	graphRen->pushData(fps);
 
 	float velocity = 5.5f;
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
@@ -1213,9 +1218,8 @@ void finishFrame(){
 	glUniform1i(passThroughEffect.get_uniform_location("tex"), 2);
 	renderer::render(menuQuad);
 
-
-	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-	textRen->render(renderText, 0, 0);
+	textRen->render(orthoMVP, renderText, 0, 0);
+	graphRen->render(orthoMVP, 0.005f, 0.01f);
 
 	glEnable(GL_DEPTH_TEST);
 }

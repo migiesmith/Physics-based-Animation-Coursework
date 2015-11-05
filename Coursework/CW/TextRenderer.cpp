@@ -1,9 +1,10 @@
 #include "TextRenderer.h"
 
-TextRenderer::TextRenderer(string fontPath)
+TextRenderer::TextRenderer(string fontPath, effect* shader)
 {
 	loadFontTexture(("fonts\\" + fontPath + ".png").c_str());
 	loadCharacterMapping(("..\\resources\\textures\\fonts\\" + fontPath + ".fnt").c_str());
+	this->shader = shader;
 	isReady = true;
 }
 
@@ -47,8 +48,16 @@ void TextRenderer::loadCharacterMapping(const char* fontPath){
 }
 
 // Renders text to the screen at x, y where x and y are coordinates in the ran 0 to 1
-void TextRenderer::render(const string text, float x, float y){
-	if (!isReady) return;
+void TextRenderer::render(const mat4& orthoMVP, const string text, float x, float y){
+	if (!isReady || text.size() == 0) return;
+
+	renderer::bind(*shader);
+	glUniformMatrix4fv(
+		shader->get_uniform_location("MVP"), // Location of uniform
+		1, // Number of values - 1 mat4
+		GL_FALSE, // Transpose the matrix?
+		value_ptr(orthoMVP)); // Pointer to matrix data
+	glUniform1i(shader->get_uniform_location("tex"), 0);
 
 	int xOffset = 0;
 	geometry screenQuadGeom = geometry();
@@ -67,7 +76,7 @@ void TextRenderer::render(const string text, float x, float y){
 			float quadX = character->width * fontSize;
 			float quadY = character->height * fontSize;
 			float xPos = (renderer::get_screen_width() / 2.0f) - quadX - (x*renderer::get_screen_width());
-			float yPos = -(renderer::get_screen_height() / 2.0f) + quadY + (y*renderer::get_screen_height());
+			float yPos = -(renderer::get_screen_height() / 2.0f) + quadY + character->yOffset * 0.5f + (y*renderer::get_screen_height());
 
 			// Push the current character's quad onto the positions vector
 			positions.push_back(vec3(-quadX + xOffset - xPos, quadY - yPos, 0.0f));
@@ -106,6 +115,18 @@ void TextRenderer::render(const string text, float x, float y){
 	renderer::bind(tex, 0);
 	renderer::render(screenQuadGeom);
 	
+}
+
+float TextRenderer::getFontHeight(){
+	return (characters['T']->height + characters['T']->yOffset)* fontSize * 2.0f;
+}
+
+float TextRenderer::getStringWidth(const string& text){
+	float sum = 0.0f;
+	for (char c : text){
+		sum += ((characters[c]->width + characters[c]->xAdvance) * fontSize);
+	}
+	return sum;
 }
 
 // Takes in a pt size for the font and sets the fontSize value determined by the screen size and the size of the font from the file

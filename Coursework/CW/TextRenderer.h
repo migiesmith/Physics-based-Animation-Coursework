@@ -27,6 +27,8 @@ private:
 	// Used to check if the font is ready to be used
 	bool isReady = false;
 
+	effect* shader;
+
 public:
 
 	// Texture for the font
@@ -35,12 +37,14 @@ public:
 	map<char, TextRendChar*> characters;
 
 
-	TextRenderer(string fontPath);
+	TextRenderer(string fontPath, effect* shader);
 
 	void loadFontTexture(const char* fontPath);
 	void loadCharacterMapping(const char* fontPath);
-	void render(const string text, float x, float y);
+	void render(const mat4& orthoMVP, const string text, float x, float y);
 
+	float getFontHeight();
+	float getStringWidth(const string& text);
 	void setFontSize(const float sizeInPt);
 
 	~TextRenderer();

@@ -1,21 +1,51 @@
+/*
+
+Grant Smith (40111906)
+
+TODO
+
+*/
+
 #include "Link.h"
 
+/*
+	axis and angle representing the default rotation
+	inAngleLimits representing the min and max values the link can rotate (relative to the initial orientation from axis-angle)
+*/
+Link::Link(vec3 &axis, float angle, vector<vec3>* inAngleLimits){
+	origin = vec3(0, 0, 0); // Set the origin to zero
+	m_quat = angleAxis(angle, axis); // Create a quaternian representing the axis and angle
+	m_qWorld = quat(); // Create a world space quaternian for later use
+	m_length = 1.0f; // Set the length of the link to 1 (default value)
 
-Link::Link(vec3 &axis, float angle){
-	origin = vec3(0, 0, 0);
-	m_quat = angleAxis(angle, axis);//Util::FromAxisAngle(axis, angle);
-	m_qWorld = quat();
-	m_length = 1.0f;
-	angleLimits = { vec3(-pi<float>(), -pi<float>(), -pi<float>()), vec3(pi<float>(), pi<float>(), pi<float>()) };
+	// Get the roll, pitch and yaw representing the default orientation and add it to the angleLimits (makes the angle limits relative to the starting orientation)
+	vec3 startOri = rollPitchYawFromQuat(m_quat);
+
+	bool validLimits = false;
+	if (inAngleLimits != NULL){
+		if (inAngleLimits->size() >= 2){
+			vec3 minA = inAngleLimits->at(0);
+			vec3 maxA = inAngleLimits->at(1);
+
+			angleLimits = { startOri + minA, startOri + maxA };
+			cout << vec3ToString(angleLimits.at(0)) << endl;
+			cout << vec3ToString(angleLimits.at(1)) << endl;
+			validLimits = true;
+		}
+	}
+	if (!validLimits){
+		angleLimits = { vec3(-pi<float>(), -pi<float>(), -pi<float>()), vec3(pi<float>(), pi<float>(), pi<float>()) };
+	}
+
 }
 
-Link::Link(vec3 &axis, float angle, float length) : Link(axis, angle){
-	m_length = length;
-}
-
-void Link::setAngleLimits(vec3& min, vec3& max){
-	angleLimits[0] = min;
-	angleLimits[1] = max;
+/*
+	axis and angle representing the default rotation
+	inAngleLimits representing the min and max values the link can rotate (relative to the initial orientation from axis-angle)
+	length stating how long the link should be
+*/
+Link::Link(vec3 &axis, float angle, vector<vec3>* inAngleLimits, float length) : Link(axis, angle, inAngleLimits){
+	m_length = length; // Set the link length to length and pass the rest to the other constructor
 }
 
 void Link::addChild(string s, Link* l){
@@ -27,12 +57,20 @@ void Link::addChild(string s, Link* l){
 }
 
 void Link::removeChild(string s){
-	children[s]->~Link();
-	//children.erase(std::remove(children.begin(), children.end(), l), children.end());
+	children.erase(s);
 }
 
 void Link::removeChild(Link* l){
-	
+	std::map<string, Link*>::iterator it = children.begin();
+	while (it != children.end()) {
+		if (it->second == l) {
+			children.erase(it++);
+			break;
+		}
+		else {
+			++it;
+		}
+	}
 }
 
 void Link::setParent(string childName, Link* l){
@@ -85,9 +123,7 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 	// Get the parent's orientation (if there is a parent)
 	quat qPar = quat();
 	if (parent)
-	{
 		qPar = normalize(parent->m_qWorld);
-	}
 
 	// Get the local space orientation
 	quat qLocal = qCur * conjugate(qPar);
@@ -98,37 +134,16 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 
 	// Convert world orientation to local space
 	quat qNew = normalize( (qCur * qDif) * conjugate(qPar) );
-
-	/*
-	vec3 newAx;
-	newAx.x = fmin(fmax(qNew.x, angleLimits[0].x), angleLimits[1].x);
-	newAx.y = fmin(fmax(qNew.y, angleLimits[0].y), angleLimits[1].y);
-	newAx.z = fmin(fmax(qNew.z, angleLimits[0].z), angleLimits[1].z);
-	qNew = qNew;
-
-	vec3 newAx;
-	float newAng = ToAxisAngle(qNew, newAx);
-	newAx *= newAng;
-	newAx.x = clamp(newAx.x, angleLimits[0].x, angleLimits[1].x);
-	newAx.y = clamp(newAx.y, angleLimits[0].y, angleLimits[1].y);
-	newAx.z = clamp(newAx.z, angleLimits[0].z, angleLimits[1].z);
-	qNew = normalize(angleAxis(newAng, newAx));
-	cout << vec3ToString(newAx) << endl;
-	*/
-
-
-	// Use slerp to avoid `snapping' to the target - if 
-	// we instead want to `gradually' interpolate to 
-	// towards the target
-
+	
+	// Slerp and normalize the new rotation quat
 	qNew = normalize(slerp(m_quat, qNew, physicsTimeStep));
+	
+	// Get the roll, pitch and yaw
+	vec3 rollPitchYaw = rollPitchYawFromQuat(qNew);
 
-	float roll = atan2(2 * qNew.y*qNew.w - 2 * qNew.x*qNew.z, 1 - 2 * qNew.y*qNew.y - 2 * qNew.z*qNew.z);
-	float pitch = atan2(2 * qNew.x*qNew.w - 2 * qNew.y*qNew.z, 1 - 2 * qNew.x*qNew.x - 2 * qNew.z*qNew.z);
-	float yaw = asin(2 * qNew.x*qNew.y + 2 * qNew.z*qNew.w);
-
-	if (clamp(roll, angleLimits[0].x, angleLimits[1].x) == roll && clamp(pitch, angleLimits[0].y, angleLimits[1].y) == pitch && clamp(yaw, angleLimits[0].z, angleLimits[1].z) == yaw)
-		m_quat = qNew;
+	// Check the roll, pitch and yaw against the angle limits
+	if (clamp(rollPitchYaw.x, angleLimits[0].x, angleLimits[1].x) == rollPitchYaw.x && clamp(rollPitchYaw.y, angleLimits[0].y, angleLimits[1].y) == rollPitchYaw.y && clamp(rollPitchYaw.z, angleLimits[0].z, angleLimits[1].z) == rollPitchYaw.z)
+		m_quat = qNew; // If the roll, pitch and yaw are within the limits, apply the rotation
 	
 }
 

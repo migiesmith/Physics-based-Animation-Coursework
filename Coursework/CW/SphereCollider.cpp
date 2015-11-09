@@ -1,8 +1,8 @@
 /*
 
-Grant Smith (40111906)
+Grant Smith (40111906) - 9/11/2015
 
-TODO
+The collider that handles sphere related intersection (sphere-sphere, sphere-plane, sphere-cube, etc.)
 
 */
 
@@ -36,6 +36,11 @@ IntersectionData SphereCollider::intersects(Collider* other, float velocity){
 			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
 			data.direction = data.direction * -1.0f;
 			data.intersection = position + (radius *normalize(data.direction));
+			break;
+		}
+		case ColliderTypes::PLANE:
+		{
+			data = dynamic_cast<PlaneCollider*>(other)->intersects(this, velocity);
 			break;
 		}
 	}

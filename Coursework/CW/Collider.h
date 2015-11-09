@@ -1,8 +1,8 @@
 /*
 
-Grant Smith (40111906)
+Grant Smith (40111906) - 9/11/2015
 
-TODO
+The base collider class that all of the colliders inherit from.
 
 */
 
@@ -22,7 +22,8 @@ enum class ColliderTypes :short{
 	CUBE,
 	SPHERE,
 	OBBCUBE,
-	LINE
+	LINE,
+	PLANE
 };
 
 class Collider

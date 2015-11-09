@@ -9,6 +9,7 @@ TODO
 #pragma once
 #include "Collider.h"
 #include "CubeCollider.h"
+#include "PlaneCollider.h"
 #include "IntersectionData.h"
 
 using namespace Util;

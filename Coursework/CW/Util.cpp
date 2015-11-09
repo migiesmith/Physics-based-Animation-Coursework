@@ -196,6 +196,15 @@ using namespace Util;
 			0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
+	// Returns a vec3 representing the rotation as vec3(roll, pitch, yaw)
+	vec3 Util::rollPitchYawFromQuat(const quat& q){
+		vec3 v = vec3(0, 0, 0);
+		v.x = atan2(2 * q.y*q.w - 2 * q.x*q.z, 1 - 2 * q.y*q.y - 2 * q.z*q.z); // Roll
+		v.y = atan2(2 * q.x*q.w - 2 * q.y*q.z, 1 - 2 * q.x*q.x - 2 * q.z*q.z); // Pitch
+		v.z = asin(2 * q.x*q.y + 2 * q.z*q.w); // Yaw
+		return v;
+	}
+
 	pair<vec3, vec3> Util::rayFromScreen(vec3& camPos, vec2& clickPos){
 
 		return pair<vec3, vec3>(vec3(0,0,0), vec3(0,0,0));

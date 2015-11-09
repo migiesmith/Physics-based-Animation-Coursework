@@ -42,6 +42,8 @@ namespace Util
 	mat4 quatToMat4(quat& q);
 	quat FromAxisAngle(const vec3& v, float angle);
 
+	vec3 rollPitchYawFromQuat(const quat& q);
+
 	pair<vec3, vec3> rayFromScreen(vec3& camPos, vec2& clickPos);
 
 	/* TODO

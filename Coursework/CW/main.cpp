@@ -424,45 +424,44 @@ void initSceneObjects(){
 	float scale = 1.0f;
 
 	// Create a bipedal hierarchy
-	endLinks["root"] = new Link(vec3(0, 0, 1), -half_pi<float>(), 1.0f*scale);
+	endLinks["root"] = new Link(vec3(0, 0, 1), -half_pi<float>(), NULL, 1.0f*scale);
 	endLinks["root"]->origin = vec3(40, 100, 0);
 	endLinks["root"]->toRender = false;
 
-	endLinks["root"]->addChild("waist", new Link(vec3(0, 0, 1), 0.0f, 0.8f*scale));
-	endLinks["root"]->children["waist"]->addChild("chest", new Link(vec3(0, 0, 1), 0.0f, 1.4f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->addChild("neck", new Link(vec3(0, 0, 1), 0.0f, 0.3f*scale));
+	endLinks["root"]->addChild("waist", new Link(vec3(0, 0, 1), 0.0f, NULL, 0.8f*scale));
+	endLinks["root"]->children["waist"]->addChild("chest", new Link(vec3(0, 0, 1), 0.0f, NULL, 1.4f*scale));
+	endLinks["root"]->children["waist"]->children["chest"]->addChild("neck", new Link(vec3(0, 0, 1), 0.0f, new vector <vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.3f*scale));
 
 	// Head and Neck
-	endLinks["head"] = new Link(vec3(0, 0, 1), 0.0f, 0.5f*scale);
+	endLinks["head"] = new Link(vec3(0, 0, 1), 0.0f, new vector <vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -half_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), half_pi<float>()) }, 0.5f*scale);
 	endLinks["head"]->setParent("head", endLinks["root"]->children["waist"]->children["chest"]->children["neck"]);
-	endLinks["head"]->linkReach = 1;
 
 	// Left Arm
-	endLinks["root"]->children["waist"]->children["chest"]->addChild("leftShoulder", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), 0.5f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->addChild("upperArm", new Link(normalize(vec3(0, 1, 0)), quarter_pi<float>(), 1.2f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->children["upperArm"]->addChild("lowerArm", new Link(normalize(vec3(0, 1, 0)), quarter_pi<float>(), 1.0f*scale));
-	endLinks["leftHand"] = new Link(vec3(0, 0, 1), 0.0f, 0.3f*scale);
+	endLinks["root"]->children["waist"]->children["chest"]->addChild("leftShoulder", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), new vector<vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.5f*scale));
+	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->addChild("upperArm", new Link(normalize(vec3(0, 1, 0)), quarter_pi<float>(), NULL, 1.2f*scale));
+	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->children["upperArm"]->addChild("lowerArm", new Link(normalize(vec3(0, 1, 0)), quarter_pi<float>(), NULL, 1.0f*scale));
+	endLinks["leftHand"] = new Link(vec3(0, 0, 1), 0.0f, NULL, 0.3f*scale);
 	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->children["upperArm"]->children["lowerArm"]->addChild("hand", endLinks["leftHand"]);
 
 	// Right Arm
-	endLinks["root"]->children["waist"]->children["chest"]->addChild("rightShoulder", new Link(normalize(vec3(0, 1, 0)), -half_pi<float>(), 0.5f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->addChild("upperArm", new Link(normalize(vec3(0, 1, 0)), -quarter_pi<float>(), 1.2f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->addChild("lowerArm", new Link(normalize(vec3(0, 1, 0)), -quarter_pi<float>(), 1.0f*scale));
-	endLinks["rightHand"] = new Link(vec3(0, 0, 1), 0.0f, 0.3f*scale);
+	endLinks["root"]->children["waist"]->children["chest"]->addChild("rightShoulder", new Link(normalize(vec3(0, 1, 0)), -half_pi<float>(), new vector<vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.5f*scale));
+	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->addChild("upperArm", new Link(normalize(vec3(0, 1, 0)), -quarter_pi<float>(), NULL, 1.2f*scale));
+	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->addChild("lowerArm", new Link(normalize(vec3(0, 1, 0)), -quarter_pi<float>(), NULL, 1.0f*scale));
+	endLinks["rightHand"] = new Link(vec3(0, 0, 1), 0.0f, NULL, 0.3f*scale);
 	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->children["lowerArm"]->addChild("hand", endLinks["rightHand"]);
 
 	// Left Leg
-	endLinks["root"]->addChild("leftHip", new Link(vec3(0, 1, 0), half_pi<float>(), 0.4f*scale));
-	endLinks["root"]->children["leftHip"]->addChild("upperLeg", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), 1.2f*scale));
-	endLinks["root"]->children["leftHip"]->children["upperLeg"]->addChild("lowerLeg", new Link(normalize(vec3(0, 1, 0)), 0.0f, 1.0f*scale));
-	endLinks["leftFoot"] = new Link(vec3(0, 0, 1), half_pi<float>(), 0.4f*scale);
+	endLinks["root"]->addChild("leftHip", new Link(vec3(0, 1, 0), half_pi<float>(), NULL, 0.4f*scale));
+	endLinks["root"]->children["leftHip"]->addChild("upperLeg", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), NULL, 1.2f*scale));
+	endLinks["root"]->children["leftHip"]->children["upperLeg"]->addChild("lowerLeg", new Link(normalize(vec3(0, 1, 0)), 0.0f, NULL, 1.0f*scale));
+	endLinks["leftFoot"] = new Link(vec3(0, 0, 1), half_pi<float>(), NULL, 0.4f*scale);
 	endLinks["root"]->children["leftHip"]->children["upperLeg"]->children["lowerLeg"]->addChild("foot", endLinks["leftFoot"]);
 
 	// Right Leg
-	endLinks["root"]->addChild("rightHip", new Link(vec3(0, 1, 0), -half_pi<float>(), 0.4f*scale));
-	endLinks["root"]->children["rightHip"]->addChild("upperLeg", new Link(normalize(vec3(0, 1, 0)), -half_pi<float>(), 1.2f*scale));
-	endLinks["root"]->children["rightHip"]->children["upperLeg"]->addChild("lowerLeg", new Link(normalize(vec3(0, 1, 0)), 0.0f, 1.0f*scale));
-	endLinks["rightFoot"] = new Link(vec3(0, 0, 1), half_pi<float>(), 0.4f*scale);
+	endLinks["root"]->addChild("rightHip", new Link(vec3(0, 1, 0), -half_pi<float>(), NULL, 0.4f*scale));
+	endLinks["root"]->children["rightHip"]->addChild("upperLeg", new Link(normalize(vec3(0, 1, 0)), -half_pi<float>(), NULL, 1.2f*scale));
+	endLinks["root"]->children["rightHip"]->children["upperLeg"]->addChild("lowerLeg", new Link(normalize(vec3(0, 1, 0)), 0.0f, NULL, 1.0f*scale));
+	endLinks["rightFoot"] = new Link(vec3(0, 0, 1), half_pi<float>(), NULL, 0.4f*scale);
 	endLinks["root"]->children["rightHip"]->children["upperLeg"]->children["lowerLeg"]->addChild("foot", endLinks["rightFoot"]);
 
 	// IK Reach Limits
@@ -470,15 +469,8 @@ void initSceneObjects(){
 	endLinks["leftFoot"]->linkReach = 3;
 	endLinks["rightFoot"]->linkReach = 3;
 	endLinks["leftHand"]->linkReach = 3;
-	endLinks["rightHand"]->linkReach = 5;
+	endLinks["rightHand"]->linkReach = 3;
 
-	// IK Angle Limits
-	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
-
-	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
-
-	endLinks["head"]->parent->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
-	endLinks["head"]->setAngleLimits(vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()));
 
 	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->priority = 0.2f;
 	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->priority = 0.5f;
@@ -742,8 +734,8 @@ void updateIK(mat4 &proj, mat4 &view){
 	endLinks["root"]->render(PV, colourPassThroughEffect, *endLinks["root"], target);
 
 	//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
-	endLinks["rightHand"]->reach(sphereB.position, physicsTimeStep);
-	endLinks["head"]->reach(sphereA.position, physicsTimeStep);
+	endLinks["rightHand"]->reach(sphereA.position, physicsTimeStep);
+	endLinks["head"]->reach(sphereB.position, physicsTimeStep);
 
 	sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
 
@@ -1087,8 +1079,16 @@ bool render()
 
 		vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
 		textRen->render3D((P * V), right, "Vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", vec3(0, 0, 0));
-		quat rHandQuat = endLinks["rightHand"]->m_qWorld;
-		textRen->render3D((P * V), right, "quat(" + to_string(rHandQuat.w) + ", " + to_string(rHandQuat.x) + ", " + to_string(rHandQuat.y) + ", " + to_string(rHandQuat.z) + ")", translationFromMat4(endLinks["rightHand"]->m_base));
+
+
+		quat rHandQuat = endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_quat;
+
+		quat qNew = rHandQuat;
+		float roll = degrees(atan2(2 * qNew.y*qNew.w - 2 * qNew.x*qNew.z, 1 - 2 * qNew.y*qNew.y - 2 * qNew.z*qNew.z));
+		float pitch = degrees(atan2(2 * qNew.x*qNew.w - 2 * qNew.y*qNew.z, 1 - 2 * qNew.x*qNew.x - 2 * qNew.z*qNew.z));
+		float yaw = degrees(asin(2 * qNew.x*qNew.y + 2 * qNew.z*qNew.w));
+
+		textRen->render3D((P * V), right, "angles(" + to_string(roll) + ", " + to_string(pitch) + ", " + to_string(yaw) + ")", translationFromMat4(endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_base));
 	}
 
 

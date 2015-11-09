@@ -1,3 +1,11 @@
+/*
+
+Grant Smith (40111906)
+
+TODO
+
+*/
+
 #pragma once
 
 #include <renderer.h>
@@ -27,11 +35,9 @@ public:
 	Link* parent;
 	map<string, Link*> children;
 
-	Link(vec3& axis, float angle);
-	Link(vec3& axis, float angle, float length);
-
-	void setAngleLimits(vec3& min, vec3& max);
-
+	Link(vec3& axis, float angle, vector<vec3>* angleLimits);
+	Link(vec3& axis, float angle, vector<vec3>* angleLimits, float length);
+	
 	void addChild(string name, Link* l);
 	void removeChild(string name);
 	void removeChild(Link* l);

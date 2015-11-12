@@ -150,7 +150,8 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 
 
 void Link::reach(vec3& target, float physicsTimeStep){
-	privateReach(*this, target, physicsTimeStep);
+	if (!Util::equals(target, translationFromMat4(m_base)))
+		privateReach(*this, target, physicsTimeStep);
 
 	Link* p = parent;
 	int linksUpdated = 0;

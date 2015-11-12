@@ -137,7 +137,7 @@ bool initialise()
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	glShadeModel(GL_SMOOTH);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);      // 4-byte pixel alignment
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // 4-byte pixel alignment
 	glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 
@@ -322,8 +322,8 @@ void initSceneObjects(){
 	float scale = 1.0f;
 
 	// Create a bipedal hierarchy
-	endLinks["root"] = new Link(vec3(0, 0, 1), -half_pi<float>(), NULL, 1.0f*scale);
-	endLinks["root"]->origin = vec3(40, 100, 0);
+	endLinks["root"] = new Link(vec3(0, 0, 1), -half_pi<float>(), NULL, 2.2f*scale);
+	endLinks["root"]->origin = vec3(40, 0, 0);
 	endLinks["root"]->toRender = false;
 
 	endLinks["root"]->addChild("waist", new Link(vec3(0, 0, 1), 0.0f, NULL, 0.8f*scale));
@@ -333,6 +333,17 @@ void initSceneObjects(){
 	// Head and Neck
 	endLinks["head"] = new Link(vec3(0, 0, 1), 0.0f, new vector <vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -half_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), half_pi<float>()) }, 0.5f*scale);
 	endLinks["head"]->setParent("head", endLinks["root"]->children["waist"]->children["chest"]->children["neck"]);
+	
+	quat lEyeRot = angleAxis(half_pi<float>()*0.8f, vec3(0, 0, 1)) * angleAxis(-half_pi<float>(), vec3(0, 1, 0));
+	quat rEyeRot = angleAxis(half_pi<float>()*1.2f, vec3(0, 0, 1)) * angleAxis(-half_pi<float>(), vec3(0, 1, 0));
+	vec3 axis;
+	float angle = ToAxisAngle(lEyeRot, axis);
+
+	endLinks["leftEye"] = new Link(axis, angle, new vector < vec3 >{ vec3(0, 0, 0), vec3(0, 0, 0) }, 0.25f*scale);
+	endLinks["head"]->addChild("leftEye", endLinks["leftEye"]);
+	angle = ToAxisAngle(rEyeRot, axis);
+	endLinks["rightEye"] = new Link(axis, angle, new vector < vec3 >{ vec3(0, 0, 0), vec3(0, 0, 0) }, 0.25f*scale);
+	endLinks["head"]->addChild("rightEye", endLinks["rightEye"]);
 
 	// Left Arm
 	endLinks["root"]->children["waist"]->children["chest"]->addChild("leftShoulder", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), new vector<vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.5f*scale));
@@ -364,6 +375,8 @@ void initSceneObjects(){
 
 	// IK Reach Limits
 	endLinks["head"]->linkReach = 1;
+	endLinks["leftEye"]->linkReach = 2;
+	endLinks["rightEye"]->linkReach = 2;
 	endLinks["leftFoot"]->linkReach = 3;
 	endLinks["rightFoot"]->linkReach = 3;
 	endLinks["leftHand"]->linkReach = 3;
@@ -616,10 +629,11 @@ void updatePhysics(){
 
 		endLinks["root"]->update();
 		endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
-		endLinks["head"]->reach(sphereB.position, PHYSICS_TIME_STEP);
-
+		endLinks["leftEye"]->reach(translationFromMat4(endLinks["head"]->m_base) + normalize(sphereA.position - translationFromMat4(endLinks["head"]->m_base))*endLinks["head"]->m_length, PHYSICS_TIME_STEP);
+		endLinks["rightEye"]->reach(translationFromMat4(endLinks["head"]->m_base) + normalize(sphereA.position - translationFromMat4(endLinks["head"]->m_base))*endLinks["head"]->m_length, PHYSICS_TIME_STEP);
+		endLinks["leftFoot"]->reach(vec3(42, sin(totalTime) * endLinks["leftFoot"]->parent->m_length, 0), PHYSICS_TIME_STEP);
 		//sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
-
+		
 		//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
 
 		vec3 velocity = vec3(0,0,0);
@@ -887,9 +901,7 @@ bool render()
 		vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
 		textRen->render3D((P * V), right, "Vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", vec3(0, 0, 0));
 
-
 		quat rHandQuat = endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_quat;
-
 		quat qNew = rHandQuat;
 		float roll = degrees(atan2(2 * qNew.y*qNew.w - 2 * qNew.x*qNew.z, 1 - 2 * qNew.y*qNew.y - 2 * qNew.z*qNew.z));
 		float pitch = degrees(atan2(2 * qNew.x*qNew.w - 2 * qNew.y*qNew.z, 1 - 2 * qNew.x*qNew.x - 2 * qNew.z*qNew.z));
@@ -897,8 +909,7 @@ bool render()
 
 		textRen->render3D((P * V), right, "angles(" + to_string(roll) + ", " + to_string(pitch) + ", " + to_string(yaw) + ")", translationFromMat4(endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_base));
 	}
-
-
+	
 	// TODO IK
 	glDisable(GL_DEPTH_TEST);
 	renderer::bind(colourPassThroughEffect);

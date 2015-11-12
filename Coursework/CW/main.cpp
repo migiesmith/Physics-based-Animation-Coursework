@@ -649,7 +649,7 @@ void updatePhysics(){
 		sceneObjects["sphereA"].get_transform().position = sphereA.position;
 		sceneObjects["sphereB"].get_transform().position = sphereB.position;
 
-		particManager->update(PHYSICS_TIME_STEP);
+		particManager->update(PHYSICS_TIME_STEP, sceneObjects);
 	}
 }
 

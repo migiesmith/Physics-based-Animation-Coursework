@@ -11,7 +11,7 @@ private:
 public:
 	ParticleEmitterManager();
 
-	void update(const float delta_time);
+	void update(const float delta_time, const map<string, SceneObject>& sceneObjects);
 	void render(const mat4& PV);
 	ParticleEmitter* getEmitter(const string &emitterName){ return emitters[emitterName]; }
 	void add(const string &emitterName, ParticleEmitter* emitter){ emitters[emitterName] = emitter; }

@@ -5,7 +5,7 @@ TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particle
 {
 }
 
-void TornadoParticleEmitter::update(const float delta_time){
+void TornadoParticleEmitter::update(const float delta_time, const map<string, SceneObject>& sceneObjects){
 	for (Particle* p : particles){
 		if (p->isAlive){
 			if (!Util::isZeroVec3(*this - *p)){

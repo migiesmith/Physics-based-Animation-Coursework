@@ -9,6 +9,7 @@ Grant Smith (40111906)
 
 #include <renderer.h>
 #include "Util.h"
+#include "SphereCollider.h"
 
 using namespace std;
 using namespace graphics_framework;
@@ -21,6 +22,7 @@ private:
 
 public:
 
+	SphereCollider* collider = NULL;
 	float lifeTime;
 	bool isAlive;
 	vec3 velocity, force; // Velocity and Force

@@ -25,9 +25,10 @@ ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const v
 
 }
 
-void ParticleEmitter::update(const float delta_time){
+void ParticleEmitter::update(const float delta_time, const map<string, SceneObject>& sceneObjects){
 	for (Particle* p : particles){
 		if (p->isAlive){
+			//TODO for (const pair<string, SceneObject>& sO : sceneObjects){ }
 			p->update(delta_time);
 		}else if(emitTimer <= 0.0f){
 			awakenParticle(p);

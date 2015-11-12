@@ -5,9 +5,9 @@ ParticleEmitterManager::ParticleEmitterManager()
 {
 }
 
-void ParticleEmitterManager::update(const float delta_time){
+void ParticleEmitterManager::update(const float delta_time, const map<string, SceneObject>& sceneObjects){
 	for (pair<string, ParticleEmitter*> e : emitters){
-		e.second->update(delta_time);
+		e.second->update(delta_time, sceneObjects);
 	}
 }
 

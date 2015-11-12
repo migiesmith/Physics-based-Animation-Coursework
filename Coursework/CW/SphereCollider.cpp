@@ -8,7 +8,7 @@ The collider that handles sphere related intersection (sphere-sphere, sphere-pla
 
 #include "SphereCollider.h"
 
-IntersectionData SphereCollider::intersects(Collider* other, float velocity){
+IntersectionData SphereCollider::intersects(Collider* other, vec3 velocity){
 	IntersectionData data = IntersectionData();
 
 	switch(other->getType()){

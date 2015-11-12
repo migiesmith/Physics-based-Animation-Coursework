@@ -8,7 +8,7 @@ TODO
 
 #include "PlaneCollider.h"
 
-IntersectionData PlaneCollider::intersects(Collider* other, float velocity){
+IntersectionData PlaneCollider::intersects(Collider* other, vec3 velocity){
 	IntersectionData data = IntersectionData();
 
 	switch (other->colliderType){

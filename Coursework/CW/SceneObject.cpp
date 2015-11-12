@@ -10,60 +10,61 @@ Constructor/Destructor of the SceneObject
 
 SceneObject::SceneObject()
 {
+	velocity = vec3(0, 0, 0);
+	force = vec3(0, 0, 0);
 }
 
 void SceneObject::update(float delta_time){
 
-	/*
-		Checks if the orbitRotation is set the to a 0 vector
-		If it isn't then apply rotation on the axis (definied by orbitRotation)
-	*/
-	if (orbitRotation != vec3()){
-		mat4 rotationMat(1);
-
-		// Rotate by the scale of orbit rotation
-		float speed = dot(orbitRotation, normalize(orbitRotation));
-
-		get_transform().rotate(vec3(quarter_pi<float>(), 0, 0)*delta_time);
-		rotationMat = rotate(rotationMat, (quarter_pi<float>() / 2)*delta_time*speed, orbitRotation);
-		get_transform().position
-			= vec3(rotationMat * vec4(get_transform().position, 1.0f));
-	}
-
-	// Checks if the transform of this object has been changed
-	if (_localTransform.get_transform_matrix() != _origionalLocalTransform.get_transform_matrix()){
-		_mesh.get_transform() = _localTransform;
-		_origionalLocalTransform = _localTransform;
-	}
-
-	// If this object has a parent
-	if (_parent){
-
-		// If the parent's transform has changed
-		if (_parent->get_transform_with_parent().get_transform_matrix() != _parentTransform.get_transform_matrix()){
-
-			//Get the current transform
-			graphics_framework::transform t = get_transform();
-
-			t.rotate(_parent->get_transform_with_parent().orientation);
-
-			if (_parent->get_transform_with_parent().orientation != quat())
-				t.position = rotate(_parent->get_transform_with_parent().orientation, t.position);
-
-			t.translate(_parent->get_transform_with_parent().position);
-
-			t.scale *= _parent->get_transform_with_parent().scale;
-
-			get_transform_with_parent() = _parentTransform = t;
-		}
-	}
-
-	// Checks if this object has children to update
-	for (auto &child : *(get_children())){
-		child.update(delta_time);
-	}
 
 }
+
+void SceneObject::render(const mat4& VP, const effect& shader){
+	mat4 M = get_transform().get_transform_matrix();
+	mat4 MVP = VP * M;
+	// Set MVP matrix uniform
+	glUniformMatrix4fv(
+		shader.get_uniform_location("MVP"), // Location of uniform
+		1, // Number of values - 1 mat4
+		GL_FALSE, // Transpose the matrix?
+		value_ptr(MVP)); // Pointer to matrix data
+
+	glUniformMatrix4fv(shader.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
+
+	// Check if the SceneObject has a normal map
+	if (_normal){
+		// Bind the normal
+		renderer::bind(*(_normal), 1);
+		glUniform1i(shader.get_uniform_location("hasNormalMap"), true);
+		glUniform1i(shader.get_uniform_location("normalTex"), 1);
+	}
+	else{
+		glUniform1i(shader.get_uniform_location("hasNormalMap"), false);
+	}
+
+	// Bind and set texture
+	renderer::bind(get_texture(), 0);
+	glUniform1i(shader.get_uniform_location("tex"), 0);
+
+	// Bind the SceneObject's material
+	renderer::bind(get_material(), "mat");
+
+	renderer::render(*this);
+}
+
+void SceneObject::renderDepth(const mat4& VP, const effect& shader){
+	mat4 MVP = VP * get_transform().get_transform_matrix();
+	// Set MVP matrix uniform
+	glUniformMatrix4fv(
+		shader.get_uniform_location("MVP"), // Location of uniform
+		1, // Number of values - 1 mat4
+		GL_FALSE, // Transpose the matrix?
+		value_ptr(MVP)); // Pointer to matrix data
+
+	// Render the current SceneObject
+	renderer::render(*this);
+}
+
 
 SceneObject::~SceneObject()
 {

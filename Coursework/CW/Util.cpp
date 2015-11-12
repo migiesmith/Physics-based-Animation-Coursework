@@ -15,9 +15,11 @@ using namespace glm;
 using namespace Util;
 
 	geometry arrowGeom;
+	geometry planeGeom;
 
 	void Util::init(){
-		arrowGeom = loadModel("arrow\\arrow.obj");
+		arrowGeom = loadModel("primitives\\arrow2.obj");
+		planeGeom = loadModel("primitives\\plane.obj");
 	}
 
 
@@ -125,7 +127,7 @@ using namespace Util;
 		return to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z);
 	}
 
-	void Util::renderArrow(vec3& start, vec3& end, float length, float radius, mat4& PV, effect& currentEffect){
+	void Util::renderArrow(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& PV, effect& currentEffect){
 		// Create a transform to store the rotation, translation and scale of the arrow
 		graphics_framework::transform t;
 
@@ -151,6 +153,25 @@ using namespace Util;
 
 		// Render the arrow
 		renderer::render(arrowGeom);
+	}
+
+	void Util::renderPlane(const vec3& pos, const  vec3 scale, const  mat4& VP, effect& currentEffect){
+		// Create a transform to store the rotation, translation and scale of the arrow
+		graphics_framework::transform t;
+
+		t.scale = scale;
+		t.translate(pos);
+
+		// Pass the transform matrix to the shader
+		mat4 MVP = VP * t.get_transform_matrix();
+		glUniformMatrix4fv(
+			currentEffect.get_uniform_location("MVP"), // Location of uniform
+			1, // Number of values - 1 mat4
+			GL_FALSE, // Transpose the matrix?
+			value_ptr(MVP)); // Pointer to matrix data
+
+		// Render the arrow
+		renderer::render(planeGeom);
 	}
 
 	mat4 Util::mult(const mat4& a, const mat4& b){

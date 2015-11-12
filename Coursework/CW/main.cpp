@@ -22,7 +22,7 @@ mesh skyBox[3]; // The meshs for the skybox
 
 bool isWireframe = false; // Whether or not to render in wireframe
 
-vec3 ambientLightPosition = vec3(1800,2500,0); // Set the position of the ambient light
+vec3 ambientLightPosition = vec3(0, 1000, 0); // Set the position of the ambient light
 
 double cursor_x = 0.0; // Stores the position X of the cursor
 double cursor_y = 0.0; // Stores the position Y of the cursor
@@ -34,8 +34,8 @@ IntersectionData rayTest;
 //TODO
 //SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
 //SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
-CubeCollider sphereB = CubeCollider(vec3(30, 101, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-CubeCollider sphereA = CubeCollider(vec3(40, 110, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereB = CubeCollider(vec3(30, 1, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereA = CubeCollider(vec3(40, 10, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 IntersectionData dataTODO;
 
 //TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
@@ -61,13 +61,6 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS){
 		//TODO
-	}
-	else if (key == GLFW_KEY_F6 && action == GLFW_PRESS){
-		ssaoOnly = !ssaoOnly;
-		ssaoEnabled = true;
-	}
-	else if (key == GLFW_KEY_F7 && action == GLFW_PRESS){
-		glowEnabled = !glowEnabled;
 	}
 	else if (key == GLFW_KEY_H && action == GLFW_PRESS){
 		toggleDebugMenu = !toggleDebugMenu;
@@ -109,73 +102,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 						&& current_y < 1.0 - buttonHeight*j && current_y > 1.0 - buttonHeight*(j + 1)){
 						switch (i + (7 * j) - 1){
 						case Buttons::Vignette:
-							// Toggle Vignette
-							vignetteEnabled = !vignetteEnabled;
-							break;
-						case Buttons::Motion_Blur:
-							// Toggle Motion Blur
-							motionBlurEnabled = !motionBlurEnabled;
-							break;
-						case Buttons::Glow:
-							// Toggle Glow
-							glowEnabled = !glowEnabled;
-							break;
-						case Buttons::Grey_Scale:
-							// Toggle Greyscale
-							greyscaleEnabled = !greyscaleEnabled;
-							break;
-						case Buttons::Depth_of_Field:
-							// Toggle Depth of Field
-							//dofEnabled = !dofEnabled;
-							break;
-						case Buttons::DoF_Debug:
-							// Toggle Dof Debug
-							//dofEnabled = true;
-							//dofDebug = !dofDebug;
-							break;
-						case Buttons::Free_Cam:
-							// Change to the free camera
-							currentCamera = Camera::Free;
-							break;
-						case Buttons::SSAO_Only:
-							// Toggle SSAO Only
-							if (!ssaoOnly){
-								ssaoOnly = true;
-								ssaoEnabled = true;
-								glowEnabled = false;
-								//dofEnabled = false;
-								lensFlareEnabled = false;
-							}
-							else{
-								ssaoOnly = false;
-								glowEnabled = true;
-								//dofEnabled = true;
-								lensFlareEnabled = true;
-							}
-							break;
-						case Buttons::SSAO:
-							// Toggle SSAO rendering
-							ssaoEnabled = !ssaoEnabled;
-							break;
-						case Buttons::WireFrame:
-							// Toggle wireframe mode
-							isWireframe = !isWireframe;
-							break;
-						case Buttons::Lens_Flare:
-							// Togle Lens Flare
-							lensFlareEnabled = !lensFlareEnabled;
-							break;
-						case Buttons::Spot_Light:
-							// Toggle Spot Light mode
-							//TODO 
-							break;
-						case Buttons::Target_Cam:
-							// Change to the target camera
-							currentCamera = Camera::Target;
-							break;
-						case Buttons::Chase_Cam:
-							// Change to the chase camera
-							//currentCamera = Camera::Chase;
+							// TODO buttons?
 							break;
 						}
 					}
@@ -203,9 +130,6 @@ bool initialise()
 	glfwGetCursorPos(renderer::get_window(), &cursor_x, &cursor_y);
 
 	// Set up the required Frame buffers
-	postProcessingFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
-	fbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
-	prevFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
 	shadowFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
 	
 	// Set the perspective render quality
@@ -222,8 +146,6 @@ bool initialise()
 
 	Util::init();
 
-	
-
 	return true;
 }
 
@@ -232,7 +154,6 @@ bool load_content()
 	// *************
 	// Load in models
 	// *************
-	meshes["island"] = Util::loadModel("island\\island.obj");
 	/*
 	meshes["barn"] = Util::loadModel("barn\\barn.obj");
 	meshes["character"] = Util::loadModel("character\\character.3ds");
@@ -245,8 +166,9 @@ bool load_content()
 	meshes["farmhouse"] = Util::loadModel("farmhouse\\farmhouse.obj");
 	meshes["glass"] = Util::loadModel("glass\\glass.obj");
 	*/
-	meshes["sphere"] = Util::loadModel("sphere\\sphere.obj");
-	meshes["cube"] = Util::loadModel("cube\\cube.obj");
+	meshes["sphere"] = Util::loadModel("primitives\\sphere.obj");
+	meshes["cube"] = Util::loadModel("primitives\\cube.obj");
+	meshes["plane"] = Util::loadModel("primitives\\plane.obj");
 
 	skyBox[0] = Util::loadModel("skybox.obj");
 	skyBox[1] = skyBox[0];
@@ -255,46 +177,26 @@ bool load_content()
 	// ***************
 	// Load in textures
 	// ***************
-	texs["barn"] = Util::loadTexture("barn\\barn.jpg");
-	texs["barn-Normal"] = Util::loadTexture("barn\\barn-Normal.jpg");
-	texs["island"] = Util::loadTexture("island\\island.jpg");
-	texs["island-Normal"] = Util::loadTexture("island\\island-normal.jpg");
-	texs["rock"] = Util::loadTexture("rock\\rock.jpg");
-	texs["rock-Normal"] = Util::loadTexture("rock\\rock-normal.jpg");
-	texs["farmhouse"] = Util::loadTexture("farmhouse\\farmhouse.jpg");
-	texs["farmhouse-Normal"] = Util::loadTexture("farmhouse\\farmhouse-Normal.jpg");
-	texs["silo"] = Util::loadTexture("silo\\silo.jpg");
-	texs["silo-Normal"] = Util::loadTexture("silo\\silo-Normal.jpg");
-
-	texs["hay"] = Util::loadTexture("hay\\hay.png");
-	texs["character"] = Util::loadTexture("character\\character.jpg");
 	texs["brown"] = Util::loadTexture("brown.jpg");
-	texs["orb"] = Util::loadTexture("orb.png");
-
-	texs["glass"] = Util::loadTexture("glass\\glass.png");
-
+	
 	texs["skybox0"] = Util::loadTexture("skybox\\skybox_texture.jpg");
 	texs["skybox1"] = Util::loadTexture("skybox\\skybox_clouds0.png");
 	texs["skybox2"] = Util::loadTexture("skybox\\skybox_clouds1.png");
 
 	texs["solidRed"] = Util::loadTexture("solidRed.jpg");
 	texs["white"] = Util::loadTexture("white.jpg");
-
-	texs["lensflare"] = Util::loadTexture("lensflare\\lensflare.jpg");
+	texs["tiles"] = Util::loadTexture("tiles.jpg");
 
 	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
 	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
-	
 
 
 	//TODO
 	particManager = new ParticleEmitterManager();
-	particManager->add("tornado", new TornadoParticleEmitter(vec3(0, 140, 0), 2000, vec3(0, 15, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 140, 0), 2000, vec3(150, 15, 150), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("therosie", new ParticleEmitter(vec3(30, 140, 0), 2000, vec3(150, 3000, 150), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("tornado", new TornadoParticleEmitter(vec3(0, 140, 0), 2000, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 140, 0), 2000, vec3(15, 10, 15), 5.0f, "particles\\watersplash3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
-	particManager->getEmitter("therosie")->setColour(vec4(235.0f / 255.0f, 155.0f / 255.0f, 228.0f / 255.0f, 1));
 
 	textRen = new TextRenderer("Quikhand\\font", &passThroughEffect);
 	textRen->setFontSize(10.0f);
@@ -338,15 +240,11 @@ void initShaders(){
 	colourPassThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\colour_passthrough.vert", GL_VERTEX_SHADER);
 	colourPassThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\colour_passthrough.frag", GL_FRAGMENT_SHADER);
 
-	postProcessingEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	postProcessingEffect.add_shader("..\\resources\\shaders\\post_processing_shader\\post_processing_shader.frag", GL_FRAGMENT_SHADER);//ssao_shader.frag", GL_FRAGMENT_SHADER);
-
 	// Build effect
 	mainEffect.build();
 	passThroughEffect.build();
 	depthEffect.build();
 	colourPassThroughEffect.build();
-	postProcessingEffect.build();
 
 }
 
@@ -471,52 +369,30 @@ void initSceneObjects(){
 	endLinks["leftHand"]->linkReach = 3;
 	endLinks["rightHand"]->linkReach = 3;
 
-
-	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->priority = 0.2f;
-	//endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->priority = 0.5f;
-
-
-	/*
-	endLinks.push_back(new Link(vec3(0, 0, 1), 0.0f, l));
-	endLinks[0]->setParent(new Link(vec3(0, 0, 1), f, l));
-	Link* parent = endLinks[0]->parent;
-	parent->setParent(new Link(vec3(0, 0, -1), f, l));
-	parent->parent->setParent(new Link(vec3(0, 0, -1), half_pi<float>(), l));
-
-	endLinks[0]->getRoot()->origin = vec3(40, 100, 0);
-	endLinks[0]->getRoot()->m_length = 2.0f;
-	endLinks[0]->linkReach = -1;
-
-	endLinks.push_back(new Link(vec3(0, 0, 1), 0.0f, l));
-	Link* ll = new Link(vec3(0, 0, 1), 0.0f, l);
-	ll->setParent(endLinks[0]->parent->parent->parent);
-	endLinks[1]->setParent(ll);
-	endLinks[1]->linkReach = -1;
-	*/
-
+	
 	// ***************
 	// Set up SceneObjects
 	// ***************
-	sceneObjects["island"] = meshes["island"]; // Creates a new SceneObject from the mesh
-	sceneObjects["island"].set_texture(texs["island"]); // Sets the texture
-	sceneObjects["island"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-	sceneObjects["island"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+	
+	sceneObjects["sphereA"] = meshes["cube"];
+	sceneObjects["sphereA"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
 
-
-	sceneObjects["sphereA"] = meshes["cube"];
-	sceneObjects["sphereA"].set_texture(texs["island"]); // Sets the texture
-	sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+	sceneObjects["plane"] = meshes["plane"];
+	sceneObjects["plane"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["plane"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["plane"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
 	
 	sceneObjects["sphereB"] = meshes["cube"];
-	sceneObjects["sphereB"].set_texture(texs["island"]); // Sets the texture
-	sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["sphereB"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
@@ -548,7 +424,7 @@ void initCameras(){
 	// Free Camera
 	freeCam.set_position(vec3(0.0f, 85.0f, 0.0f));
 	freeCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
-	
+
 	// MVP for post processing (Orthographics projection)
 	float w = renderer::get_screen_width() / 2.0f;
 	float h = renderer::get_screen_height() / 2.0f;
@@ -617,7 +493,7 @@ void updateCameras(float delta_time)
 			/*
 				Move the target mesh using keypresses
 			*/
-			quat ori = inverse(target_mesh.get_transform_with_parent().orientation);
+			quat ori = inverse(target_mesh.get_transform().orientation);
 
 			if (glfwGetKey(renderer::get_window(), GLFW_KEY_W))
 				target_mesh.get_transform().translate(vec3(0, 0, -20) * ori * delta_time);
@@ -634,7 +510,7 @@ void updateCameras(float delta_time)
 			/*
 				Move the camera to the targets position and orientation
 			*/
-			chaseCam.move(target_mesh.get_transform_with_parent().position, eulerAngles(target_mesh.get_transform_with_parent().orientation));
+			chaseCam.move(target_mesh.get_transform().position, eulerAngles(target_mesh.get_transform().orientation));
 
 
 			/*
@@ -715,7 +591,7 @@ void updateLighting(float delta_time)
 {
 	mat4 rotationMat(1);
 	rotationMat = rotate(rotationMat, (quarter_pi<float>() / 12.0f)*delta_time, vec3(0.0, 1.0, 0.0));
-	ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
+	//ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
 
 	//Rotate the skyboxes (part of this method since the skybox contains the sun)
 	skyBox[1].get_transform().rotate(vec3(0, (quarter_pi<float>() / 12.0f)*delta_time, 0));
@@ -728,26 +604,49 @@ void updateIK(mat4 &proj, mat4 &view){
 	mat4 PV = proj*view;
 	vec3 target = sphereA.position;
 	
-	endLinks["root"]->update();
-	float physicsTimeStep = 0.1f;
-	//endLinks["root"]->reach(target, physicsTimeStep);
 	endLinks["root"]->render(PV, colourPassThroughEffect, *endLinks["root"], target);
 
-	//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
-	endLinks["rightHand"]->reach(sphereA.position, physicsTimeStep);
-	endLinks["head"]->reach(sphereB.position, physicsTimeStep);
-
-	sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
-
-	particManager->update(0.01f);
 
 }
 
+void updatePhysics(){
+	while (accumDeltaTime > PHYSICS_TIME_STEP){
+		accumDeltaTime -= PHYSICS_TIME_STEP;
+
+
+		endLinks["root"]->update();
+		endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
+		endLinks["head"]->reach(sphereB.position, PHYSICS_TIME_STEP);
+
+		//sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
+
+		//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
+
+		vec3 velocity = vec3(0,0,0);
+		dataTODO = sphereA.intersects(&sphereB, -velocity*PHYSICS_TIME_STEP);
+		//sphereA.translate(vec3(0.0,0.0,0.01));
+		if (dataTODO.doesIntersect){
+			sphereA.translate(dataTODO.direction*-dataTODO.amount);
+			cout << "Sphere collision: " << endl;
+			cout << dataTODO.doesIntersect << endl;
+			cout << dataTODO.direction.x << ", " << dataTODO.direction.y << ", " << dataTODO.direction.z << " * " << dataTODO.amount << endl;
+		}
+
+		sceneObjects["sphereA"].get_transform().position = sphereA.position;
+		sceneObjects["sphereB"].get_transform().position = sphereB.position;
+
+		particManager->update(PHYSICS_TIME_STEP);
+	}
+}
 
 
 
 bool update(float delta_time)
 {
+
+	accumDeltaTime += delta_time;
+	updatePhysics();
+
 	totalTime += delta_time;
 	float fps = 1.0f / delta_time;
 	//renderText = to_string(fps) + "fps";
@@ -768,21 +667,7 @@ bool update(float delta_time)
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
 		sphereA.translate(vec3(0.0, -velocity, 0.0)*delta_time);
-
 	
-	dataTODO = sphereA.intersects(&sphereB, magnitude(vec3(0.0, 0.0, -velocity))*delta_time);
-	//sphereA.translate(vec3(0.0,0.0,0.01));
-	if (dataTODO.doesIntersect){
-		sphereA.translate(dataTODO.direction*-dataTODO.amount);
-		cout << "Sphere collision: " << endl;
-		cout << dataTODO.doesIntersect << endl;
-		cout << dataTODO.direction.x << ", " << dataTODO.direction.y << ", " << dataTODO.direction.z << " * " << dataTODO.amount << endl;
-	}
-
-	sceneObjects["sphereA"].get_transform().position = sphereA.position;
-	sceneObjects["sphereB"].get_transform().position = sphereB.position;
-
-
 
 	// Write the fps to the console
 	//cout << int(1.0f / delta_time) << " fps          " << '\r';
@@ -799,96 +684,21 @@ bool update(float delta_time)
 }
 
 // Renders a SceneObject and it's children
-void renderMesh(SceneObject& sO, const mat4 &V, const mat4 &P){
-
-	mat4 M = sO.get_transform_with_parent().get_transform_matrix();
-
-	mat4 MVP = P * V * M;
-	// Set MVP matrix uniform
-	glUniformMatrix4fv(
-		mainEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(MVP)); // Pointer to matrix data
-
-	glUniformMatrix4fv(mainEffect.get_uniform_location("M"), 1, GL_FALSE, value_ptr(M));
-
-	// Check if the SceneObject has a normal map
-	if (sO._normal){
-		// Bind the normal
-		renderer::bind(*(sO._normal), 1);
-		glUniform1i(mainEffect.get_uniform_location("hasNormalMap"), true);
-		glUniform1i(mainEffect.get_uniform_location("normalTex"), 1);
+void renderSceneObjects(const mat4 &V, const mat4 &P){
+	mat4 VP = P * V;
+	// Render the SceneObjects
+	for (auto& mapObj : sceneObjects){
+		mapObj.second.render(VP, mainEffect);
 	}
-	else{
-		glUniform1i(mainEffect.get_uniform_location("hasNormalMap"), false);
-	}
-
-	// If the object has a parent and wireframe is enabled then render the parent-child hierarchy
-	if (sO._parent && isWireframe){
-		// Pass wind uniforms
-		vec3 linePos = -sO.get_transform().position / sO.get_transform_with_parent().scale;
-
-		linePos = rotate(inverse(sO.get_transform().orientation), linePos);
-
-		renderer::bind(texs["solidRed"], 0);
-		renderer::bind(material(vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), vec4(1, 1, 1, 1), 1), "mat");
-
-		glLineWidth(3);
-		glBegin(GL_LINES);
-			glVertex3f(0, 0, 0);
-			glVertex3f(linePos.x, linePos.y, linePos.z);
-		glEnd();
-		vec3 objScale = sO.get_transform_with_parent().scale;
-		vec3 linePosNorm = normalize(linePos) / objScale;
-		glLineWidth(10);
-		renderer::bind(texs["white"], 0);
-		glBegin(GL_LINES);
-			glVertex3f(0, 0, 0);
-			glVertex3f(linePosNorm.x, linePosNorm.y, linePosNorm.z);
-		glEnd();
-		glLineWidth(1);
-
-	}
-	
-	// Bind and set texture
-	renderer::bind((sO.get_texture()), 0);
-	glUniform1i(mainEffect.get_uniform_location("tex"), 0);
-
-	// Bind the SceneObject's material
-	renderer::bind(sO.get_material(), "mat");
-
-	// Render the current SceneObject
-	sO.render();
-
-	// Render the list of child SceneObjects
-	for (SceneObject& child : *(sO.get_children())){
-		renderMesh(child, V, P);
-	}
-
 }
 
 // Renders a SceneObject and it's children
-void renderMeshDepth(SceneObject& sO, const mat4 &V, const mat4 &P){
-
-	mat4 M = sO.get_transform_with_parent().get_transform_matrix();
-
-	mat4 MVP = P * V * M;
-	// Set MVP matrix uniform
-	glUniformMatrix4fv(
-		depthEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(MVP)); // Pointer to matrix data
-	
-	// Render the current SceneObject
-	sO.render();
-
-	// Render the list of child SceneObjects
-	for (SceneObject& child : *(sO.get_children())){
-		renderMeshDepth(child, V, P);
+void renderSceneObjectsDepth(const mat4 &V, const mat4 &P){
+	mat4 VP = P * V;
+	// Render the SceneObjects
+	for (auto& mapObj : sceneObjects){
+		mapObj.second.render(VP, depthEffect);
 	}
-
 }
 
 bool render()
@@ -907,20 +717,16 @@ bool render()
 	glCullFace(GL_FRONT);
 
 	// Compute the MVP matrix from the light's point of view
-	float orthoScale = 1.0f / 8.0f;
-	float farOrtho = MYFAR*orthoScale;
-	mat4 depthProjectionMatrix = ortho<float>(-farOrtho, farOrtho, -farOrtho, farOrtho, -farOrtho, farOrtho);
-	mat4 depthViewMatrix = lookAt(normalize(ambientLightPosition), normalize(-ambientLightPosition), vec3(0, 1, 0));
+	mat4 depthProjectionMatrix = ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, MYNEAR, MYFAR);
+	mat4 depthViewMatrix = lookAt(ambientLightPosition, -normalize(ambientLightPosition), vec3(0.0f, 1.0f, 0.0f));
 
 	// Bind the depth shader
 	renderer::bind(depthEffect);
 	glUniform1f(depthEffect.get_uniform_location("totalTime"), totalTime);
 	glUniform1f(depthEffect.get_uniform_location("near"), MYNEAR);
 	glUniform1f(depthEffect.get_uniform_location("far"), MYFAR);
-	// Render the list of sorted child SceneObjects
-	for (auto& mapObj : sceneObjects){
-		renderMeshDepth(mapObj.second, depthViewMatrix, depthProjectionMatrix);
-	}
+	// Render the list of SceneObjects
+	renderSceneObjectsDepth(depthViewMatrix, depthProjectionMatrix);
 
 	// Change the culling back to back face
 	glCullFace(GL_BACK);
@@ -949,7 +755,7 @@ bool render()
 	}
 
 	// Bind the main framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.get_buffer());
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Clear the main frame buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1026,11 +832,12 @@ bool render()
 	glUniformMatrix4fv(mainEffect.get_uniform_location("depthBias"), 1, GL_FALSE, value_ptr(biasMatrix));
 	glUniformMatrix4fv(mainEffect.get_uniform_location("lightVP"), 1, GL_FALSE, value_ptr(depthProjectionMatrix*depthViewMatrix));
 
-	// Render the list of sorted child SceneObjects
-	for (auto& mapObj : sceneObjects){
-		renderMesh(mapObj.second, V, P);
-	}
+	// Render the list of SceneObjects
+	renderSceneObjects(V, P);
 
+	renderer::bind(texs["white"], 0);
+	renderer::bind(sceneObjects["sphereA"].get_material(), "mat");
+	
 
 	particManager->render(P*V);
 
@@ -1073,7 +880,7 @@ bool render()
 	glEnable(GL_DEPTH_TEST);
 
 	// TODO
-	IntersectionData lineIntersectionData = lineA->intersects(lineB, 0.0f);
+	IntersectionData lineIntersectionData = lineA->intersects(lineB, vec3(0,0,0));
 	if (lineIntersectionData.doesIntersect){
 		mat4 rot = mat4();
 
@@ -1106,8 +913,6 @@ bool render()
 
 
 	
-	// Apply post processing effects
-	postProcessing();
 	
 	// Finish rendering this frame
 	finishFrame();
@@ -1115,6 +920,7 @@ bool render()
 	return true;
 }
 
+/* TODO REMOVE
 void postProcessing(){
 
 	// Disable Depth Testing
@@ -1203,7 +1009,7 @@ void postProcessing(){
 	glEnable(GL_DEPTH_TEST);
 
 }
-
+*/
 void finishFrame(){
 
 	glDisable(GL_DEPTH_TEST);
@@ -1218,6 +1024,7 @@ void finishFrame(){
 		value_ptr(orthoMVP)); // Pointer to matrix data
 
 
+	/* TODO REMOVE
 	// Render the finished frame to the previous frame fbo
 	glBindTexture(GL_TEXTURE_2D, postProcessingFbo.get_texture());
 	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
@@ -1228,6 +1035,7 @@ void finishFrame(){
 	// Render the finished frame to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	renderer::render(screenQuad);
+	*/
 
 	if (toggleDebugMenu){
 		// Render the cornerCam onto the screen
@@ -1250,21 +1058,6 @@ void finishFrame(){
 	graphRen->render(orthoMVP, 0.005f, 0.01f);
 
 	glEnable(GL_DEPTH_TEST);
-}
-
-// Compares two scene objects in terms of distance from their origin
-bool orderByDistance(SceneObject* sObj1, SceneObject* sObj2){
-	float dist1, dist2;
-
-	dist1 = sqrt(pow((camPos.x - sObj1->get_transform_with_parent().position.x), 2)
-		+ pow((camPos.y - sObj1->get_transform_with_parent().position.y), 2)
-		+ pow((camPos.z - sObj1->get_transform_with_parent().position.z), 2));
-
-	dist2 = sqrt(pow((camPos.x - sObj2->get_transform_with_parent().position.x), 2)
-		+ pow((camPos.y - sObj2->get_transform_with_parent().position.y), 2)
-		+ pow((camPos.z - sObj2->get_transform_with_parent().position.z), 2));
-
-	return dist1 > dist2;
 }
 
 void main()

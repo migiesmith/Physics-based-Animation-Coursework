@@ -30,7 +30,7 @@ void main()
 	vec4 v = vec4(position, 1.0);
 	gl_Position = MVP * v;
 
-	shadowCoord =  (depthBias*(lightVP * M)) * v;
+	shadowCoord = (depthBias*(lightVP * M)) * v;
 
 	// Output texture coordinate to fragement shader
 	tex_coord_out = tex_coord_in;

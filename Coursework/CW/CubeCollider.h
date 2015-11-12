@@ -36,7 +36,7 @@ public:
 		this->dimensions = dimensions;
 	}
 
-	IntersectionData intersects(Collider* other, float velocity);
+	IntersectionData intersects(Collider* other, vec3 velocity);
 	IntersectionData oBBCollision(CubeCollider other, vector<vec3> norms);
 	pair<bool, float> checkProjectedIntersection(vector<vec3> corners0, vector<vec3> corners1, vec3 axis, vec3 offset);
 	vector<vec3> getCorners();
@@ -45,8 +45,8 @@ public:
 	float sqdValue(float pVal, float bmin, float bmax);
 
 	vec3 closestCollidingNormal(Collider* other);
-	IntersectionData obbCollision(CubeCollider* cube, float velocity);
-	IntersectionData sphereToCubeCollision(SphereCollider* sphere, float velocity);
+	IntersectionData obbCollision(CubeCollider* cube, vec3 velocity);
+	IntersectionData sphereToCubeCollision(SphereCollider* sphere, vec3 velocity);
 	bool testSphereObb(SphereCollider* sphere, CubeCollider obb, vec3 pt);
 	vec3 closestPtOnOBB(vec3 v);
 

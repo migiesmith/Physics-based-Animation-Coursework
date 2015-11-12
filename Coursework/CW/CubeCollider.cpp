@@ -11,7 +11,7 @@ TODO
 
 
 
-IntersectionData CubeCollider::intersects(Collider* other, float velocity){
+IntersectionData CubeCollider::intersects(Collider* other, vec3 velocity){
 	IntersectionData data = IntersectionData();
 
 	switch(other->colliderType){
@@ -40,7 +40,7 @@ IntersectionData CubeCollider::intersects(Collider* other, float velocity){
 						if (abs(position.z - otherPos.z) < dimensions.z + otherDimen.z) {
 							data.doesIntersect = true;
 							data.direction = -closestCollidingNormal(other);
-							data.amount = -velocity;
+							data.amount = -magnitude(velocity);
 						}
 					}
 				}
@@ -87,7 +87,7 @@ vec3 CubeCollider::closestCollidingNormal(Collider* other){
 	return outNorm;
 }
 
-IntersectionData CubeCollider::obbCollision(CubeCollider* cube, float velocity){
+IntersectionData CubeCollider::obbCollision(CubeCollider* cube, vec3 velocity){
 	IntersectionData data = IntersectionData();
 	vec3 offset = cube->position - position;
 	vector<vec3> norms = {
@@ -111,18 +111,18 @@ IntersectionData CubeCollider::obbCollision(CubeCollider* cube, float velocity){
 
 	data = oBBCollision(*cube, norms);
 	if (dot(data.direction, offset) < 0.0f) data.direction *= -1.0f;
-	data.amount = velocity;
+	data.amount = magnitude(velocity);
 	data.intersection = position + data.direction * dimensions;
 
 	return data;
 }
 
-IntersectionData CubeCollider::sphereToCubeCollision(SphereCollider* sphere, float velocity){
+IntersectionData CubeCollider::sphereToCubeCollision(SphereCollider* sphere, vec3 velocity){
 	IntersectionData data = IntersectionData();
 	vec3 pt = vec3(0, 0, 0);
 	data.doesIntersect = testSphereObb(sphere, *this, pt);
 	data.direction = closestCollidingNormal(sphere);
-	data.amount = velocity;
+	data.amount = magnitude(velocity);
 	return data;
 }
 
@@ -314,7 +314,7 @@ float CubeCollider::sqdDistPointAABB(vec3 p, CubeCollider aabb){
 			sq += sqdValue(p.x, aabb.getMin().x, aabb.getMax().x);
 			sq += sqdValue(p.y, aabb.getMin().y, aabb.getMax().y);
 			sq += sqdValue(p.z, aabb.getMin().z, aabb.getMax().z);
-			sq / 3.0f;
+			sq /= 3.0f;
 
 			return sq;
 }

@@ -28,6 +28,9 @@ using namespace graphics_framework;
 float MYNEAR = 2.414f;
 float MYFAR = 3500.0f;
 
+float accumDeltaTime = 0.0f;
+float PHYSICS_TIME_STEP = 0.01f;
+
 // Debug menu toggle
 bool toggleDebugMenu = false;
 
@@ -44,26 +47,8 @@ bool lensFlareEnabled = true;
 static effect mainEffect; // The main effect used
 static effect passThroughEffect; // The effect used for the skybox
 static effect colourPassThroughEffect; // The effect used for the skybox
-static effect fboEffect; // The effect used for the skybox
 static effect depthEffect; // The effect used for the ssao post process
 
-static effect postProcessingEffect; // The effect used for all of the post processes
-
-// SSAO values
-bool ssaoNoise = true;
-bool ssaoOnly = false;
-float ssaoLumInfluence = 0.8f;
-float ssaoSelfShadowReduc = 0.4f;
-float ssaoGaussDisplace = 0.4f;
-
-// Vignette values
-float vignetteOuterRadius = 0.65f;
-float vignetteInnerRadius = 0.4f;
-float vignetteIntensity = 0.3f;
-
-FrameBuffer postProcessingFbo;
-FrameBuffer fbo;
-FrameBuffer prevFbo;
 FrameBuffer shadowFbo;
 
 static mesh screenQuad; // Quad used for post processing

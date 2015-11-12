@@ -40,7 +40,7 @@ public:
 	Collider(vec3 position, ColliderTypes colliderType);
 	void setPosition(vec3 position);
 	void translate(vec3 translation);
-	IntersectionData intersects(Collider* other, float velocity);
+	IntersectionData intersects(Collider* other, vec3 velocity);
 	ColliderTypes getType(){ return colliderType; }
 	~Collider();
 };

@@ -7,7 +7,8 @@ Particle::Particle(const vec3 v, const float mass) : Particle(v.x, v.y, v.z, mas
 
 Particle::Particle(const float x, const float y, const float z, const float mass) : vec3(x, y, z)
 {
-	velocity = vec3(0, 0, 0);
+	velocity = vec3(0, 0, 0); 
+	force = vec3(0, 0, 0);
 	isAlive = true;
 	setMass(mass);
 }
@@ -26,11 +27,11 @@ void Particle::awaken(const vec3& v, const vec3& force, const float lifeTime){
 void Particle::update(const float delta_time){
 	if (!isAlive) return;
 
-	force += vec3(0, -9.8, 0);
+	addForce(vec3(0, -9.8, 0));
 
 	vec3 acceleration = force * invMass;
-	velocity = velocity + acceleration * delta_time;
-	setPosition(*this + velocity * delta_time);
+	velocity += acceleration * delta_time;
+	setPosition(*this + (velocity * delta_time));
 
 	force = vec3(0,0,0);
 	acceleration *= 0.9f;

@@ -1,0 +1,17 @@
+#define NUM_PARTICLES 1024*1024 // total number of particles to move
+#define WORK_GROUP_SIZE 128 // # work-items per work-group
+
+struct pos
+{
+float x y z w;  // positions
+};
+
+struct vel
+{
+float vx, vy, vz, vw; // velocities
+};
+
+
+// need to do the following for both position, velocity, and colors of the particles:
+GLuint posSSbo;
+GLuint velSSbo;

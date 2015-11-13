@@ -40,7 +40,7 @@ public:
 	Collider(vec3 position, ColliderTypes colliderType);
 	void setPosition(vec3 position);
 	void translate(vec3 translation);
-	IntersectionData intersects(Collider* other, vec3 velocity);
+	virtual void intersects(Collider& other, const vec3& velocity, IntersectionData& data){ cout << "ERROR: Collider intersect miscalled" << endl; }
 	ColliderTypes getType(){ return colliderType; }
 	~Collider();
 };

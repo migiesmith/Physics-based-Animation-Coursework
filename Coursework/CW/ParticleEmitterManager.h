@@ -7,6 +7,7 @@ class ParticleEmitterManager
 private:
 
 	map<string, ParticleEmitter*> emitters;
+	effect particleShader;
 
 public:
 	ParticleEmitterManager();
@@ -16,6 +17,8 @@ public:
 	ParticleEmitter* getEmitter(const string &emitterName){ return emitters[emitterName]; }
 	void add(const string &emitterName, ParticleEmitter* emitter){ emitters[emitterName] = emitter; }
 	void remove(const string &emitterName){ emitters.erase(emitterName); }
+
+	void compute();
 
 	~ParticleEmitterManager();
 };

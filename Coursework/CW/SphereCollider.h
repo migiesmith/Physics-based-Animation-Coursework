@@ -28,7 +28,7 @@ public:
 	}
 	
 
-	IntersectionData intersects(Collider* other, vec3 velocity);
+	void intersects(Collider& other, const vec3& velocity, IntersectionData& data) ;
 
 	~SphereCollider();
 };

@@ -15,8 +15,13 @@ SceneObject::SceneObject()
 }
 
 void SceneObject::update(float delta_time){
+	if (_collider)
+		get_transform().position = _collider->position;
+}
 
-
+void SceneObject::intersects(Collider& c, const vec3& velocity, IntersectionData& data){
+	if (_collider)
+		_collider->intersects(c, velocity, data);
 }
 
 void SceneObject::render(const mat4& VP, const effect& shader){

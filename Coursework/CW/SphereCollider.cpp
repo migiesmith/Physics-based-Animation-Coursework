@@ -8,13 +8,12 @@ The collider that handles sphere related intersection (sphere-sphere, sphere-pla
 
 #include "SphereCollider.h"
 
-IntersectionData SphereCollider::intersects(Collider* other, vec3 velocity){
-	IntersectionData data = IntersectionData();
+void  SphereCollider::intersects(Collider& other, const vec3& velocity, IntersectionData& data){
 
-	switch(other->getType()){
+	switch(other.getType()){
 		case ColliderTypes::SPHERE : {
-			data.direction = this->position - other->position;
-			data.amount = Util::magnitude(data.direction) - (this->radius + dynamic_cast<SphereCollider*>(other)->radius);
+			data.direction = this->position - other.position;
+			data.amount = Util::magnitude(data.direction) - (this->radius + ((SphereCollider&)other).radius);
 			data.direction = normalize(data.direction);
 			if (data.amount <= 0){
 				data.doesIntersect = true;
@@ -26,26 +25,25 @@ IntersectionData SphereCollider::intersects(Collider* other, vec3 velocity){
 			
 		case ColliderTypes::CUBE :
 		{
-			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
+			other.intersects(*this, velocity, data);
 			data.direction = data.direction * -1.0f;
 			data.intersection = position + (radius * normalize(data.direction));
 			break;
 		}
 		case ColliderTypes::OBBCUBE:
 		{
-			data = dynamic_cast<CubeCollider*>(other)->intersects(this, velocity);
+			other.intersects(*this, velocity, data);
 			data.direction = data.direction * -1.0f;
 			data.intersection = position + (radius *normalize(data.direction));
 			break;
 		}
 		case ColliderTypes::PLANE:
 		{
-			data = dynamic_cast<PlaneCollider*>(other)->intersects(this, velocity);
+			other.intersects(*this, velocity, data);
 			break;
 		}
 	}
 
-	return data;
 }
 
 

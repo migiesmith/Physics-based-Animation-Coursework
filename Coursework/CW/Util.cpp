@@ -33,8 +33,13 @@ using namespace Util;
 	texture Util::loadTexture(string textureName){ return loadTexture(textureName, false, false); }
 
 	//Returns the magnitude vec3 v
-	float Util::magnitude(vec3 v){
+	float Util::magnitude(const vec3& v){
 		return sqrtf(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
+	}
+
+	//Returns the magnitude vec3 v (without the sqrt)
+	float Util::sqdMagnitude(const vec3& v){
+		return pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2);
 	}
 
 	//Checks if vec3 v is a zero vector

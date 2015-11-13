@@ -7,8 +7,8 @@ ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const v
 	this->lifeTime = lifeTime;
 	this->particleCount = particleCount;
 	for (int i = 0; i < particleCount; i++){
-		Particle* p = new Particle(v, 1.0f);
-		p->isAlive = false;
+		Particle& p = Particle(v, 1.0f);
+		p.isAlive = false;
 		particles.push_back(p);
 	}
 	// Add Shaders
@@ -26,10 +26,20 @@ ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const v
 }
 
 void ParticleEmitter::update(const float delta_time, const map<string, SceneObject>& sceneObjects){
-	for (Particle* p : particles){
-		if (p->isAlive){
-			//TODO for (const pair<string, SceneObject>& sO : sceneObjects){ }
-			p->update(delta_time);
+	IntersectionData& data = IntersectionData();
+	for (Particle& p : particles){
+		if (p.isAlive){
+			for (auto& mapObj : sceneObjects){
+				SceneObject& sO = (SceneObject&)mapObj.second;
+				//TODO make intersects take in a IntersectionData to modify
+				data.reset();
+				sO.intersects(*p.collider, p.velocity, data);
+				if (data.doesIntersect){
+					p.addForce(data.direction * data.amount);
+					p.velocity -= data.direction*dot(data.direction, p.velocity);
+				}
+			}
+			p.update(delta_time);
 		}else if(emitTimer <= 0.0f){
 			awakenParticle(p);
 		}
@@ -38,14 +48,14 @@ void ParticleEmitter::update(const float delta_time, const map<string, SceneObje
 	emitTimer -= delta_time;
 }
 
-void ParticleEmitter::awakenParticle(Particle* p){
+void ParticleEmitter::awakenParticle(Particle& p){
 	vec3 offset = normalize(force);
 
 	for (int i = 0; i < 3; i++){
 		offset[i] = ((((rand() % 200) - 100.0f) / 100.0f) * (1.0f - offset[i])) * 120.0f;
 	}
 
-	p->awaken(*this, force + offset, lifeTime);
+	p.awaken(*this, force + offset, lifeTime);
 	emitTimer = 1.0f / emitSpeed;
 }
 
@@ -67,9 +77,9 @@ void ParticleEmitter::render(const mat4& PV){
 	glUniform1f(particleEffect.get_uniform_location("lifeTime"), lifeTime);
 	glUniform1f(particleEffect.get_uniform_location("xCoordInterval"), 1.0f / columns);
 	glUniform1f(particleEffect.get_uniform_location("yCoordInterval"), 1.0f / rows);
-	for (Particle* p : particles){
-		glUniform1f(particleEffect.get_uniform_location("totalTime"), lifeTime - p->lifeTime);
-		p->render();
+	for (Particle& p : particles){
+		glUniform1f(particleEffect.get_uniform_location("totalTime"), lifeTime - p.lifeTime);
+		p.render();
 	}
 	glDisable(GL_ALPHA_TEST);
 }
@@ -86,6 +96,5 @@ void ParticleEmitter::setColour(const vec4& v){
 
 ParticleEmitter::~ParticleEmitter()
 {
-	for (Particle* p : particles)
-		delete p;
+
 }

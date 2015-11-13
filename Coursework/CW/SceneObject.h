@@ -25,7 +25,7 @@ class SceneObject : public mesh
 {
 private:
 	texture* _texture; // This objects texture
-	Collider* _collider; // This objects texture
+	Collider* _collider = NULL; // This objects texture
 	texture* _normal = NULL; // The normal map of this object
 	
 public:
@@ -63,13 +63,10 @@ public:
 
 	// Update the scene object
 	void update(float delta_time);
-	IntersectionData intersects(Collider* c, vec3 velocity){
-		IntersectionData data = IntersectionData();
-		if (_collider){
-			data = _collider->intersects(c, velocity);
-		}
-		return data;
-	}
+
+	void setCollider(Collider& c){ _collider = &c; }
+
+	void intersects(Collider& c, const vec3& velocity, IntersectionData& data);
 
 	// Render the mesh of the object
 	void render(const mat4& VP, const effect& shader);

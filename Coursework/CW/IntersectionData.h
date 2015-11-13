@@ -25,6 +25,12 @@ public:
 	vec3 intersection = vec3(0.0f,0.0f,0.0f);
 
 	IntersectionData();
+	void reset(){
+		doesIntersect = false;
+		direction = vec3(0.0f, 0.0f, 0.0f);
+		amount = 0.0f;
+		intersection = vec3(0.0f, 0.0f, 0.0f);
+	}
 	~IntersectionData();
 };
 

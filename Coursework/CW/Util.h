@@ -24,7 +24,8 @@ namespace Util
 	texture loadTexture(string textureName);
 
 	void init();
-	float magnitude(vec3 v);
+	float magnitude(const vec3& v);
+	float sqdMagnitude(const vec3& v);
 	bool isZeroVec3(vec3 v);
 	bool equals(vec3 v0, vec3 v1);
 

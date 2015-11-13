@@ -22,7 +22,7 @@ public:
 		this->radius = radius;
 	}
 
-	IntersectionData intersects(Collider* other, vec3 velocity);
+	IntersectionData intersects(Collider* other, const vec3& velocity);
 
 	~LineCollider();
 

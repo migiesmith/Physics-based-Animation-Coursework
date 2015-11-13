@@ -11,7 +11,7 @@ using namespace glm;
 class ParticleEmitter : public vec3
 {
 protected:
-	vector<Particle*> particles;
+	vector<Particle> particles;
 	float lifeTime = 5.0f;
 	float emitTimer = 0.5f;
 	effect particleEffect;
@@ -29,7 +29,7 @@ public:
 
 	virtual void update(const float delta_time, const map<string, SceneObject>& sceneObjects);
 	void render(const mat4& PV);
-	void awakenParticle(Particle* p);
+	void awakenParticle(Particle& p);
 	void setPosition(const vec3& v);
 	void setColour(const vec4& v);
 	

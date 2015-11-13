@@ -13,7 +13,7 @@ GraphRenderer::GraphRenderer(TextRenderer* textRenderer, effect* shader, const f
 void GraphRenderer::pushData(const float y){
 	if(y >= 0)
 		data.push_back(y);
-	if(data.size() > limit)
+	if ((int)data.size() > limit)
 		data.erase(data.begin());
 }
 

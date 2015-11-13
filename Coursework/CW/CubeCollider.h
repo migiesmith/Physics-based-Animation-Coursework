@@ -36,18 +36,18 @@ public:
 		this->dimensions = dimensions;
 	}
 
-	IntersectionData intersects(Collider* other, vec3 velocity);
-	IntersectionData oBBCollision(CubeCollider other, vector<vec3> norms);
+	void intersects(Collider& other, const vec3& velocity, IntersectionData& data);
+	void oBBCollision(CubeCollider& other, const vector<vec3>& norms, IntersectionData& data);
 	pair<bool, float> checkProjectedIntersection(vector<vec3> corners0, vector<vec3> corners1, vec3 axis, vec3 offset);
 	vector<vec3> getCorners();
 	void rotate(vec3 axis, float degrees);
 	float sqdDistPointAABB(vec3 p, CubeCollider aabb);
 	float sqdValue(float pVal, float bmin, float bmax);
 
-	vec3 closestCollidingNormal(Collider* other);
-	IntersectionData obbCollision(CubeCollider* cube, vec3 velocity);
-	IntersectionData sphereToCubeCollision(SphereCollider* sphere, vec3 velocity);
-	bool testSphereObb(SphereCollider* sphere, CubeCollider obb, vec3 pt);
+	vec3 closestCollidingNormal(Collider& other);
+	void obbCollision(CubeCollider& cube, const vec3& velocity, IntersectionData& data);
+	void sphereToCubeCollision(SphereCollider& sphere, vec3 velocity, IntersectionData& data);
+	bool testSphereObb(SphereCollider& sphere, CubeCollider obb, vec3 pt);
 	vec3 closestPtOnOBB(vec3 v);
 
 	IntersectionData rayCast(vec3& start, vec3& direction);

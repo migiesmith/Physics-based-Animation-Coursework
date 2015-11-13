@@ -185,7 +185,8 @@ bool load_content()
 
 	texs["solidRed"] = Util::loadTexture("solidRed.jpg");
 	texs["white"] = Util::loadTexture("white.jpg");
-	texs["tiles"] = Util::loadTexture("tiles.jpg");
+	texs["tiles"] = Util::loadTexture("whiteTiles.jpg");
+	texs["greenTiles"] = Util::loadTexture("greenTiles.jpg");
 
 	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
 	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
@@ -193,8 +194,8 @@ bool load_content()
 
 	//TODO
 	particManager = new ParticleEmitterManager();
-	particManager->add("tornado", new TornadoParticleEmitter(vec3(0, 140, 0), 2000, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 140, 0), 2000, vec3(15, 10, 15), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 100, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 200, vec3(15, 10, 15), 5.0f, "particles\\watersplash3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 
@@ -394,9 +395,10 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	sceneObjects["sphereA"].setCollider(sphereA);
 
 	sceneObjects["plane"] = meshes["plane"];
-	sceneObjects["plane"].set_texture(texs["white"]); // Sets the texture
+	sceneObjects["plane"].set_texture(texs["greenTiles"]); // Sets the texture
 	//sceneObjects["plane"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["plane"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
@@ -637,7 +639,8 @@ void updatePhysics(){
 		//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
 
 		vec3 velocity = vec3(0,0,0);
-		dataTODO = sphereA.intersects(&sphereB, -velocity*PHYSICS_TIME_STEP);
+		dataTODO.reset();
+		sphereA.intersects(sphereB, -velocity*PHYSICS_TIME_STEP, dataTODO);
 		//sphereA.translate(vec3(0.0,0.0,0.01));
 		if (dataTODO.doesIntersect){
 			sphereA.translate(dataTODO.direction*-dataTODO.amount);
@@ -927,6 +930,8 @@ bool render()
 	
 	// Finish rendering this frame
 	finishFrame();
+
+	particManager->compute();
 
 	return true;
 }

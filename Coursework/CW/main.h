@@ -83,10 +83,7 @@ texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);
 texture loadTexture(string textureName);
 geometry loadModel(string modelName);
 
-void copyBackFBO();
-void postProcessing();
 void finishFrame();
-bool orderByDistance(SceneObject* sObj1, SceneObject* sObj2);
 void initSceneObjects();
 void initScreenQuads();
 void initShaders();

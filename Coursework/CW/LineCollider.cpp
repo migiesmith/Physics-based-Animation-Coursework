@@ -1,7 +1,7 @@
 #include "LineCollider.h"
 
 
-IntersectionData LineCollider::intersects(Collider* other, vec3 velocity){
+IntersectionData LineCollider::intersects(Collider* other, const vec3& velocity){
 	IntersectionData data = IntersectionData();
 
 	switch (other->colliderType){

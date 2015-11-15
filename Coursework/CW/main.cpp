@@ -643,16 +643,16 @@ void updatePhysics(){
 		sphereA.intersects(sphereB, -velocity*PHYSICS_TIME_STEP, dataTODO);
 		//sphereA.translate(vec3(0.0,0.0,0.01));
 		if (dataTODO.doesIntersect){
-			sphereA.translate(dataTODO.direction*-dataTODO.amount);
-			cout << "Sphere collision: " << endl;
-			cout << dataTODO.doesIntersect << endl;
-			cout << dataTODO.direction.x << ", " << dataTODO.direction.y << ", " << dataTODO.direction.z << " * " << dataTODO.amount << endl;
+			sphereA.translate(dataTODO.direction*0.1f);
+			//cout << "Sphere collision: " << endl;
+			//cout << dataTODO.doesIntersect << endl;
+			//cout << dataTODO.direction.x << ", " << dataTODO.direction.y << ", " << dataTODO.direction.z << " * " << dataTODO.amount << endl;
 		}
 
 		sceneObjects["sphereA"].get_transform().position = sphereA.position;
 		sceneObjects["sphereB"].get_transform().position = sphereB.position;
 
-		particManager->update(PHYSICS_TIME_STEP, sceneObjects);
+		//particManager->update(PHYSICS_TIME_STEP, sceneObjects);
 	}
 }
 

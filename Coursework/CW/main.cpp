@@ -34,7 +34,7 @@ IntersectionData rayTest;
 //TODO
 //SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
 //SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
-CubeCollider sphereB = CubeCollider(vec3(30, 1, 0.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereB = CubeCollider(vec3(31, 5, 5), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 CubeCollider sphereA = CubeCollider(vec3(40, 10, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 IntersectionData dataTODO;
 
@@ -61,6 +61,8 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS){
 		//TODO
+		SPGrid& grid = SPGrid::getInstance();
+		cout << grid.getPosInGrid(sphereA.position) << endl;
 	}
 	else if (key == GLFW_KEY_H && action == GLFW_PRESS){
 		toggleDebugMenu = !toggleDebugMenu;
@@ -146,6 +148,9 @@ bool initialise()
 
 	Util::init();
 
+	SPGrid::getInstance().init(20,10,20, 10, vec3(0,0,0));
+	SPGrid::getInstance().setBasePos(0,-10,0);
+
 	return true;
 }
 
@@ -195,7 +200,7 @@ bool load_content()
 	//TODO
 	particManager = new ParticleEmitterManager();
 	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 100, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 200, vec3(15, 10, 15), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 10, 15), 5.0f, "particles\\watersplash3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 
@@ -412,6 +417,7 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	sceneObjects["sphereB"].setCollider(sphereB);
 
 	sphereB.rotate(vec3(0,0,1), 45.0f);
 	sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
@@ -639,8 +645,13 @@ void updatePhysics(){
 		//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
 
 		vec3 velocity = vec3(0,0,0);
+
+		SPGrid& spGrid = SPGrid::getInstance();
+
 		dataTODO.reset();
-		sphereA.intersects(sphereB, -velocity*PHYSICS_TIME_STEP, dataTODO);
+		spGrid.intersects(sphereA, velocity*PHYSICS_TIME_STEP, dataTODO);
+
+		//sphereA.intersects(sphereB, -velocity*PHYSICS_TIME_STEP, dataTODO);
 		//sphereA.translate(vec3(0.0,0.0,0.01));
 		if (dataTODO.doesIntersect){
 			sphereA.translate(dataTODO.direction*0.1f);
@@ -652,7 +663,9 @@ void updatePhysics(){
 		sceneObjects["sphereA"].get_transform().position = sphereA.position;
 		sceneObjects["sphereB"].get_transform().position = sphereB.position;
 
-		//particManager->update(PHYSICS_TIME_STEP, sceneObjects);
+		SPGrid::getInstance().update(sceneObjects);
+
+		particManager->update(PHYSICS_TIME_STEP);
 	}
 }
 
@@ -896,6 +909,8 @@ bool render()
 
 	glEnable(GL_DEPTH_TEST);
 
+	//SPGrid::getInstance().render();
+
 	// TODO
 	IntersectionData lineIntersectionData = lineA->intersects(lineB, vec3(0,0,0));
 	if (lineIntersectionData.doesIntersect){
@@ -913,6 +928,7 @@ bool render()
 		textRen->render3D((P * V), right, "angles(" + to_string(roll) + ", " + to_string(pitch) + ", " + to_string(yaw) + ")", translationFromMat4(endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_base));
 	}
 	
+
 	// TODO IK
 	glDisable(GL_DEPTH_TEST);
 	renderer::bind(colourPassThroughEffect);
@@ -924,10 +940,7 @@ bool render()
 	// Disable wireframe
 	glPolygonMode(GL_FRONT, GL_FILL);
 
-
-
-	
-	
+		
 	// Finish rendering this frame
 	finishFrame();
 
@@ -936,96 +949,6 @@ bool render()
 	return true;
 }
 
-/* TODO REMOVE
-void postProcessing(){
-
-	// Disable Depth Testing
-	glDisable(GL_DEPTH_TEST);
-
-	//------------------ Start post processing start ------------------------
-
-	// Bind the front post processing framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, postProcessingFbo.get_buffer());
-
-	// Bind the Screen Space Ambient Occlusion effect
-	renderer::bind(postProcessingEffect);
-
-	glUniformMatrix4fv(
-		postProcessingEffect.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(orthoMVP)); // Pointer to matrix data
-
-	// Bind the last frame buffer's texture - MOTIONBLUR
-	glActiveTexture(GL_TEXTURE0 + 3);
-	glBindTexture(GL_TEXTURE_2D, prevFbo.get_texture());
-	glUniform1i(postProcessingEffect.get_uniform_location("prevTex"), 3);
-
-	// Bind the lens flare dirt texture - LENSFLARE
-	glActiveTexture(GL_TEXTURE0 + 2);
-	glBindTexture(GL_TEXTURE_2D, texs["lensflare"].get_id());
-	glUniform1i(postProcessingEffect.get_uniform_location("dirt"), 2);
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_2D, fbo.get_depth());
-	glUniform1i(postProcessingEffect.get_uniform_location("depth"), 1);
-
-	// Bind the frame buffer's texture
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, fbo.get_texture());
-	glUniform1i(postProcessingEffect.get_uniform_location("tex"), 0);
-
-	// Send the screen dimensions to the shader
-	glUniform1f(postProcessingEffect.get_uniform_location("screenWidth"), (float)renderer::get_screen_width());
-	glUniform1f(postProcessingEffect.get_uniform_location("screenHeight"), (float)renderer::get_screen_height());
-
-	// Send the near and far values to the shader
-	glUniform1f(postProcessingEffect.get_uniform_location("near"), MYNEAR);
-	glUniform1f(postProcessingEffect.get_uniform_location("far"), MYFAR);
-
-	// Set the number of ghosts and their dispersal - LENSFLARE
-	glUniform1i(postProcessingEffect.get_uniform_location("ghostCount"), 6);
-	glUniform1f(postProcessingEffect.get_uniform_location("ghostDispersal"), 0.15f);
-
-	// Send the shader the vignette parameters (outer + inner radius and the intensity of the vignette) - VIGNETTE
-	glUniform1f(postProcessingEffect.get_uniform_location("outerRadius"), vignetteOuterRadius);
-	glUniform1f(postProcessingEffect.get_uniform_location("innerRadius"), vignetteInnerRadius);
-	glUniform1f(postProcessingEffect.get_uniform_location("intensity"), vignetteIntensity);
-
-	// Send the shader the degree of blurring (rings + samples per ring) - SSAO + DOF
-	glUniform1i(postProcessingEffect.get_uniform_location("samples"), 3);
-	glUniform1i(postProcessingEffect.get_uniform_location("rings"), 3);
-
-	// Send the shader the ssao parameters - SSAO
-	glUniform1f(postProcessingEffect.get_uniform_location("aoRadius"), 1.0f);
-	glUniform1f(postProcessingEffect.get_uniform_location("lumInfluence"), ssaoLumInfluence);
-	glUniform1f(postProcessingEffect.get_uniform_location("selfShadowReduc"), ssaoSelfShadowReduc);
-	glUniform1f(postProcessingEffect.get_uniform_location("gaussDisplace"), ssaoGaussDisplace);
-
-	// Pass toggles
-	glUniform1i(postProcessingEffect.get_uniform_location("ssaoEnabled"), ssaoEnabled);
-	glUniform1i(postProcessingEffect.get_uniform_location("glowEnabled"), glowEnabled);
-	glUniform1i(postProcessingEffect.get_uniform_location("lensFlareEnabled"), lensFlareEnabled);
-	glUniform1i(postProcessingEffect.get_uniform_location("motionBlurEnabled"), motionBlurEnabled);
-	glUniform1i(postProcessingEffect.get_uniform_location("greyscaleEnabled"), greyscaleEnabled);
-	glUniform1i(postProcessingEffect.get_uniform_location("vignetteEnabled"), vignetteEnabled);
-
-	// Tell the shader whether to use noise - SSAO
-	glUniform1i(postProcessingEffect.get_uniform_location("useNoise"), ssaoNoise);
-	// Tell the shader whether to use colour + ssao or just ssao - SSAO
-	glUniform1i(postProcessingEffect.get_uniform_location("renderOnlyAO"), ssaoOnly);
-
-	// Render the sceen quad
-	renderer::render(screenQuad);
-
-	//------------------ Start post processing start ------------------------
-
-	// Re-enable Depth Testing
-	glEnable(GL_DEPTH_TEST);
-
-}
-*/
 void finishFrame(){
 
 	glDisable(GL_DEPTH_TEST);
@@ -1071,6 +994,10 @@ void finishFrame(){
 	renderer::render(menuQuad);
 
 	textRen->render(orthoMVP, renderText, 0, 0);
+	cout << particManager->getParticleCount() << endl;
+	std::ostringstream avgStr;
+	avgStr << particManager->getParticleCount();
+	textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.79);
 	graphRen->render(orthoMVP, 0.005f, 0.01f);
 
 	glEnable(GL_DEPTH_TEST);

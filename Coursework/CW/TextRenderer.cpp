@@ -117,7 +117,7 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 	glEnable(GL_ALPHA_TEST);
 	renderer::render(screenQuadGeom);
 	glDisable(GL_ALPHA_TEST);
-	
+		
 }
 
 void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string text, vec3& pos){

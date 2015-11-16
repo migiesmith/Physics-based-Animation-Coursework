@@ -57,7 +57,7 @@ void CubeCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 	case ColliderTypes::OBBCUBE:
 	{
 		obbCollision(((CubeCollider&)other), velocity, data);
-		data.direction *= -1.0f;
+		//data.direction *= -1.0f;
 		data.amount *= -1.0f;
 		break;
 	}
@@ -80,7 +80,7 @@ vec3 CubeCollider::closestCollidingNormal(Collider& other){
 		-normals[1],
 		-normals[2]
 	};
-	for (int i = 0; i < norms.size(); i++){
+	for (int i = 0; i < (int) norms.size(); i++){
 		float d = dot(direction, (position + (norms[i] * (dimensions / 2.0f)) - other.position));
 		if (d < minCollision){
 			closestIndex = i;
@@ -175,7 +175,7 @@ void CubeCollider::oBBCollision(CubeCollider& other, const vector<vec3*>& norms,
 
 	int minPos = 0;
 	float minVal = std::numeric_limits<float>::max();
-	for (int i = 0; i < axis.size(); i++){
+	for (int i = 0; i < (int) axis.size(); i++){
 		if (abs(depth.at(i)) < minVal){ minVal = depth.at(i); minPos = i; }
 	}
 
@@ -313,8 +313,6 @@ float CubeCollider::sqdDistPointAABB(vec3 p, CubeCollider aabb){
 	sq += sqdValue(p.x, aabb.getMin().x, aabb.getMax().x);
 	sq += sqdValue(p.y, aabb.getMin().y, aabb.getMax().y);
 	sq += sqdValue(p.z, aabb.getMin().z, aabb.getMax().z);
-	sq / 3.0f;
-
 	return sq;
 }
 

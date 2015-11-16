@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Inverse Kinematics">
       <UniqueIdentifier>{14414cfe-057d-40d6-b23d-b92b431cb4a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Spatial Partitioning">
+      <UniqueIdentifier>{b95759bd-0877-4db6-a305-321fc4022489}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Spatial Partitioning">
+      <UniqueIdentifier>{58a76310-5544-4157-b0db-88c16e08bddd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -89,6 +95,12 @@
     </ClCompile>
     <ClCompile Include="Link.cpp">
       <Filter>Source Files\Inverse Kinematics</Filter>
+    </ClCompile>
+    <ClCompile Include="SPGrid.cpp">
+      <Filter>Source Files\Spatial Partitioning</Filter>
+    </ClCompile>
+    <ClCompile Include="SPCell.cpp">
+      <Filter>Source Files\Spatial Partitioning</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +157,12 @@
     </ClInclude>
     <ClInclude Include="Link.h">
       <Filter>Header Files\Inverse Kinematics</Filter>
+    </ClInclude>
+    <ClInclude Include="SPGrid.h">
+      <Filter>Header Files\Spatial Partitioning</Filter>
+    </ClInclude>
+    <ClInclude Include="SPCell.h">
+      <Filter>Header Files\Spatial Partitioning</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

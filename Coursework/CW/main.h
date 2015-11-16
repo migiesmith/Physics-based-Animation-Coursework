@@ -19,6 +19,8 @@
 #include "GraphRenderer.h"
 #include "ParticleEmitterManager.h"
 
+#include "SPGrid.h"
+
 class SceneObject;
 
 using namespace std;

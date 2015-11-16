@@ -5,18 +5,19 @@ TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particle
 {
 }
 
-void TornadoParticleEmitter::update(const float delta_time, const map<string, SceneObject>& sceneObjects){
+void TornadoParticleEmitter::update(const float delta_time){
 	IntersectionData& data = IntersectionData();
+	SPGrid& spGrid = SPGrid::getInstance();
+
 	for (Particle& p : particles){
 		if (p.isAlive){
-			for (auto& mapObj : sceneObjects){
-				SceneObject& sO = (SceneObject&)mapObj.second;
-				//TODO make intersects take in a IntersectionData to modify
-				data.reset();
-				sO.intersects(*p.collider, p.velocity, data);
-				if (data.doesIntersect){
-					p.addForce(data.direction * data.amount * dot(data.direction, p.velocity));
-				}
+
+			data.reset();
+			spGrid.intersects(*p.collider, p.velocity, data);
+
+			if (data.doesIntersect){
+				p.addForce(data.direction * data.amount);
+				p.velocity -= data.direction*dot(data.direction, p.velocity);
 			}
 			if (!Util::isZeroVec3(*this - p)){
 				vec3 offset = normalize(*this - p);

@@ -65,6 +65,7 @@ public:
 	void update(float delta_time);
 
 	void setCollider(Collider& c){ _collider = &c; }
+	Collider* getCollider(){ return _collider; }
 
 	void intersects(Collider& c, const vec3& velocity, IntersectionData& data);
 

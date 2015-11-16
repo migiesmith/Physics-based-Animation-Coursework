@@ -6,8 +6,6 @@ TODO
 
 */
 
-#include <math.h>
-#include <renderer.h>
 #include "Util.h"
 
 using namespace glm;

@@ -3,6 +3,7 @@
 #include "Particle.h"
 #include "SceneObject.h"
 #include "SphereCollider.h"
+#include "SPGrid.h"
 
 using namespace std;
 using namespace graphics_framework;
@@ -27,7 +28,7 @@ public:
 
 	ParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const string texturePath, const int columns, const int rows);
 
-	virtual void update(const float delta_time, const map<string, SceneObject>& sceneObjects);
+	virtual void update(const float delta_time);
 	void render(const mat4& PV);
 	void awakenParticle(Particle& p);
 	void setPosition(const vec3& v);

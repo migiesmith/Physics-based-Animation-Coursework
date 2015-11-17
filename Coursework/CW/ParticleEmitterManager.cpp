@@ -3,10 +3,10 @@
 
 ParticleEmitterManager::ParticleEmitterManager()
 {
-	particleShader.add_shader("..\\resources\\shaders\\particle_shader.comp", GL_COMPUTE_SHADER);
+	//particleShader.add_shader("..\\resources\\shaders\\particle_shader.comp", GL_COMPUTE_SHADER);
 
 	// Build effect
-	particleShader.build();
+	//particleShader.build();
 }
 
 void ParticleEmitterManager::update(const float delta_time){

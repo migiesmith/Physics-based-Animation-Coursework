@@ -909,7 +909,8 @@ bool render()
 
 	glEnable(GL_DEPTH_TEST);
 
-	//SPGrid::getInstance().render();
+	if (toggleDebugMenu)
+		SPGrid::getInstance().render();
 
 	// TODO
 	IntersectionData lineIntersectionData = lineA->intersects(lineB, vec3(0,0,0));
@@ -994,7 +995,7 @@ void finishFrame(){
 	renderer::render(menuQuad);
 
 	textRen->render(orthoMVP, renderText, 0, 0);
-	cout << particManager->getParticleCount() << endl;
+
 	std::ostringstream avgStr;
 	avgStr << particManager->getParticleCount();
 	textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.79);

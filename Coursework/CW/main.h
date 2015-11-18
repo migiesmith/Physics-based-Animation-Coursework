@@ -20,6 +20,7 @@
 #include "ParticleEmitterManager.h"
 
 #include "SPGrid.h"
+#include "IKHierarchy.h"
 
 class SceneObject;
 

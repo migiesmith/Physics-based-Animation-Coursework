@@ -102,6 +102,9 @@
     <ClCompile Include="SPCell.cpp">
       <Filter>Source Files\Spatial Partitioning</Filter>
     </ClCompile>
+    <ClCompile Include="IKHierarchy.cpp">
+      <Filter>Source Files\Inverse Kinematics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneObject.h">
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="SPCell.h">
       <Filter>Header Files\Spatial Partitioning</Filter>
+    </ClInclude>
+    <ClInclude Include="IKHierarchy.h">
+      <Filter>Header Files\Inverse Kinematics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -28,6 +28,7 @@ double cursor_x = 0.0; // Stores the position X of the cursor
 double cursor_y = 0.0; // Stores the position Y of the cursor
 
 float totalTime = 0.0f; // Stores how much time has passed (used for time based events like model bobbing and light movement)
+float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physics engine (used for time based events such as ik walking)
 
 IntersectionData rayTest;
 
@@ -43,6 +44,7 @@ ParticleEmitterManager* particManager;
 
 // IK constants
 map<string, Link*> endLinks;
+IKHierarchy ikHierarchy;
 //TODO
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -151,6 +153,8 @@ bool initialise()
 	SPGrid::getInstance().init(20,10,20, 10, vec3(0,0,0));
 	SPGrid::getInstance().setBasePos(0,-10,0);
 
+	ikHierarchy = IKHierarchy("..\\resources\\ik\\test.txt");
+
 	return true;
 }
 
@@ -200,7 +204,7 @@ bool load_content()
 	//TODO
 	particManager = new ParticleEmitterManager();
 	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 100, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 10, 15), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 10, 15), 3.0f, "particles\\watersplash3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 
@@ -347,6 +351,7 @@ void initSceneObjects(){
 
 	endLinks["leftEye"] = new Link(axis, angle, new vector < vec3 >{ vec3(0, 0, 0), vec3(0, 0, 0) }, 0.25f*scale);
 	endLinks["head"]->addChild("leftEye", endLinks["leftEye"]);
+
 	angle = ToAxisAngle(rEyeRot, axis);
 	endLinks["rightEye"] = new Link(axis, angle, new vector < vec3 >{ vec3(0, 0, 0), vec3(0, 0, 0) }, 0.25f*scale);
 	endLinks["head"]->addChild("rightEye", endLinks["rightEye"]);
@@ -626,7 +631,7 @@ void updateIK(mat4 &proj, mat4 &view){
 	vec3 target = sphereA.position;
 	
 	endLinks["root"]->render(PV, colourPassThroughEffect, *endLinks["root"], target);
-
+	ikHierarchy.render(PV, colourPassThroughEffect, *endLinks["root"], target);
 
 }
 
@@ -634,12 +639,21 @@ void updatePhysics(){
 	while (accumDeltaTime > PHYSICS_TIME_STEP){
 		accumDeltaTime -= PHYSICS_TIME_STEP;
 
+		totalPhysicsTime += PHYSICS_TIME_STEP;
 
 		endLinks["root"]->update();
 		endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
+
+		ikHierarchy.update();
+		//ikHierarchy.endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
+		ikHierarchy.endLinks["leftFoot"]->reach(ikHierarchy.rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
+		ikHierarchy.endLinks["rightFoot"]->reach(ikHierarchy.rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
+		ikHierarchy.endLinks["lowerArmLeft"]->reach(ikHierarchy.rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
+		ikHierarchy.endLinks["lowerArmRight"]->reach(ikHierarchy.rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
+
 		endLinks["leftEye"]->reach(translationFromMat4(endLinks["head"]->m_base) + normalize(sphereA.position - translationFromMat4(endLinks["head"]->m_base))*endLinks["head"]->m_length, PHYSICS_TIME_STEP);
 		endLinks["rightEye"]->reach(translationFromMat4(endLinks["head"]->m_base) + normalize(sphereA.position - translationFromMat4(endLinks["head"]->m_base))*endLinks["head"]->m_length, PHYSICS_TIME_STEP);
-		endLinks["leftFoot"]->reach(vec3(42, sin(totalTime) * endLinks["leftFoot"]->parent->m_length, 0), PHYSICS_TIME_STEP);
+		endLinks["leftFoot"]->reach(vec3(42, sin(totalPhysicsTime) * endLinks["leftFoot"]->parent->m_length, 0), PHYSICS_TIME_STEP);
 		//sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
 		
 		//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
@@ -871,6 +885,7 @@ bool render()
 
 	particManager->render(P*V);
 
+
 	// TODO --------------------
 	if (dataTODO.doesIntersect){
 		glDisable(GL_DEPTH_TEST);
@@ -883,7 +898,7 @@ bool render()
 	glDisable(GL_DEPTH_TEST);
 	renderer::bind(colourPassThroughEffect);
 
-	glPointSize(6.0f);
+	//glPointSize(6.0f);
 	// Set MVP matrix uniform
 	glUniformMatrix4fv(
 		colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
@@ -895,6 +910,17 @@ bool render()
 	glVertex3f(rayTest.intersection.x, rayTest.intersection.y, rayTest.intersection.z);
 	glEnd();
 
+	/* IK COLLISION TEST TODO
+	for (int i = 0; i < (int)ikHierarchy.allLinks.size() - 1; i++){
+		Link* l = ikHierarchy.allLinks.at(i);
+		vec3 ikstart = translationFromMat4(l->m_base);
+		vec3 ikend = vec4ToVec3(l->m_base * vec4(l->m_length, 0, 0, 1));
+		glBegin(GL_LINES);
+		glVertex3f(ikstart.x, ikstart.y, ikstart.z);
+		glVertex3f(ikend.x, ikend.y, ikend.z);
+		glEnd();
+	}
+	*/
 
 	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
 	LineCollider* lineA = new LineCollider(vec3(0, 0, -1), vec3(0, 1, 0), 1.0f);
@@ -913,7 +939,8 @@ bool render()
 		SPGrid::getInstance().render();
 
 	// TODO
-	IntersectionData lineIntersectionData = lineA->intersects(lineB, vec3(0,0,0));
+	IntersectionData lineIntersectionData = IntersectionData();
+	lineA->intersects(*lineB, vec3(0, 0, 0), lineIntersectionData);
 	if (lineIntersectionData.doesIntersect){
 		mat4 rot = mat4();
 

@@ -28,14 +28,14 @@ Link::Link(vec3 &axis, float angle, vector<vec3>* inAngleLimits){
 			vec3 maxA = inAngleLimits->at(1);
 
 			angleLimits = { startOri + minA, startOri + maxA };
-			cout << vec3ToString(angleLimits.at(0)) << endl;
-			cout << vec3ToString(angleLimits.at(1)) << endl;
 			validLimits = true;
 		}
 	}
 	if (!validLimits){
 		angleLimits = { vec3(-pi<float>(), -pi<float>(), -pi<float>()), vec3(pi<float>(), pi<float>(), pi<float>()) };
 	}
+
+	ignoreCollision = false;
 
 }
 

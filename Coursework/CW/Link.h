@@ -25,6 +25,7 @@ public:
 	float m_length;
 	vec3 origin;
 
+	bool ignoreCollision;
 	bool toRender = true;
 	bool debugRender = false;
 	float priority = 1.0f;

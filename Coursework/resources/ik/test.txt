@@ -1,0 +1,505 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "angleLimits": {
+                        "minX": 0,
+                        "maxX": 0,
+                        "minY": 0,
+                        "maxY": 0,
+                        "minZ": 0,
+                        "maxZ": 0
+                      },
+                      "rotation": {
+                        "axis": [
+                          0.506732,
+                          -0.697457,
+                          0.506732
+                        ],
+                        "angle": 1.92356
+                      },
+                      "name": "LeftEye",
+                      "size": 0.25,
+                      "reach": 2
+                    },
+                    {
+                      "angleLimits": {
+                        "minX": 0,
+                        "maxX": 0,
+                        "minY": 0,
+                        "maxY": 0,
+                        "minZ": 0,
+                        "maxZ": 0
+                      },
+                      "rotation": {
+                        "axis": [
+                          0.62896,
+                          -0.456966,
+                          0.62896
+                        ],
+                        "angle": 2.28433
+                      },
+                      "name": "RightEye",
+                      "size": 0.25,
+                      "reach": 2
+                    }
+                  ],
+                  "angleLimits": {
+                    "minX": -0.785,
+                    "maxX": 0.785,
+                    "minY": -0.785,
+                    "maxY": 0.785,
+                    "minZ": -0.785,
+                    "maxZ": 0.785
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      0,
+                      1
+                    ],
+                    "angle": 0
+                  },
+                  "name": "Head",
+                  "size": 0.5,
+                  "reach": 1
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.785,
+                "maxX": 0.785,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0.785
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  0,
+                  1
+                ],
+                "angle": 0
+              },
+              "name": "Neck",
+              "size": 0.3
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "angleLimits": {
+                            "minX": -0.785,
+                            "maxX": 0.785,
+                            "minY": -0.785,
+                            "maxY": 0.785,
+                            "minZ": -0.785,
+                            "maxZ": 0.785
+                          },
+                          "rotation": {
+                            "axis": [
+                              0,
+                              0,
+                              1
+                            ],
+                            "angle": 0
+                          },
+                          "name": "leftHand",
+                          "size": 0.3,
+                          "reach": 3
+                        }
+                      ],
+                      "angleLimits": {
+                        "minX": -0.785,
+                        "maxX": 0.785,
+                        "minY": 0,
+                        "maxY": 0.785,
+                        "minZ": 0,
+                        "maxZ": 0.785
+                      },
+                      "rotation": {
+                        "axis": [
+                          0,
+                          0,
+                          1
+                        ],
+                        "angle": 0
+                      },
+                      "name": "lowerArmLeft",
+                      "size": 1,
+                      "isEndLink": true,
+                      "reach": 2
+                    }
+                  ],
+                  "angleLimits": {
+                    "minX": -0.785,
+                    "maxX": 0.785,
+                    "minY": 0,
+                    "maxY": 0.785,
+                    "minZ": -0.785,
+                    "maxZ": 0.785
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      1,
+                      0
+                    ],
+                    "angle": 0.785
+                  },
+                  "name": "upperArm",
+                  "size": 1.2
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.785,
+                "maxX": 0.785,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0.785
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "angle": 1.57
+              },
+              "name": "leftShoulder",
+              "size": 0.5
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "angleLimits": {
+                            "minX": -0.785,
+                            "maxX": 0.785,
+                            "minY": -0.785,
+                            "maxY": 0.785,
+                            "minZ": -0.785,
+                            "maxZ": 0.785
+                          },
+                          "rotation": {
+                            "axis": [
+                              0,
+                              0,
+                              1
+                            ],
+                            "angle": 0
+                          },
+                          "name": "rightHand",
+                          "size": 0.3,
+                          "reach": 3
+                        }
+                      ],
+                      "angleLimits": {
+                        "minX": -0.785,
+                        "maxX": 0.785,
+                        "minY": 0,
+                        "maxY": 0.785,
+                        "minZ": 0,
+                        "maxZ": 0.785
+                      },
+                      "rotation": {
+                        "axis": [
+                          0,
+                          0,
+                          1
+                        ],
+                        "angle": 0
+                      },
+                      "name": "lowerArmRight",
+                      "size": 1,
+                      "isEndLink": true,
+                      "reach": 2
+                    }
+                  ],
+                  "angleLimits": {
+                    "minX": -0.785,
+                    "maxX": 0.785,
+                    "minY": 0,
+                    "maxY": 0.785,
+                    "minZ": -0.785,
+                    "maxZ": 0.785
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      1,
+                      0
+                    ],
+                    "angle": -0.785
+                  },
+                  "name": "upperArm",
+                  "size": 1.2
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.785,
+                "maxX": 0.785,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0.785
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "angle": -1.57
+              },
+              "name": "rightShoulder",
+              "size": 0.5
+            }
+          ],
+          "angleLimits": {
+            "minX": -0.785,
+            "maxX": 0.785,
+            "minY": -0.785,
+            "maxY": 0.785,
+            "minZ": -0.785,
+            "maxZ": 0.785
+          },
+          "rotation": {
+            "axis": [
+              0,
+              0,
+              1
+            ],
+            "angle": 0
+          },
+          "name": "Chest",
+          "size": 1.4
+        }
+      ],
+      "angleLimits": {
+        "minX": -0.785,
+        "maxX": 0.785,
+        "minY": -0.785,
+        "maxY": 0.785,
+        "minZ": -0.785,
+        "maxZ": 0.785
+      },
+      "rotation": {
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "angle": 0
+      },
+      "name": "Waist",
+      "size": 0.8
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "angleLimits": {
+                    "minX": 0,
+                    "maxX": 0,
+                    "minY": 0,
+                    "maxY": 0,
+                    "minZ": -0.785,
+                    "maxZ": 0
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      0,
+                      1
+                    ],
+                    "angle": 1.57
+                  },
+                  "name": "leftFoot",
+                  "size": 0.4,
+                  "reach": 3
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.1,
+                "maxX": 0.1,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  0,
+                  1
+                ],
+                "angle": 0
+              },
+              "name": "lowerLeg",
+              "size": 1
+            }
+          ],
+          "angleLimits": {
+            "minX": -0.785,
+            "maxX": 0.785,
+            "minY": -0.785,
+            "maxY": 0.785,
+            "minZ": -0.785,
+            "maxZ": 0
+          },
+          "rotation": {
+            "axis": [
+              0,
+              1,
+              0
+            ],
+            "angle": 1.57
+          },
+          "name": "upperLeg",
+          "size": 1.2
+        }
+      ],
+      "angleLimits": {
+        "minX": -0.785,
+        "maxX": 0.785,
+        "minY": -0.785,
+        "maxY": 0.785,
+        "minZ": -0.785,
+        "maxZ": 0.785
+      },
+      "rotation": {
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "angle": 1.57
+      },
+      "name": "leftHip",
+      "size": 0.4
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "angleLimits": {
+                    "minX": 0,
+                    "maxX": 0,
+                    "minY": 0,
+                    "maxY": 0,
+                    "minZ": -0.785,
+                    "maxZ": 0
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      0,
+                      1
+                    ],
+                    "angle": 1.57
+                  },
+                  "name": "rightFoot",
+                  "size": 0.4,
+                  "reach": 3
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.1,
+                "maxX": 0.1,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  0,
+                  1
+                ],
+                "angle": 0
+              },
+              "name": "lowerLeg",
+              "size": 1
+            }
+          ],
+          "angleLimits": {
+            "minX": -0.785,
+            "maxX": 0.785,
+            "minY": -0.785,
+            "maxY": 0.785,
+            "minZ": -0.785,
+            "maxZ": 0
+          },
+          "rotation": {
+            "axis": [
+              0,
+              1,
+              0
+            ],
+            "angle": -1.57
+          },
+          "name": "upperLeg",
+          "size": 1.2
+        }
+      ],
+      "angleLimits": {
+        "minX": -0.785,
+        "maxX": 0.785,
+        "minY": -0.785,
+        "maxY": 0.785,
+        "minZ": -0.785,
+        "maxZ": 0.785
+      },
+      "rotation": {
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "angle": -1.57
+      },
+      "name": "rightHip",
+      "size": 0.4
+    }
+  ],
+  "angleLimits": {
+    "minX": -3.141,
+    "maxX": 3.141,
+    "minY": -3.141,
+    "maxY": 3.141,
+    "minZ": -3.141,
+    "maxZ": 3.141
+  },
+  "rotation": {
+    "axis": [
+      0,
+      0,
+      1
+    ],
+    "angle": -1.57
+  },
+  "name": "Root",
+  "size": 2.2
+}

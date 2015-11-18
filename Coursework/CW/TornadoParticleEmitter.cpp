@@ -13,11 +13,11 @@ void TornadoParticleEmitter::update(const float delta_time){
 		if (p.isAlive){
 
 			data.reset();
-			spGrid.intersects(*p.collider, p.velocity, data);
+			spGrid.intersects(*p.collider, p.collider->velocity, data);
 
 			if (data.doesIntersect){
 				p.addForce(data.direction * data.amount);
-				p.velocity -= data.direction*dot(data.direction, p.velocity);
+				p.collider->velocity -= data.direction*dot(data.direction, p.collider->velocity);
 			}
 			if (!Util::isZeroVec3(*this - p)){
 				vec3 offset = normalize(*this - p);

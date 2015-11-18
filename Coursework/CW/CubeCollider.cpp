@@ -158,14 +158,14 @@ void CubeCollider::oBBCollision(CubeCollider& other, const vector<vec3*>& norms,
 	data.reset();
 	vec3 offset = position - other.position;
 
-	if (magnitude(offset) > magnitude(getCorners()[0] - position) + magnitude(other.getCorners()[0] - other.position)) return;
+	if (magnitude(offset) > magnitude(getCorners(2.0f)[0] - position) + magnitude(other.getCorners(2.0f)[0] - other.position)) return;
 
 	vector<float> depth = {};
 	vector<vec3> axis = {};
 
 	for (int i = 0; i < norms.size(); i++){
 		if (!isZeroVec3(*norms[i])){
-			pair<bool, float> out = checkProjectedIntersection(getCorners(), other.getCorners(), *norms[i], offset);
+			pair<bool, float> out = checkProjectedIntersection(getCorners(2.0f), other.getCorners(2.0f), *norms[i], offset);
 
 			if (!out.first) return;
 			axis.push_back(*norms[i]);
@@ -227,8 +227,8 @@ void CubeCollider::rotate(vec3 axis, float degrees){
 	}
 }
 
-vector<vec3> CubeCollider::getCorners(){
-	vec3 halfDimen = dimensions*2.0f;
+vector<vec3> CubeCollider::getCorners(const float& scale){
+	vec3 halfDimen = dimensions * scale;
 	//TODO Add in the rotation code here? if(colliderType == ColliderTypes.OBBCUBE)
 	if (colliderType == ColliderTypes::CUBE){
 		return{

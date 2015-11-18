@@ -33,10 +33,11 @@ float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physic
 IntersectionData rayTest;
 
 //TODO
-//SphereCollider sphereA = SphereCollider(vec3(0, 100, 2.0), 1.0);
+//SphereCollider sphereA = SphereCollider(vec3(0, 5, 0), 1.0);
 //SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
 CubeCollider sphereB = CubeCollider(vec3(31, 5, 5), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 CubeCollider sphereA = CubeCollider(vec3(40, 10, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+PlaneCollider ground = PlaneCollider(vec3(0, 0, 0), vec3(0, 1, 0));
 IntersectionData dataTODO;
 
 //TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
@@ -63,8 +64,9 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS){
 		//TODO
-		SPGrid& grid = SPGrid::getInstance();
-		cout << grid.getPosInGrid(sphereA.position) << endl;
+		//SPGrid& grid = SPGrid::getInstance();
+		//cout << grid.getPosInGrid(sphereA.position) << endl;
+		//ikHierarchy.resolveCollisions();
 	}
 	else if (key == GLFW_KEY_H && action == GLFW_PRESS){
 		toggleDebugMenu = !toggleDebugMenu;
@@ -80,7 +82,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 		vec3 camDir = normalize(freeCam.get_target() - freeCam.get_position());
 		
 		//TODO screenPosToWorldPos
-		rayTest = sphereA.rayCast(pos, camDir);
+		//rayTest = sphereA.rayCast(pos, camDir);
 
 
 		if (toggleDebugMenu){
@@ -151,7 +153,7 @@ bool initialise()
 	Util::init();
 
 	SPGrid::getInstance().init(20,10,20, 10, vec3(0,0,0));
-	SPGrid::getInstance().setBasePos(0,-10,0);
+	SPGrid::getInstance().setBasePos(0,-6,0);
 
 	ikHierarchy = IKHierarchy("..\\resources\\ik\\test.txt");
 
@@ -204,7 +206,7 @@ bool load_content()
 	//TODO
 	particManager = new ParticleEmitterManager();
 	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 100, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 10, 15), 3.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 10, 15), 3.0f, "particles\\bouncyball3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 
@@ -414,6 +416,8 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	sceneObjects["plane"].setCollider(ground);
+	ground.staticPos = true;
 	
 	sceneObjects["sphereB"] = meshes["cube"];
 	sceneObjects["sphereB"].set_texture(texs["white"]); // Sets the texture
@@ -424,8 +428,8 @@ void initSceneObjects(){
 		50.0f);
 	sceneObjects["sphereB"].setCollider(sphereB);
 
-	sphereB.rotate(vec3(0,0,1), 45.0f);
-	sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
+	//sphereB.rotate(vec3(0,0,1), 45.0f);
+	//sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
 
 }
 
@@ -663,7 +667,12 @@ void updatePhysics(){
 		SPGrid& spGrid = SPGrid::getInstance();
 
 		dataTODO.reset();
-		spGrid.intersects(sphereA, velocity*PHYSICS_TIME_STEP, dataTODO);
+		//spGrid.intersects(sphereA, velocity*PHYSICS_TIME_STEP, dataTODO);
+
+		for (auto &e : sceneObjects)
+		{
+			e.second.update(PHYSICS_TIME_STEP);
+		}
 
 		//sphereA.intersects(sphereB, -velocity*PHYSICS_TIME_STEP, dataTODO);
 		//sphereA.translate(vec3(0.0,0.0,0.01));
@@ -698,28 +707,19 @@ bool update(float delta_time)
 
 	float velocity = 5.5f;
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
-		sphereA.translate(vec3(velocity, 0.0, 0.0)*delta_time);
+		sphereA.addForce(vec3(velocity, 0.0, 0.0));
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN))
-		sphereA.translate(vec3(-velocity, 0.0, 0.0)*delta_time);
+		sphereA.addForce(vec3(-velocity, 0.0, 0.0));
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_LEFT))
-		sphereA.translate(vec3(0.0, 0.0, velocity)*delta_time);
+		sphereA.addForce(vec3(0.0, 0.0, velocity));
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
-		sphereA.translate(vec3(0.0, 0.0, -velocity)*delta_time);
+		sphereA.addForce(vec3(0.0, 0.0, -velocity));
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
-		sphereA.translate(vec3(0.0, velocity, 0.0)*delta_time);
+		sphereA.addForce(vec3(0.0, velocity, 0.0));
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
-		sphereA.translate(vec3(0.0, -velocity, 0.0)*delta_time);
-	
-
-	// Write the fps to the console
-	//cout << int(1.0f / delta_time) << " fps          " << '\r';
-
-	for (auto &e : sceneObjects)
-	{
-		e.second.update(delta_time);
-	}
+		sphereA.addForce(vec3(0.0, -velocity, 0.0));
 
 	updateCameras(delta_time);
 	updateLighting(delta_time);
@@ -923,8 +923,8 @@ bool render()
 	*/
 
 	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
-	LineCollider* lineA = new LineCollider(vec3(0, 0, -1), vec3(0, 1, 0), 1.0f);
-	LineCollider* lineB = new LineCollider(vec3(0, 0.5f, 1), vec3(0, 0.5f, -1), 1.0f);
+	LineCollider* lineA = new LineCollider(vec3(0, 0, 0), vec3(1, 0, 0), 1.0f);
+	LineCollider* lineB = new LineCollider(vec3(0, 0, 0), vec3(0, 1, 0), 1.0f);
 
 	glBegin(GL_LINES);
 	glVertex3f(lineA->position.x, lineA->position.y, lineA->position.z);
@@ -939,6 +939,7 @@ bool render()
 		SPGrid::getInstance().render();
 
 	// TODO
+	
 	IntersectionData lineIntersectionData = IntersectionData();
 	lineA->intersects(*lineB, vec3(0, 0, 0), lineIntersectionData);
 	if (lineIntersectionData.doesIntersect){

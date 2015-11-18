@@ -17,15 +17,11 @@ using namespace glm;
 
 class Particle : public vec3
 {
-private:
-	float invMass;
-
 public:
 
 	SphereCollider* collider = NULL;
 	float lifeTime;
 	bool isAlive;
-	vec3 velocity, force; // Velocity and Force
 
 	Particle(const vec3 v, const float mass);
 	Particle(const float x, const float y, const  float z, const float mass);

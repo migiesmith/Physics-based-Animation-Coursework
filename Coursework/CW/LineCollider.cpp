@@ -48,6 +48,9 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 				data.doesIntersect = true;
 
 			data.direction = aToB;
+
+
+
 		}
 		
 

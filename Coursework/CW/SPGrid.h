@@ -45,6 +45,7 @@ public:
 
 	void update(const map<string, SceneObject>& sceneObjects);
 
+	vec3 getXYZInGrid(const vec3& v);
 	int getPosInGrid(const vec3& v);
 	vec3 xyzCellPosition(const int& pos);
 

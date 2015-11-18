@@ -10,7 +10,6 @@ IKHierarchy::IKHierarchy(char* filepath)
 	config_doc >> root;
 
 	parseIKTree(root, NULL);
-
 	
 	rootBone->update();
 
@@ -103,21 +102,23 @@ void IKHierarchy::resolveCollisions(){
 				continue;
 			}
 
-			lCol1.position = translationFromMat4(l1->m_base);
-			lCol2.position = translationFromMat4(l2->m_base);
+			vec3 dir1 = normalize(translationFromMat4(l1->m_base) - vec4ToVec3(l1->m_base * vec4(l1->m_length, 0, 0, 1))) * l1->m_length;
+			vec3 dir2 = normalize(translationFromMat4(l2->m_base) - vec4ToVec3(l2->m_base * vec4(l2->m_length, 0, 0, 1))) * l2->m_length;
+			lCol1.position = translationFromMat4(l1->m_base) - dir1*0.25f;
+			lCol2.position = translationFromMat4(l2->m_base) - dir2*0.25f;
 
-			if (magnitude(lCol1.position - lCol2.position) < 1.0f)
+			if (equals(lCol1.position, lCol2.position))
 				continue;
 
-			lCol1.endPosition = vec4ToVec3(l1->m_base * vec4(l1->m_length, 0, 0, 1));
-			lCol2.endPosition = vec4ToVec3(l2->m_base * vec4(l2->m_length, 0, 0, 1));
+			lCol1.endPosition = translationFromMat4(l1->m_base) - dir1*0.75f;
+			lCol2.endPosition = translationFromMat4(l2->m_base) - dir2*0.75f;
 
 			lCol1.intersects(lCol2, vec3(0,0,0), data);
 			
 			//TODO fix line collider
 
 			if (data.doesIntersect){
-				
+				int temp = 0;
 			}
 			
 		}

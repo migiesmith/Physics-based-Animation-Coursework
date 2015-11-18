@@ -21,12 +21,16 @@ void SPGrid::setBasePos(const int& x, const int& y, const int& z){
 
 int SPGrid::getPosInGrid(const vec3& v){
 	// Math.floor( (position - gridMinimum) / gridCellSize )
+	vec3 pos = getXYZInGrid(v);
+	//grid[col][cell] = ... // bucket to put entity into
+	return cellIndex(pos.x, pos.y, pos.z);
+}
+
+vec3 SPGrid::getXYZInGrid(const vec3& v){
 	int row = floor((v.x - _offset.x) / _cellSize);
 	int col = floor((v.y - _offset.y) / _cellSize);
 	int cell = floor((v.z - _offset.z) / _cellSize);
-
-	//grid[col][cell] = ... // bucket to put entity into
-	return cellIndex(row, col, cell);
+	return vec3(row, col, cell);
 }
 
 vec3 SPGrid::xyzCellPosition(const int& pos){
@@ -42,6 +46,7 @@ void SPGrid::intersects(Collider& inCollider, const vec3& velocity, Intersection
 		_cells[posInGrid].intersects(inCollider, velocity, data);
 }
 
+
 void SPGrid::update(const map<string, SceneObject>& sceneObjects){
 	for (int i = 0; i < _WIDTH * _HEIGHT * _DEPTH; i++){
 		_cells[i].clear();
@@ -56,38 +61,25 @@ void SPGrid::update(const map<string, SceneObject>& sceneObjects){
 			// TODO fix the check to see if an object is within multiple partitions
 			if (soCollider->getType() == ColliderTypes::OBBCUBE || soCollider->getType() == ColliderTypes::CUBE){
 				CubeCollider* cubeCollider = (CubeCollider*)soCollider;
-				int newPos = getPosInGrid(cubeCollider->getCorners()[0]);
-				int newPos2 = getPosInGrid(cubeCollider->getCorners()[4]);
 				
-				vec3 start = xyzCellPosition(newPos2);
-				vec3 end = xyzCellPosition(newPos);
-				if (start.x > end.x){
-					int t = start.x;
-					start.x = end.x;
-					end.x = t;
+				/*
+				vector<vec3>& corners = cubeCollider->getCorners();
+				
+				vec3 topRight = normalize(vec3(1, 1, 1));
+				vec3 max;
+				vec3 min;
+				float maxVal = numeric_limits<float>().min();
+				float minVal = numeric_limits<float>().max();
+				for (vec3& corner : corners){
+					_cells[getPosInGrid(corner)].addCollider(sO.getCollider());
 				}
-				if (start.y > end.y){
-					int t = start.y;
-					start.y = end.y;
-					end.y = t;
-				}
-				if (start.z > end.z){
-					int t = start.z;
-					start.z = end.z;
-					end.z = t;
-				}
-				//cout << endl;
-				if (posInGrid != newPos || posInGrid != newPos2){
-					for (int x = start.x; x <= end.x; x++){
-						for (int y = start.y; y <= end.y; y++){
-							for (int z = start.z; z <= end.z; z++){
-								int index = cellIndex(x,y,z);
-								if (index != -1){
-									//cout << index << endl;
-									_cells[index].addCollider(sO.getCollider());
-								}
-							}
-						}
+				*/
+
+			}
+			else if (soCollider->getType() == ColliderTypes::PLANE){
+				for (int x = 0; x < _WIDTH; x++){
+					for (int z = 0; z < _DEPTH; z++){
+						_cells[cellIndex(x, 0, z)].addCollider(sO.getCollider());
 					}
 				}
 			}

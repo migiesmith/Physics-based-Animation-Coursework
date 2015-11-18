@@ -7,7 +7,7 @@ ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const v
 	this->lifeTime = lifeTime;
 	this->particleCount = particleCount;
 	for (int i = 0; i < particleCount; i++){
-		Particle& p = Particle(v, 1.0f);
+		Particle& p = Particle(v, 0.04f);
 		p.isAlive = false;
 		particles.push_back(p);
 	}
@@ -32,13 +32,9 @@ void ParticleEmitter::update(const float delta_time){
 	for (Particle& p : particles){
 		if (p.isAlive){
 			data.reset();
-			spGrid.intersects(*p.collider, p.velocity, data);
-			
-			if (data.doesIntersect){
-				p.addForce(data.direction * data.amount);
-				p.velocity -= data.direction*dot(data.direction, p.velocity);
-			}
 			p.update(delta_time);
+			spGrid.intersects(*p.collider, p.collider->velocity, data);
+			
 		}else if(emitTimer <= 0.0f){
 			awakenParticle(p);
 		}

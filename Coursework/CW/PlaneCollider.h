@@ -26,8 +26,8 @@ public:
 		this->normal = normal;
 	}
 
-
-	IntersectionData intersects(Collider* other, const vec3& velocity);
+	void intersects(Collider& other, const vec3& velocity, IntersectionData& data);
+	void cubeIntersection(CubeCollider& other, const vec3& velocity, IntersectionData& data);
 
 	~PlaneCollider();
 };

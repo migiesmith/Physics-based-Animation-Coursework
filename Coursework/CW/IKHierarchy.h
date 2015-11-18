@@ -15,11 +15,10 @@ class IKHierarchy
 private:
 
 	bool ready = false;
-	vector<Link*> allLinks;
-	void resolveCollisions();
 
 public:
 
+	vector<Link*> allLinks;
 	Link* rootBone;
 
 	map<string, Link*> endLinks;
@@ -31,7 +30,8 @@ public:
 
 	Link* parseBone(Json::Value jsonBone);
 
-	void update(){ rootBone->update(); resolveCollisions(); }
+	void update(){ rootBone->update(); }//resolveCollisions(); }
+	void resolveCollisions();
 
 	void render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
 		if (rootBone &&  ready)

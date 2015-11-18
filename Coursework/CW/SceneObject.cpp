@@ -6,6 +6,7 @@ Constructor/Destructor of the SceneObject
 
 */
 #include "SceneObject.h"
+#include "SPGrid.h"
 
 
 SceneObject::SceneObject()
@@ -15,8 +16,13 @@ SceneObject::SceneObject()
 }
 
 void SceneObject::update(float delta_time){
-	if (_collider)
+	if (_collider){
+		_collider->update(delta_time);
+		IntersectionData data = IntersectionData();
+		SPGrid::getInstance().intersects(*_collider, velocity*delta_time, data);
+
 		get_transform().position = _collider->position;
+	}
 }
 
 void SceneObject::intersects(Collider& c, const vec3& velocity, IntersectionData& data){

@@ -29,9 +29,15 @@ enum class ColliderTypes :short{
 class Collider
 {
 private:
+
 	bool _solid = true;
 
+
 public:
+	bool staticPos = false;
+	float invMass;
+
+	vec3 velocity, force; // Velocity and Force
 
 	vec3 position;
 	ColliderTypes colliderType;
@@ -41,6 +47,11 @@ public:
 	void setPosition(vec3 position);
 	void translate(vec3 translation);
 	virtual void intersects(Collider& other, const vec3& velocity, IntersectionData& data){ cout << "ERROR: Collider intersect miscalled" << endl; }
+
+	void addForce(const vec3& f);
+	void update(const float delta_time);
+	void setMass(const float m);
+
 	ColliderTypes getType(){ return colliderType; }
 	~Collider();
 };

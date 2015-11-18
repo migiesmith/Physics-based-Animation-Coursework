@@ -8,19 +8,19 @@ TODO
 
 #include "PlaneCollider.h"
 
-IntersectionData PlaneCollider::intersects(Collider* other, const vec3& velocity){
-	IntersectionData data = IntersectionData();
-
-	switch (other->colliderType){
+void PlaneCollider::intersects(Collider& other, const vec3& velocity, IntersectionData& data){
+	data.reset();
+	
+	switch (other.colliderType){
 	case ColliderTypes::SPHERE:
 		{
-			SphereCollider* otherSphere = (SphereCollider*)other;
+			SphereCollider& otherSphere = (SphereCollider&)other;
 
 			// Calculate the distance the plane is from the origin
 			float d0 = dot(normal, position);
 
 			// Calculate the distance between the plane and the sphere
-			float d = dot(normal, (otherSphere->position - position)) - (d0 + otherSphere->radius);
+			float d = dot(normal, (otherSphere.position - position)) - (d0 + otherSphere.radius);
 
 			// Set the intersection amount to d
 			data.amount = d;
@@ -28,13 +28,52 @@ IntersectionData PlaneCollider::intersects(Collider* other, const vec3& velocity
 			data.doesIntersect = data.amount <= 0;
 
 			// Set the point of intersection to the closest point between the plane and the sphere
-			data.intersection = otherSphere->position - normal*(data.amount + otherSphere->radius);
+			data.intersection = otherSphere.position - normal*(data.amount + otherSphere.radius);
+
+			data.direction = normal;
 
 			break;
 		}
+		case ColliderTypes::CUBE:
+		{
+			cubeIntersection((CubeCollider&)other, velocity, data);
+			break;
+		}
+		case ColliderTypes::OBBCUBE:
+		{
+			cubeIntersection((CubeCollider&)other, velocity, data);
+			break;
+		}
+	}
+}
+
+void PlaneCollider::cubeIntersection(CubeCollider& other, const vec3& velocity, IntersectionData& data){
+
+
+	// Calculate the distance the plane is from the origin
+	float d0 = dot(normal, position);
+
+	vector<vec3>& corners = other.getCorners(1.0f);
+
+	float minDist = numeric_limits<float>().max();
+	for (vec3& corner : corners){
+		// Calculate the distance between the plane and the sphere
+		float d = dot(normal, (corner - position)) - d0;
+
+		if (d <= minDist)
+			minDist = d;
 	}
 
-	return data;
+	// Set the intersection amount to d
+	data.amount = minDist;
+	// If the intersection amount is less than or equal to 0 then there is an intersection
+	data.doesIntersect = data.amount <= 0;
+
+	// Set the point of intersection to the closest point between the plane and the sphere
+	data.intersection = other.position - normal*data.amount;
+
+	data.direction = normal;
+
 }
 
 PlaneCollider::~PlaneCollider()

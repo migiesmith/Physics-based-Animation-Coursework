@@ -42,6 +42,7 @@ vec3 SPGrid::xyzCellPosition(const int& pos){
 
 void SPGrid::intersects(Collider& inCollider, const vec3& velocity, IntersectionData& data){
 	int posInGrid = getPosInGrid(inCollider.position);
+
 	if (posInGrid != -1)
 		_cells[posInGrid].intersects(inCollider, velocity, data);
 }
@@ -62,18 +63,14 @@ void SPGrid::update(const map<string, SceneObject>& sceneObjects){
 			if (soCollider->getType() == ColliderTypes::OBBCUBE || soCollider->getType() == ColliderTypes::CUBE){
 				CubeCollider* cubeCollider = (CubeCollider*)soCollider;
 				
-				/*
-				vector<vec3>& corners = cubeCollider->getCorners();
 				
-				vec3 topRight = normalize(vec3(1, 1, 1));
-				vec3 max;
-				vec3 min;
-				float maxVal = numeric_limits<float>().min();
-				float minVal = numeric_limits<float>().max();
+				vector<vec3>& corners = cubeCollider->getCorners(1.0f);
 				for (vec3& corner : corners){
-					_cells[getPosInGrid(corner)].addCollider(sO.getCollider());
+					int cornerPos = getPosInGrid(corner);
+					if (cornerPos != -1)
+						_cells[cornerPos].addCollider(sO.getCollider());
 				}
-				*/
+				
 
 			}
 			else if (soCollider->getType() == ColliderTypes::PLANE){
@@ -92,13 +89,24 @@ void SPGrid::update(const map<string, SceneObject>& sceneObjects){
 }
 
 // Render the grid, only for debugging
-void SPGrid::render(){
+void SPGrid::render(effect& shader){
 	for (int x = 0; x < _WIDTH; x++){
 
 		for (int y = 0; y < _HEIGHT; y++){
 
 			for (int z = 0; z < _DEPTH; z++){
-				if (_cells[cellIndex(x, y, z)].beenTested > 0){
+				if (_cells[cellIndex(x, y, z)].testCount > 0 || _cells[cellIndex(x, y, z)].beenChecked){
+					int col = _cells[cellIndex(x, y, z)].testCount / 5.0f;
+					if (col > 5){
+						glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(1,0,0,1)));
+					}
+					else if (col > 0){
+						glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(0,1,0, 1)));
+					}
+					else{
+						glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(0,0,1, 1)));
+					}
+
 					vec3 p = vec3(_offset.x + x*_cellSize, _offset.y + y*_cellSize, _offset.z + z*_cellSize);
 					glBegin(GL_LINE_LOOP);
 					glVertex3f(p.x, p.y, p.z);

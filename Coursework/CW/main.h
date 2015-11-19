@@ -37,22 +37,10 @@ float PHYSICS_TIME_STEP = 0.01f;
 // Debug menu toggle
 bool toggleDebugMenu = false;
 
-/*
-	Post Processing Effects toggles
-*/
-bool motionBlurEnabled = true;
-bool glowEnabled = true;
-bool ssaoEnabled = true;
-bool greyscaleEnabled = false;
-bool vignetteEnabled = true;
-bool lensFlareEnabled = true;
 
 static effect mainEffect; // The main effect used
 static effect passThroughEffect; // The effect used for the skybox
 static effect colourPassThroughEffect; // The effect used for the skybox
-static effect depthEffect; // The effect used for the ssao post process
-
-FrameBuffer shadowFbo;
 
 static mesh screenQuad; // Quad used for post processing
 static mesh cornerCamQuad; // Quad used for rendering a texture to the corner of the screen
@@ -80,7 +68,6 @@ short targetCamDirection = -1; // The direction that the targetCam rotates
 
 TextRenderer* textRen;
 GraphRenderer* graphRen;
-string renderText;
 
 texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);
 texture loadTexture(string textureName);

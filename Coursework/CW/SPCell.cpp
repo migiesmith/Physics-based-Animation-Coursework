@@ -10,21 +10,27 @@ void SPCell::intersects(Collider& inCollider, const vec3& velocity, Intersection
 		if (c != &inCollider){
 			data.reset();
 			c->intersects(inCollider, velocity, data);
+
+			vec3 correctiveVelocity = data.direction * dot(data.direction, (inCollider.velocity - c->velocity));
+
 			if (data.doesIntersect){
-
-				if (inCollider.getType() == ColliderTypes::OBBCUBE && !(abs(dot(data.direction, inCollider.velocity)) > 0.0f))
-					cout << Util::vec3ToString(data.direction) << endl;
-
-				inCollider.velocity -= (data.direction * dot(data.direction, inCollider.velocity))*1.5f;
-				if (!c->staticPos)
-					c->velocity -= (data.direction * (c->invMass / inCollider.invMass) * dot(data.direction, inCollider.velocity))*1.5f;
-
-				inCollider.addForce(inCollider.force * inCollider.invMass * dot(data.direction, inCollider.velocity));
+				if (c->staticPos){
+					inCollider.velocity -= (correctiveVelocity);
+				}
+				else{
+					inCollider.velocity -= (correctiveVelocity * (inCollider.invMass / c->invMass));
+					c->velocity -= -(correctiveVelocity* (c->invMass / inCollider.invMass));
+				}
+				
+				inCollider.addForce(data.direction * dot(data.direction, inCollider.velocity));
 				inCollider.addForce(vec3(0, 9.8, 0) * dot(vec3(0, 1, 0), data.direction)*2.0f);
+								
 			}
+
+			testCount++;
 		}
 	}
-	beenTested = true;
+	beenChecked = true;
 }
 
 SPCell::~SPCell()

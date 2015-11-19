@@ -26,7 +26,8 @@ void Particle::awaken(const vec3& v, const vec3& force, const float lifeTime){
 void Particle::update(const float delta_time){
 	if (!isAlive) return;
 
-	addForce(vec3(0, -9.8, 0));
+	if(!collider->ignoreGravity)
+		addForce(vec3(0, -9.8, 0));
 
 	vec3 acceleration = collider->force * collider->invMass;
 	collider->velocity += acceleration * delta_time;

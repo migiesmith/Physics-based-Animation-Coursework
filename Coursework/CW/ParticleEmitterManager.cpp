@@ -24,10 +24,6 @@ int ParticleEmitterManager::getParticleCount(){
 	return sum;
 }
 
-void ParticleEmitterManager::compute(){
-
-}
-
 void ParticleEmitterManager::render(const mat4& PV){
 	for (pair<string, ParticleEmitter*> e : emitters){
 		e.second->render(PV);

@@ -7,7 +7,7 @@ ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const v
 	this->lifeTime = lifeTime;
 	this->particleCount = particleCount;
 	for (int i = 0; i < particleCount; i++){
-		Particle& p = Particle(v, 0.04f);
+		Particle& p = Particle(v, 0.1f);
 		p.isAlive = false;
 		particles.push_back(p);
 	}

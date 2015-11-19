@@ -25,7 +25,7 @@ public:
 
 	vec3 dimensions;
 
-	mat4 rotation = mat4();
+	mat4 rotation = mat4(1.0f);
 
 	vector<vec3> normals = 
 	vector<vec3>{
@@ -40,7 +40,7 @@ public:
 	void oBBCollision(CubeCollider& other, const vector<vec3*>& norms, IntersectionData& data);
 	pair<bool, float> checkProjectedIntersection(vector<vec3>& corners0, vector<vec3>& corners1, const vec3& axis, const vec3& offset);
 	vector<vec3> getCorners(const float& scale);
-	void rotate(vec3 axis, float degrees);
+	void setRotation(vec3 axis, float degrees);
 	float sqdDistPointAABB(vec3 p, CubeCollider aabb);
 	float sqdValue(float pVal, float bmin, float bmax);
 

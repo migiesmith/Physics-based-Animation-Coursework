@@ -25,6 +25,7 @@ private:
 
 	// The cells within the grid
 	SPCell* _cells;
+	vector<Collider*> checked;
 
 	int cellIndex(const int& x, const int& y, const int& z);
 	int incremenetedCellIndex(const int& currentIndex, const int& x, const int& y, const int& z);
@@ -50,7 +51,7 @@ public:
 	vec3 xyzCellPosition(const int& pos);
 
 	
-	void render();
+	void render(effect& shader);
 
 
 	SPGrid(SPGrid const&) = delete;

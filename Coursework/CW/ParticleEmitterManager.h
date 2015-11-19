@@ -19,9 +19,7 @@ public:
 	void remove(const string &emitterName){ emitters.erase(emitterName); }
 
 	int getParticleCount();
-
-	void compute();
-
+	
 	~ParticleEmitterManager();
 };
 

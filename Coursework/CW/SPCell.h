@@ -13,7 +13,8 @@ private:
 
 public:
 	
-	bool beenTested = false;
+	int testCount = 0;
+	bool beenChecked = false;
 	
 	SPCell();
 	
@@ -22,8 +23,9 @@ public:
 	}
 
 	void intersects(Collider& inCollider, const vec3& velocity, IntersectionData& data);
+
 	bool contains(Collider* c){ return std::find(_colliders.begin(), _colliders.end(), c) != _colliders.end(); }
-	void clear(){ _colliders.clear(); beenTested = false; }
+	void clear(){ _colliders.clear(); testCount = 0; beenChecked = false; }
 	int colliderCount(){ return _colliders.size(); }
 
 	~SPCell();

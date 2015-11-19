@@ -22,7 +22,7 @@ mesh skyBox[3]; // The meshs for the skybox
 
 bool isWireframe = false; // Whether or not to render in wireframe
 
-vec3 ambientLightPosition = vec3(0, 1000, 0); // Set the position of the ambient light
+vec3 ambientLightPosition = vec3(300, 600, 0); // Set the position of the ambient light
 
 double cursor_x = 0.0; // Stores the position X of the cursor
 double cursor_y = 0.0; // Stores the position Y of the cursor
@@ -30,23 +30,11 @@ double cursor_y = 0.0; // Stores the position Y of the cursor
 float totalTime = 0.0f; // Stores how much time has passed (used for time based events like model bobbing and light movement)
 float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physics engine (used for time based events such as ik walking)
 
-IntersectionData rayTest;
-
-//TODO
-//SphereCollider sphereA = SphereCollider(vec3(-12, 10, 0), 1.0);
-//SphereCollider sphereB = SphereCollider(vec3(-10, 10, 0), 1.0);
-CubeCollider sphereB = CubeCollider(vec3(-10, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-CubeCollider sphereA = CubeCollider(vec3(-12, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-PlaneCollider ground = PlaneCollider(vec3(0, 0, 0), vec3(0, 1, 0));
-IntersectionData dataTODO;
 
 //TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
 ParticleEmitterManager* particManager;
 
-// IK constants
-map<string, Link*> endLinks;
-IKHierarchy ikHierarchy;
-//TODO
+map<string, IKHierarchy> ikHierarchies;
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
@@ -65,7 +53,7 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS){
 		//TODO
 		//SPGrid& grid = SPGrid::getInstance();
-		//cout << grid.getPosInGrid(sphereA.position) << endl;
+		//cout << grid.getPosInGrid(cubeA.position) << endl;
 		//ikHierarchy.resolveCollisions();
 	}
 	else if (key == GLFW_KEY_H && action == GLFW_PRESS){
@@ -81,9 +69,6 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 		vec3 pos = freeCam.get_position();
 		vec3 camDir = normalize(freeCam.get_target() - freeCam.get_position());
 		
-		//TODO screenPosToWorldPos
-		//rayTest = sphereA.rayCast(pos, camDir);
-
 
 		if (toggleDebugMenu){
 			// Get the current mouse pos
@@ -135,8 +120,6 @@ bool initialise()
 	// Get the cursor's initial position
 	glfwGetCursorPos(renderer::get_window(), &cursor_x, &cursor_y);
 
-	// Set up the required Frame buffers
-	shadowFbo = FrameBuffer(renderer::get_screen_width(), renderer::get_screen_height());
 	
 	// Set the perspective render quality
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -152,11 +135,9 @@ bool initialise()
 
 	Util::init();
 
-	SPGrid::getInstance().init(20,10,20, 10, vec3(0,0,0));
-	SPGrid::getInstance().setBasePos(0,-6,0);
-
-	ikHierarchy = IKHierarchy("..\\resources\\ik\\test.txt");
-
+	SPGrid::getInstance().init(20, 10, 20, 10, vec3(0, 0, 0));
+	SPGrid::getInstance().setBasePos(0, -6, 0);
+	
 	return true;
 }
 
@@ -179,7 +160,7 @@ bool load_content()
 	*/
 	meshes["sphere"] = Util::loadModel("primitives\\sphere.obj");
 	meshes["cube"] = Util::loadModel("primitives\\cube.obj");
-	meshes["plane"] = Util::loadModel("primitives\\plane.obj");
+	meshes["ground"] = Util::loadModel("primitives\\plane.obj");
 
 	skyBox[0] = Util::loadModel("skybox.obj");
 	skyBox[1] = skyBox[0];
@@ -194,7 +175,7 @@ bool load_content()
 	texs["skybox1"] = Util::loadTexture("skybox\\skybox_clouds0.png");
 	texs["skybox2"] = Util::loadTexture("skybox\\skybox_clouds1.png");
 
-	texs["solidRed"] = Util::loadTexture("solidRed.jpg");
+	texs["red"] = Util::loadTexture("solidRed.jpg");
 	texs["white"] = Util::loadTexture("white.jpg");
 	texs["tiles"] = Util::loadTexture("whiteTiles.jpg");
 	texs["greenTiles"] = Util::loadTexture("greenTiles.jpg");
@@ -202,17 +183,22 @@ bool load_content()
 	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
 	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
 
+	// Set up IK
+	ikHierarchies["walkingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
+	//ikHierarchies["reachingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
+	ikHierarchies["reachTester"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
+	ikHierarchies["reachTester"].rootBone->origin = vec3(20, 0, 20);
 
-	//TODO
+	// Set up the particle manager
 	particManager = new ParticleEmitterManager();
 	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 1000, vec3(0, 80, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 0, 15), 3.0f, "particles\\bouncyball3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 300, vec3(15, 0, 15), 3.0f, "particles\\bouncyball3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 
 	textRen = new TextRenderer("Quikhand\\font", &passThroughEffect);
 	textRen->setFontSize(10.0f);
-	renderText = "";
+
 	graphRen = new GraphRenderer(textRen, &colourPassThroughEffect, 200.0f, 100.0f);
 	graphRen->setText("fps", "time");
 	graphRen->setLimit(80);
@@ -245,17 +231,13 @@ void initShaders(){
 
 	passThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
 	passThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.frag", GL_FRAGMENT_SHADER);
-
-	depthEffect.add_shader("..\\resources\\shaders\\depth_shader\\depth.vert", GL_VERTEX_SHADER);
-	depthEffect.add_shader("..\\resources\\shaders\\depth_shader\\depth.frag", GL_FRAGMENT_SHADER);
-	
+		
 	colourPassThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\colour_passthrough.vert", GL_VERTEX_SHADER);
 	colourPassThroughEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\colour_passthrough.frag", GL_FRAGMENT_SHADER);
 
 	// Build effect
 	mainEffect.build();
 	passThroughEffect.build();
-	depthEffect.build();
 	colourPassThroughEffect.build();
 
 }
@@ -333,103 +315,73 @@ void initSceneObjects(){
 
 	float scale = 1.0f;
 
-	// Create a bipedal hierarchy
-	endLinks["root"] = new Link(vec3(0, 0, 1), -half_pi<float>(), NULL, 2.2f*scale);
-	endLinks["root"]->origin = vec3(40, 0, 0);
-	endLinks["root"]->toRender = false;
-
-	endLinks["root"]->addChild("waist", new Link(vec3(0, 0, 1), 0.0f, NULL, 0.8f*scale));
-	endLinks["root"]->children["waist"]->addChild("chest", new Link(vec3(0, 0, 1), 0.0f, NULL, 1.4f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->addChild("neck", new Link(vec3(0, 0, 1), 0.0f, new vector <vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.3f*scale));
-
-	// Head and Neck
-	endLinks["head"] = new Link(vec3(0, 0, 1), 0.0f, new vector <vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -half_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), half_pi<float>()) }, 0.5f*scale);
-	endLinks["head"]->setParent("head", endLinks["root"]->children["waist"]->children["chest"]->children["neck"]);
-	
-	quat lEyeRot = angleAxis(half_pi<float>()*0.8f, vec3(0, 0, 1)) * angleAxis(-half_pi<float>(), vec3(0, 1, 0));
-	quat rEyeRot = angleAxis(half_pi<float>()*1.2f, vec3(0, 0, 1)) * angleAxis(-half_pi<float>(), vec3(0, 1, 0));
-	vec3 axis;
-	float angle = ToAxisAngle(lEyeRot, axis);
-
-	endLinks["leftEye"] = new Link(axis, angle, new vector < vec3 >{ vec3(0, 0, 0), vec3(0, 0, 0) }, 0.25f*scale);
-	endLinks["head"]->addChild("leftEye", endLinks["leftEye"]);
-
-	angle = ToAxisAngle(rEyeRot, axis);
-	endLinks["rightEye"] = new Link(axis, angle, new vector < vec3 >{ vec3(0, 0, 0), vec3(0, 0, 0) }, 0.25f*scale);
-	endLinks["head"]->addChild("rightEye", endLinks["rightEye"]);
-
-	// Left Arm
-	endLinks["root"]->children["waist"]->children["chest"]->addChild("leftShoulder", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), new vector<vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.5f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->addChild("upperArm", new Link(normalize(vec3(0, 1, 0)), quarter_pi<float>(), NULL, 1.2f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->children["upperArm"]->addChild("lowerArm", new Link(normalize(vec3(0, 1, 0)), quarter_pi<float>(), NULL, 1.0f*scale));
-	endLinks["leftHand"] = new Link(vec3(0, 0, 1), 0.0f, NULL, 0.3f*scale);
-	endLinks["root"]->children["waist"]->children["chest"]->children["leftShoulder"]->children["upperArm"]->children["lowerArm"]->addChild("hand", endLinks["leftHand"]);
-
-	// Right Arm
-	endLinks["root"]->children["waist"]->children["chest"]->addChild("rightShoulder", new Link(normalize(vec3(0, 1, 0)), -half_pi<float>(), new vector<vec3>{ vec3(-quarter_pi<float>(), -quarter_pi<float>(), -quarter_pi<float>()), vec3(quarter_pi<float>(), quarter_pi<float>(), quarter_pi<float>()) }, 0.5f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->addChild("upperArm", new Link(normalize(vec3(0, 1, 0)), -quarter_pi<float>(), NULL, 1.2f*scale));
-	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->addChild("lowerArm", new Link(normalize(vec3(0, 1, 0)), -quarter_pi<float>(), NULL, 1.0f*scale));
-	endLinks["rightHand"] = new Link(vec3(0, 0, 1), 0.0f, NULL, 0.3f*scale);
-	endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->children["upperArm"]->children["lowerArm"]->addChild("hand", endLinks["rightHand"]);
-
-	// Left Leg
-	endLinks["root"]->addChild("leftHip", new Link(vec3(0, 1, 0), half_pi<float>(), NULL, 0.4f*scale));
-	endLinks["root"]->children["leftHip"]->addChild("upperLeg", new Link(normalize(vec3(0, 1, 0)), half_pi<float>(), NULL, 1.2f*scale));
-	endLinks["root"]->children["leftHip"]->children["upperLeg"]->addChild("lowerLeg", new Link(normalize(vec3(0, 1, 0)), 0.0f, NULL, 1.0f*scale));
-	endLinks["leftFoot"] = new Link(vec3(0, 0, 1), half_pi<float>(), NULL, 0.4f*scale);
-	endLinks["root"]->children["leftHip"]->children["upperLeg"]->children["lowerLeg"]->addChild("foot", endLinks["leftFoot"]);
-
-	// Right Leg
-	endLinks["root"]->addChild("rightHip", new Link(vec3(0, 1, 0), -half_pi<float>(), NULL, 0.4f*scale));
-	endLinks["root"]->children["rightHip"]->addChild("upperLeg", new Link(normalize(vec3(0, 1, 0)), -half_pi<float>(), NULL, 1.2f*scale));
-	endLinks["root"]->children["rightHip"]->children["upperLeg"]->addChild("lowerLeg", new Link(normalize(vec3(0, 1, 0)), 0.0f, NULL, 1.0f*scale));
-	endLinks["rightFoot"] = new Link(vec3(0, 0, 1), half_pi<float>(), NULL, 0.4f*scale);
-	endLinks["root"]->children["rightHip"]->children["upperLeg"]->children["lowerLeg"]->addChild("foot", endLinks["rightFoot"]);
-
-	// IK Reach Limits
-	endLinks["head"]->linkReach = 1;
-	endLinks["leftEye"]->linkReach = 2;
-	endLinks["rightEye"]->linkReach = 2;
-	endLinks["leftFoot"]->linkReach = 3;
-	endLinks["rightFoot"]->linkReach = 3;
-	endLinks["leftHand"]->linkReach = 3;
-	endLinks["rightHand"]->linkReach = 3;
-
-	
 	// ***************
 	// Set up SceneObjects
 	// ***************
 	
-	sceneObjects["sphereA"] = meshes["cube"];
-	sceneObjects["sphereA"].set_texture(texs["white"]); // Sets the texture
-	//sceneObjects["sphereA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+	sceneObjects["cubeA"] = meshes["cube"];
+	sceneObjects["cubeA"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["cubeA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["cubeA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["sphereA"].setCollider(sphereA);
+	sceneObjects["cubeA"].setCollider(new CubeCollider(vec3(-19, 15, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
-	sceneObjects["plane"] = meshes["plane"];
-	sceneObjects["plane"].set_texture(texs["greenTiles"]); // Sets the texture
-	//sceneObjects["plane"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-	sceneObjects["plane"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+
+
+	sceneObjects["ground"] = meshes["ground"];
+	sceneObjects["ground"].set_texture(texs["greenTiles"]); // Sets the texture
+	//sceneObjects["ground"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["ground"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["plane"].setCollider(ground);
-	ground.staticPos = true;
+	sceneObjects["ground"].setCollider(new PlaneCollider(vec3(0, 0, 0), vec3(0, 1, 0)));
+	sceneObjects["ground"].getCollider()->staticPos = true;
+
+	//SphereCollider cubeA = SphereCollider(vec3(-12, 10, 0), 1.0);
+	//SphereCollider cubeB = SphereCollider(vec3(-10, 10, 0), 1.0);
 	
-	sceneObjects["sphereB"] = meshes["cube"];
-	sceneObjects["sphereB"].set_texture(texs["white"]); // Sets the texture
-	//sceneObjects["sphereB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-	sceneObjects["sphereB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+	sceneObjects["cubeB"] = meshes["cube"];
+	sceneObjects["cubeB"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["cubeB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["sphereB"].setCollider(sphereB);
+	sceneObjects["cubeB"].setCollider(new CubeCollider(vec3(-21.5f, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
-	//sphereB.rotate(vec3(0,0,1), 45.0f);
-	//sceneObjects["sphereB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
+
+	sceneObjects["cubeC"] = meshes["cube"];
+	sceneObjects["cubeC"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["cubeC"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+		vec4(0.7, 0.7, 0.7, 1),
+		vec4(1, 1, 1, 1),
+		50.0f);
+	sceneObjects["cubeC"].setCollider(new CubeCollider(vec3(40, 20, 20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
+
+	sceneObjects["cubeD"] = meshes["cube"];
+	sceneObjects["cubeD"].set_texture(texs["white"]); // Sets the texture
+	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["cubeD"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+		vec4(0.7, 0.7, 0.7, 1),
+		vec4(1, 1, 1, 1),
+		50.0f);
+	sceneObjects["cubeD"].setCollider(new CubeCollider(vec3(-40, 30, -20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
+
+	sceneObjects["reachTesterTarget"] = meshes["sphere"];
+	sceneObjects["reachTesterTarget"].get_transform().scale = vec3(0.2f,0.2f,0.2f);
+	sceneObjects["reachTesterTarget"].set_texture(texs["red"]); // Sets the texture
+	sceneObjects["reachTesterTarget"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+		vec4(0.7, 0.7, 0.7, 1),
+		vec4(1, 1, 1, 1),
+		50.0f);
+	sceneObjects["reachTesterTarget"].get_transform().position = vec3(25,10,25);
+
+	//cubeB.rotate(vec3(0,0,1), 45.0f);
+	//sceneObjects["cubeB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
 
 }
 
@@ -620,23 +572,12 @@ void updateCameras(float delta_time)
 void updateLighting(float delta_time)
 {
 	mat4 rotationMat(1);
-	rotationMat = rotate(rotationMat, (quarter_pi<float>() / 12.0f)*delta_time, vec3(0.0, 1.0, 0.0));
-	//ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
+	rotationMat = rotate(rotationMat, (quarter_pi<float>() / 6.0f)*delta_time, vec3(0.0, 1.0, 0.0));
+	ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
 
 	//Rotate the skyboxes (part of this method since the skybox contains the sun)
 	skyBox[1].get_transform().rotate(vec3(0, (quarter_pi<float>() / 12.0f)*delta_time, 0));
 	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
-}
-
-//TODO IK
-void updateIK(mat4 &proj, mat4 &view){
-
-	mat4 PV = proj*view;
-	vec3 target = sphereA.position;
-	
-	endLinks["root"]->render(PV, colourPassThroughEffect, *endLinks["root"], target);
-	ikHierarchy.render(PV, colourPassThroughEffect, *endLinks["root"], target);
-
 }
 
 void updatePhysics(){
@@ -647,49 +588,27 @@ void updatePhysics(){
 
 		SPGrid::getInstance().update(sceneObjects);
 
-		endLinks["root"]->update();
-		endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
-
-		ikHierarchy.update();
-		//ikHierarchy.endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
-		ikHierarchy.endLinks["leftFoot"]->reach(ikHierarchy.rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
-		ikHierarchy.endLinks["rightFoot"]->reach(ikHierarchy.rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
-		ikHierarchy.endLinks["lowerArmLeft"]->reach(ikHierarchy.rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
-		ikHierarchy.endLinks["lowerArmRight"]->reach(ikHierarchy.rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
-
-		endLinks["leftEye"]->reach(translationFromMat4(endLinks["head"]->m_base) + normalize(sphereA.position - translationFromMat4(endLinks["head"]->m_base))*endLinks["head"]->m_length, PHYSICS_TIME_STEP);
-		endLinks["rightEye"]->reach(translationFromMat4(endLinks["head"]->m_base) + normalize(sphereA.position - translationFromMat4(endLinks["head"]->m_base))*endLinks["head"]->m_length, PHYSICS_TIME_STEP);
-		endLinks["leftFoot"]->reach(vec3(42, sin(totalPhysicsTime) * endLinks["leftFoot"]->parent->m_length, 0), PHYSICS_TIME_STEP);
-		//sphereB.position = vec3(50, 101 + sin(totalTime)*2.0f, sin(totalTime)*8.0f);
+		for (auto& ikHierarchy : ikHierarchies){
+			ikHierarchy.second.update();
+		}
+		//ikHierarchy.endLinks["rightHand"]->reach(cubeA.position, PHYSICS_TIME_STEP);
+		ikHierarchies["walkingMan"].endLinks["leftFoot"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
+		ikHierarchies["walkingMan"].endLinks["rightFoot"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
+		ikHierarchies["walkingMan"].endLinks["lowerArmLeft"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
+		ikHierarchies["walkingMan"].endLinks["lowerArmRight"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
 		
-		//endLinks["leftHand"]->reach(sphereA.position, physicsTimeStep);
+		ikHierarchies["reachTester"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
 
 		vec3 velocity = vec3(0,0,0);
 
 		SPGrid& spGrid = SPGrid::getInstance();
 
-		dataTODO.reset();
-		//spGrid.intersects(sphereA, velocity*PHYSICS_TIME_STEP, dataTODO);
-
 		for (auto &e : sceneObjects)
 		{
 			e.second.update(PHYSICS_TIME_STEP);
 		}
-
-		//sphereA.intersects(sphereB, -velocity*PHYSICS_TIME_STEP, dataTODO);
-		//sphereA.translate(vec3(0.0,0.0,0.01));
-		if (dataTODO.doesIntersect){
-			sphereA.translate(dataTODO.direction*0.1f);
-			//cout << "Sphere collision: " << endl;
-			//cout << dataTODO.doesIntersect << endl;
-			//cout << dataTODO.direction.x << ", " << dataTODO.direction.y << ", " << dataTODO.direction.z << " * " << dataTODO.amount << endl;
-		}
-
-		sceneObjects["sphereA"].get_transform().position = sphereA.position;
-		sceneObjects["sphereB"].get_transform().position = sphereB.position;
-
+		
 		particManager->update(PHYSICS_TIME_STEP);
-
 
 	}
 }
@@ -704,24 +623,23 @@ bool update(float delta_time)
 
 	totalTime += delta_time;
 	float fps = 1.0f / delta_time;
-	//renderText = to_string(fps) + "fps";
 	graphRen->pushData(fps);
 
-	float velocity = 5.5f;
+	float movementForce = 20.0f;
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
-		sphereA.addForce(vec3(velocity, 0.0, 0.0));
+		sceneObjects["cubeA"].getCollider()->addForce(vec3(movementForce, 0.0, 0.0));
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN))
-		sphereA.addForce(vec3(-velocity, 0.0, 0.0));
+		sceneObjects["cubeA"].getCollider()->addForce(vec3(-movementForce, 0.0, 0.0));
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_LEFT))
-		sphereA.addForce(vec3(0.0, 0.0, velocity));
+		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, movementForce));
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
-		sphereA.addForce(vec3(0.0, 0.0, -velocity));
+		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, -movementForce));
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
-		sphereA.addForce(vec3(0.0, velocity*6.0f, 0.0));
+		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, movementForce + 9.8, 0.0));
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
-		sphereA.addForce(vec3(0.0, -velocity*4.0f, 0.0));
+		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, -movementForce, 0.0));
 
 	updateCameras(delta_time);
 	updateLighting(delta_time);
@@ -738,46 +656,8 @@ void renderSceneObjects(const mat4 &V, const mat4 &P){
 	}
 }
 
-// Renders a SceneObject and it's children
-void renderSceneObjectsDepth(const mat4 &V, const mat4 &P){
-	mat4 VP = P * V;
-	// Render the SceneObjects
-	for (auto& mapObj : sceneObjects){
-		mapObj.second.render(VP, depthEffect);
-	}
-}
-
 bool render()
 {
-
-	//------------ Start Shadow Map ------------//
-
-	// Sort the SceneObjects into furthest from camera rendered first
-
-	// Bind the shadow framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowFbo.get_buffer());
-	// Clear the shadow framebuffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Change culling to front face
-	glCullFace(GL_FRONT);
-
-	// Compute the MVP matrix from the light's point of view
-	mat4 depthProjectionMatrix = ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, MYNEAR, MYFAR);
-	mat4 depthViewMatrix = lookAt(ambientLightPosition, -normalize(ambientLightPosition), vec3(0.0f, 1.0f, 0.0f));
-
-	// Bind the depth shader
-	renderer::bind(depthEffect);
-	glUniform1f(depthEffect.get_uniform_location("totalTime"), totalTime);
-	glUniform1f(depthEffect.get_uniform_location("near"), MYNEAR);
-	glUniform1f(depthEffect.get_uniform_location("far"), MYFAR);
-	// Render the list of SceneObjects
-	renderSceneObjectsDepth(depthViewMatrix, depthProjectionMatrix);
-
-	// Change the culling back to back face
-	glCullFace(GL_BACK);
-
-	//------------ End Shadow Map ------------//
 
 	// Set up the view, projection and camera direction
 	mat4 V, P;
@@ -863,43 +743,34 @@ bool render()
 	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
 	glUniform3fv(mainEffect.get_uniform_location("eyeDir"), 1, value_ptr(camDir));
 	glUniform1f(mainEffect.get_uniform_location("totalTime"), totalTime);
-
-	// Bind the shadow map's depth
-	glActiveTexture(GL_TEXTURE0 + 3);
-	glBindTexture(GL_TEXTURE_2D, shadowFbo.get_depth());
-	glUniform1i(mainEffect.get_uniform_location("shadowMap"), 3);
-	// Set up the depth bias matrix (shifts the coords)
-	mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-		);
-	glUniformMatrix4fv(mainEffect.get_uniform_location("depthBias"), 1, GL_FALSE, value_ptr(biasMatrix));
-	glUniformMatrix4fv(mainEffect.get_uniform_location("lightVP"), 1, GL_FALSE, value_ptr(depthProjectionMatrix*depthViewMatrix));
-
+	
 	// Render the list of SceneObjects
 	renderSceneObjects(V, P);
 
 	renderer::bind(texs["white"], 0);
-	renderer::bind(sceneObjects["sphereA"].get_material(), "mat");
+	renderer::bind(sceneObjects["cubeA"].get_material(), "mat");
 	
 
 	particManager->render(P*V);
 
 
-	// TODO --------------------
-	if (dataTODO.doesIntersect){
-		glDisable(GL_DEPTH_TEST);
-		renderer::bind(colourPassThroughEffect);
-		glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-		Util::renderArrow(dataTODO.intersection, dataTODO.intersection + dataTODO.direction, 1.0f, 0.5f, P * V, colourPassThroughEffect);
-		glEnable(GL_DEPTH_TEST);
-	}
-
 	glDisable(GL_DEPTH_TEST);
-	renderer::bind(colourPassThroughEffect);
 
+
+
+
+	LineCollider lineA = LineCollider(vec3(12.5f, 7.5f, 10), vec3(7.5f, 7.5f, 10), 1.0f);
+	LineCollider lineB = LineCollider(vec3(10, 5, 10), vec3(10, 10, 10), 1.0f);
+	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
+
+	IntersectionData lineIntersectionData = IntersectionData();
+
+	lineA.intersects(lineB, vec3(0, 0, 0), lineIntersectionData);
+
+	vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
+	textRen->render3D((P * V), right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
+
+	renderer::bind(colourPassThroughEffect);
 	//glPointSize(6.0f);
 	// Set MVP matrix uniform
 	glUniformMatrix4fv(
@@ -907,64 +778,30 @@ bool render()
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
 		value_ptr(P * V)); // Pointer to matrix data
-	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0, 0, 1, 1)));
-	glBegin(GL_POINTS);
-	glVertex3f(rayTest.intersection.x, rayTest.intersection.y, rayTest.intersection.z);
-	glEnd();
-
-	/* IK COLLISION TEST TODO
-	for (int i = 0; i < (int)ikHierarchy.allLinks.size() - 1; i++){
-		Link* l = ikHierarchy.allLinks.at(i);
-		vec3 ikstart = translationFromMat4(l->m_base);
-		vec3 ikend = vec4ToVec3(l->m_base * vec4(l->m_length, 0, 0, 1));
-		glBegin(GL_LINES);
-		glVertex3f(ikstart.x, ikstart.y, ikstart.z);
-		glVertex3f(ikend.x, ikend.y, ikend.z);
-		glEnd();
-	}
-	*/
-
-	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
-	LineCollider* lineA = new LineCollider(vec3(0, 0, 0), vec3(1, 0, 0), 1.0f);
-	LineCollider* lineB = new LineCollider(vec3(0, 0, 0), vec3(0, 1, 0), 1.0f);
-
 	glBegin(GL_LINES);
-	glVertex3f(lineA->position.x, lineA->position.y, lineA->position.z);
-	glVertex3f(lineA->endPosition.x, lineA->endPosition.y, lineA->endPosition.z);
-	glVertex3f(lineB->position.x, lineB->position.y, lineB->position.z);
-	glVertex3f(lineB->endPosition.x, lineB->endPosition.y, lineB->endPosition.z);
+	glVertex3f(lineA.position.x, lineA.position.y, lineA.position.z);
+	glVertex3f(lineA.endPosition.x, lineA.endPosition.y, lineA.endPosition.z);
+	glVertex3f(lineB.position.x, lineB.position.y, lineB.position.z);
+	glVertex3f(lineB.endPosition.x, lineB.endPosition.y, lineB.endPosition.z);
 	glEnd();
 
 	glEnable(GL_DEPTH_TEST);
 
+	// Render the spatial partitioning grid
 	if (toggleDebugMenu)
-		SPGrid::getInstance().render();
+		SPGrid::getInstance().render(colourPassThroughEffect);
 
-	// TODO
-	
-	IntersectionData lineIntersectionData = IntersectionData();
-	lineA->intersects(*lineB, vec3(0, 0, 0), lineIntersectionData);
-	if (lineIntersectionData.doesIntersect){
-		mat4 rot = mat4();
-
-		vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
-		textRen->render3D((P * V), right, "Vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", vec3(0, 0, 0));
-
-		quat rHandQuat = endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_quat;
-		quat qNew = rHandQuat;
-		float roll = degrees(atan2(2 * qNew.y*qNew.w - 2 * qNew.x*qNew.z, 1 - 2 * qNew.y*qNew.y - 2 * qNew.z*qNew.z));
-		float pitch = degrees(atan2(2 * qNew.x*qNew.w - 2 * qNew.y*qNew.z, 1 - 2 * qNew.x*qNew.x - 2 * qNew.z*qNew.z));
-		float yaw = degrees(asin(2 * qNew.x*qNew.y + 2 * qNew.z*qNew.w));
-
-		textRen->render3D((P * V), right, "angles(" + to_string(roll) + ", " + to_string(pitch) + ", " + to_string(yaw) + ")", translationFromMat4(endLinks["root"]->children["waist"]->children["chest"]->children["rightShoulder"]->m_base));
+	// Render IK
+	for (auto& ikHierarchy : ikHierarchies){
+		ikHierarchy.second.render(P * V, colourPassThroughEffect);
 	}
-	
 
 	// TODO IK
 	glDisable(GL_DEPTH_TEST);
 	renderer::bind(colourPassThroughEffect);
 	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-	updateIK(P, V);
+
+
 	glEnable(GL_DEPTH_TEST);
 
 	
@@ -974,8 +811,6 @@ bool render()
 		
 	// Finish rendering this frame
 	finishFrame();
-
-	particManager->compute();
 
 	return true;
 }
@@ -992,28 +827,7 @@ void finishFrame(){
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
 		value_ptr(orthoMVP)); // Pointer to matrix data
-
-
-	/* TODO REMOVE
-	// Render the finished frame to the previous frame fbo
-	glBindTexture(GL_TEXTURE_2D, postProcessingFbo.get_texture());
-	glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, prevFbo.get_buffer());
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	renderer::render(screenQuad);
-
-	// Render the finished frame to the screen
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	renderer::render(screenQuad);
-	*/
-
-	if (toggleDebugMenu){
-		// Render the cornerCam onto the screen
-		glBindTexture(GL_TEXTURE_2D, shadowFbo.get_depth());
-		glUniform1i(passThroughEffect.get_uniform_location("tex"), 0);
-		renderer::render(cornerCamQuad);
-	}
-
+	
 	// Render the menu onto the screen
 	if (toggleDebugMenu){
 		renderer::bind(texs["menuon"], 2);
@@ -1024,7 +838,6 @@ void finishFrame(){
 	glUniform1i(passThroughEffect.get_uniform_location("tex"), 2);
 	renderer::render(menuQuad);
 
-	textRen->render(orthoMVP, renderText, 0, 0);
 
 	std::ostringstream avgStr;
 	avgStr << particManager->getParticleCount();

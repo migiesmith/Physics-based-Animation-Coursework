@@ -26,14 +26,12 @@ void  SphereCollider::intersects(Collider& other, const vec3& velocity, Intersec
 		case ColliderTypes::CUBE :
 		{
 			other.intersects(*this, velocity, data);
-			data.direction = data.direction * -1.0f;
 			data.intersection = position + (radius * normalize(data.direction));
 			break;
 		}
 		case ColliderTypes::OBBCUBE:
 		{
 			other.intersects(*this, velocity, data);
-			data.direction = data.direction * -1.0f;
 			data.intersection = position + (radius *normalize(data.direction));
 			break;
 		}

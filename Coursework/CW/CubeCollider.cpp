@@ -22,7 +22,6 @@ void CubeCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 	switch (other.colliderType){
 	case ColliderTypes::SPHERE: {
 		sphereToCubeCollision((SphereCollider&)(other), velocity, data);
-		data.direction *= -1.0f;
 		data.amount *= -1.0f;
 		break;
 	}
@@ -214,11 +213,16 @@ pair<bool, float> CubeCollider::checkProjectedIntersection(vector<vec3>& corners
 	return pair<bool, float>((longSpan <= sumSpan), (sumSpan - longSpan));
 }
 
-void CubeCollider::rotate(vec3 axis, float degrees){
+void CubeCollider::setRotation(vec3 axis, float degrees){
 	if (colliderType == ColliderTypes::OBBCUBE){
 		rotation = Util::rotationMat4(axis, degrees);
+		vector<vec3> newNorms{
+			vec3(1.0, 0.0, 0.0),
+			vec3(0.0, 1.0, 0.0),
+			vec3(0.0, 0.0, 1.0)
+		};
 		for (int i = 0; i < 2; i++){
-			vec4 rotatedNorm = vec4(normals[i], 1.0) * rotation;
+			vec4 rotatedNorm = vec4(newNorms[i], 1.0) * rotation;
 			normals[i] = vec3(rotatedNorm.x, rotatedNorm.y, rotatedNorm.z);
 		}
 	}

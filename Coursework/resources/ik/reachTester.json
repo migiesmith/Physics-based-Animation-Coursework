@@ -1,0 +1,64 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "angleLimits": {
+            "minX": -2.35619449019,
+            "maxX": 2.35619449019,
+            "minY": -2.35619449019,
+            "maxY": 2.35619449019,
+            "minZ": -2.35619449019,
+            "maxZ": 2.35619449019
+          },
+          "rotation": {
+            "axis": [
+              0,
+              0,
+              1
+            ],
+            "angle": 0
+          },
+          "name": "End",
+          "size": 0.75
+        }
+      ],
+      "angleLimits": {
+        "minX": -2.35619449019,
+        "maxX": 2.35619449019,
+        "minY": -2.35619449019,
+        "maxY": 2.35619449019,
+        "minZ": -2.35619449019,
+        "maxZ": 2.35619449019
+      },
+      "rotation": {
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "angle": 0
+      },
+      "name": "Middle",
+      "size": 1.5
+    }
+  ],
+  "angleLimits": {
+    "minX": -3.141,
+    "maxX": 3.141,
+    "minY": -3.141,
+    "maxY": 3.141,
+    "minZ": -3.141,
+    "maxZ": 3.141
+  },
+  "rotation": {
+    "axis": [
+      0,
+      0,
+      1
+    ],
+    "angle": 0
+  },
+  "name": "Root",
+  "size": 2
+}

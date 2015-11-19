@@ -37,7 +37,8 @@ void Collider::update(const float delta_time){
 	if (staticPos)
 		return;
 
-	addForce(vec3(0, -9.8, 0));
+	if(!ignoreGravity)
+		addForce(vec3(0, -9.8, 0));
 
 	vec3 acceleration = force * invMass;
 	velocity += acceleration * delta_time;
@@ -45,6 +46,8 @@ void Collider::update(const float delta_time){
 
 	force = vec3(0, 0, 0);
 	acceleration *= 0.9f;
+
+	velocity *= 0.999f;
 }
 
 void Collider::setMass(const float m){

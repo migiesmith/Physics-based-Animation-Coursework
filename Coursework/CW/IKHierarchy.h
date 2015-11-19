@@ -30,12 +30,11 @@ public:
 
 	Link* parseBone(Json::Value jsonBone);
 
-	void update(){ rootBone->update(); }//resolveCollisions(); }
-	void resolveCollisions();
+	void update(){ rootBone->update(); }
 
-	void render(mat4& PV, effect& currentEffect, Link& endLink, vec3& target){
-		if (rootBone &&  ready)
-			rootBone->render(PV, currentEffect, endLink, target);
+	void render(mat4& PV, effect& currentEffect){
+		if (rootBone && ready)
+			rootBone->render(PV, currentEffect);
 	}
 
 	~IKHierarchy();

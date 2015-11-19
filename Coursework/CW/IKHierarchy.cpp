@@ -38,7 +38,6 @@ void IKHierarchy::parseIKTree(Json::Value& json, Link* parentLink){
 		if (!json["isEndLink"].isNull())
 			if (json["isEndLink"].asBool()){
 				endLinks[json["name"].asString()] = parsedBone;
-				cout << json["name"].asString() << endl;
 			}
 		
 		for (Json::Value child : children){
@@ -57,13 +56,9 @@ Link* IKHierarchy::parseBone(Json::Value jsonBone){
 	Json::Value jsonAngleLimits = jsonBone["angleLimits"];
 	vec3 minAngLimits = vec3(jsonAngleLimits["minX"].asFloat(), jsonAngleLimits["minY"].asFloat(), jsonAngleLimits["minZ"].asFloat());
 	vec3 maxAngLimits = vec3(jsonAngleLimits["maxX"].asFloat(), jsonAngleLimits["maxY"].asFloat(), jsonAngleLimits["maxZ"].asFloat());
-
-	cout << "min limits" << vec3ToString(minAngLimits) << endl;
-	cout << "max limits" << vec3ToString(maxAngLimits) << endl;
-
+	
 	vector<vec3>* angleLimits = new vector<vec3>{ minAngLimits, maxAngLimits };
 
-	//cout << jsonBone << endl;
 	Json::Value rotation = jsonBone["rotation"];
 	vec3 axis = vec3(rotation["axis"][0].asFloat(), rotation["axis"][1].asFloat(), rotation["axis"][2].asFloat());
 	float angle = rotation["angle"].asFloat();
@@ -72,58 +67,12 @@ Link* IKHierarchy::parseBone(Json::Value jsonBone){
 	if (!jsonBone["size"].isNull())
 		size = jsonBone["size"].asFloat();
 
-	if (!jsonBone["size"].isNull())
-		size = jsonBone["size"].asFloat();
-
 	link = new Link(axis, angle, angleLimits, size);
 
 	if (!jsonBone["reach"].isNull())
 		link->linkReach = jsonBone["reach"].asInt();
-
-	//link->origin = vec3(jsonBone["translation"][0].asFloat(), jsonBone["translation"][1].asFloat(), jsonBone["translation"][2].asFloat());
-
+	
 	return link;
-}
-
-void IKHierarchy::resolveCollisions(){
-	/*
-	LineCollider lCol1 = LineCollider(vec3(0, 0, 0), vec3(0, 0, 1));
-	LineCollider lCol2 = LineCollider(vec3(0, 0, 0), vec3(0, 0, 1));
-
-	IntersectionData data = IntersectionData();
-
-	for (int i = 0; i < (int) allLinks.size() - 1; i++){
-		for (int j = i + 1; j < (int) allLinks.size(); j++){
-
-			Link* l1 = allLinks.at(i);
-			Link* l2 = allLinks.at(j);
-			
-			if (l1->ignoreCollision || l2->ignoreCollision || l1 == l2->parent || l2 == l1->parent){
-				continue;
-			}
-
-			vec3 dir1 = normalize(translationFromMat4(l1->m_base) - vec4ToVec3(l1->m_base * vec4(l1->m_length, 0, 0, 1))) * l1->m_length;
-			vec3 dir2 = normalize(translationFromMat4(l2->m_base) - vec4ToVec3(l2->m_base * vec4(l2->m_length, 0, 0, 1))) * l2->m_length;
-			lCol1.position = translationFromMat4(l1->m_base) - dir1*0.25f;
-			lCol2.position = translationFromMat4(l2->m_base) - dir2*0.25f;
-
-			if (equals(lCol1.position, lCol2.position))
-				continue;
-
-			lCol1.endPosition = translationFromMat4(l1->m_base) - dir1*0.75f;
-			lCol2.endPosition = translationFromMat4(l2->m_base) - dir2*0.75f;
-
-			lCol1.intersects(lCol2, vec3(0,0,0), data);
-			
-			//TODO fix line collider
-
-			if (data.doesIntersect){
-				int temp = 0;
-			}
-			
-		}
-	}
-	*/
 }
 
 IKHierarchy::~IKHierarchy()

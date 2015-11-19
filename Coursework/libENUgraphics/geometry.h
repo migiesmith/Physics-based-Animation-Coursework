@@ -67,7 +67,7 @@ namespace graphics_framework
 		geometry(const geometry &other) = default;
 		geometry& operator=(const geometry &rhs) = default;
 		// Destroys the geometry object
-		~geometry() { }
+		~geometry() {}
 		// Gets the type of the geometry
 		GLenum get_type() const { return _type; }
 		// Sets the type of the geometry

@@ -60,10 +60,15 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 	glUniform1i(shader->get_uniform_location("tex"), 0);
 
 	int xOffset = 0;
-	geometry screenQuadGeom = geometry();
-	vector<vec3> positions;
-	vector<vec3> texCoords;
+	struct Vertex {
+		GLfloat position[3];
+		GLfloat texcoord[2];
+	};
+	const int tSize = text.size();
+	const int NUM_VERTS = 6 * tSize;
+	Vertex* vertexdata = new Vertex[NUM_VERTS];
 
+	int vertNum = 0;
 	for (char c : text){
 		if (c == ' '){
 			// If the current character is a space, just increment the xOffset
@@ -78,46 +83,78 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 			float xPos = (renderer::get_screen_width() / 2.0f) - quadX - (x*renderer::get_screen_width());
 			float yPos = -(renderer::get_screen_height() / 2.0f) + quadY + character->yOffset * 0.5f + (y*renderer::get_screen_height());
 
-			// Push the current character's quad onto the positions vector
-			positions.push_back(vec3(-quadX + xOffset - xPos, quadY - yPos, 0.0f));
-			positions.push_back(vec3(quadX + xOffset - xPos, -quadY - yPos, 0.0f));
-			positions.push_back(vec3(quadX + xOffset - xPos, quadY - yPos, 0.0f));
-
-			positions.push_back(vec3(-quadX + xOffset - xPos, quadY - yPos, 0.0f));
-			positions.push_back(vec3(-quadX + xOffset - xPos, -quadY - yPos, 0.0f));
-			positions.push_back(vec3(quadX + xOffset - xPos, -quadY - yPos, 0.0f));
-
 			// Get the tex coord values for the current character quad
 			float xCoord = (float)character->xPos / (float)tex.get_width();
 			float yCoord = -(float)character->yPos / (float)tex.get_height();
 			float w = (float)character->width / (float)tex.get_width();
 			float h = -(float)character->height / (float)tex.get_height();
+			
+			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY - yPos, 0.0f }, { xCoord, yCoord } };
+			vertNum++;
 
-			// Push the current character's texcoords onto the positions vector
-			texCoords.push_back(vec3(xCoord, yCoord, 0.0f));
-			texCoords.push_back(vec3(xCoord + w, yCoord + h, 0.0f));
-			texCoords.push_back(vec3(xCoord + w, yCoord, 0.0f));
+			vertexdata[vertNum] = { { quadX + xOffset - xPos, -quadY - yPos, 0.0f }, { xCoord + w, yCoord + h } };
+			vertNum++;
 
-			texCoords.push_back(vec3(xCoord, yCoord, 0.0f));
-			texCoords.push_back(vec3(xCoord, yCoord + h, 0.0f));
-			texCoords.push_back(vec3(xCoord + w, yCoord + h, 0.0f));
+			vertexdata[vertNum] = { { quadX + xOffset - xPos, quadY - yPos, 0.0f }, { xCoord + w, yCoord } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY - yPos, 0.0f }, { xCoord, yCoord } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { -quadX + xOffset - xPos, -quadY - yPos, 0.0f }, { xCoord, yCoord + h } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { quadX + xOffset - xPos, -quadY - yPos, 0.0f }, { xCoord + w, yCoord + h } };
+			vertNum++;
 
 			// Increment the xOffset to move the character along
 			xOffset += (int)((characters[c]->width + characters[c]->xAdvance) * fontSize);
 		}
 	}
 
-	// Create the mesh for rendering the screen to
-	screenQuadGeom.add_buffer(positions, BUFFER_INDEXES::POSITION_BUFFER);
-	screenQuadGeom.add_buffer(texCoords, BUFFER_INDEXES::TEXTURE_COORDS_0);
 
+	// Create and bind a VAO
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	// Create and bind a BO for vertex data
+	GLuint vbuffer;
+	glGenBuffers(1, &vbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+
+	// copy data into the buffer object
+	glBufferData(GL_ARRAY_BUFFER, NUM_VERTS * sizeof(Vertex), vertexdata, GL_STATIC_DRAW);
+
+	delete[] vertexdata;
+
+	int posAttrib = glGetAttribLocation(shader->get_program(), "position");
+	int texAttrib = glGetAttribLocation(shader->get_program(), "tex_coord_in");
+
+	// set up vertex attributes
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
+
+	
 	// Remder the string
 	renderer::bind(tex, 0);
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
-	renderer::render(screenQuadGeom);
+	glDrawArrays(GL_TRIANGLES, 0, NUM_VERTS);
 	glDisable(GL_ALPHA_TEST);
-		
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(posAttrib);
+	glDisableVertexAttribArray(texAttrib);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffersARB(1, &vbuffer);
+
 }
 
 void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string text, vec3& pos){

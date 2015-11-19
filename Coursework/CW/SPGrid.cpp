@@ -98,29 +98,31 @@ void SPGrid::render(){
 		for (int y = 0; y < _HEIGHT; y++){
 
 			for (int z = 0; z < _DEPTH; z++){
-				vec3 p = vec3(_offset.x + x*_cellSize, _offset.y + y*_cellSize, _offset.z + z*_cellSize);
-				glBegin(GL_LINE_LOOP);
-				glVertex3f(p.x, p.y, p.z);
-				glVertex3f(p.x, p.y + _cellSize, p.z);
-				glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z);
-				glVertex3f(p.x + _cellSize, p.y, p.z);
+				if (_cells[cellIndex(x, y, z)].beenTested > 0){
+					vec3 p = vec3(_offset.x + x*_cellSize, _offset.y + y*_cellSize, _offset.z + z*_cellSize);
+					glBegin(GL_LINE_LOOP);
+					glVertex3f(p.x, p.y, p.z);
+					glVertex3f(p.x, p.y + _cellSize, p.z);
+					glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z);
+					glVertex3f(p.x + _cellSize, p.y, p.z);
 
-				glVertex3f(p.x, p.y, p.z);
-				glVertex3f(p.x, p.y + _cellSize, p.z);
-				glVertex3f(p.x, p.y + _cellSize, p.z + _cellSize);
-				glVertex3f(p.x, p.y, p.z + _cellSize);
+					glVertex3f(p.x, p.y, p.z);
+					glVertex3f(p.x, p.y + _cellSize, p.z);
+					glVertex3f(p.x, p.y + _cellSize, p.z + _cellSize);
+					glVertex3f(p.x, p.y, p.z + _cellSize);
 
-				glVertex3f(p.x + _cellSize, p.y, p.z + _cellSize);
-				glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z + _cellSize);
-				glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z);
-				glVertex3f(p.x + _cellSize, p.y, p.z);
+					glVertex3f(p.x + _cellSize, p.y, p.z + _cellSize);
+					glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z + _cellSize);
+					glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z);
+					glVertex3f(p.x + _cellSize, p.y, p.z);
 
-				glVertex3f(p.x + _cellSize, p.y, p.z + _cellSize);
-				glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z + _cellSize);
-				glVertex3f(p.x, p.y + _cellSize, p.z + _cellSize);
-				glVertex3f(p.x, p.y, p.z + _cellSize);
+					glVertex3f(p.x + _cellSize, p.y, p.z + _cellSize);
+					glVertex3f(p.x + _cellSize, p.y + _cellSize, p.z + _cellSize);
+					glVertex3f(p.x, p.y + _cellSize, p.z + _cellSize);
+					glVertex3f(p.x, p.y, p.z + _cellSize);
 
-				glEnd();
+					glEnd();
+				}
 			}
 		}
 	}

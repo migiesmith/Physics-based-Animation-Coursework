@@ -72,10 +72,64 @@ void ParticleEmitter::render(const mat4& PV){
 	glUniform1f(particleEffect.get_uniform_location("lifeTime"), lifeTime);
 	glUniform1f(particleEffect.get_uniform_location("xCoordInterval"), 1.0f / columns);
 	glUniform1f(particleEffect.get_uniform_location("yCoordInterval"), 1.0f / rows);
+
+
+	struct Vertex {
+		GLfloat position[3];
+		GLfloat vertTime;
+	};
+	const int NUM_VERTS = particles.size();
+	Vertex* vertexdata = new Vertex[NUM_VERTS];
+
+	int vertNum = 0;
 	for (Particle& p : particles){
-		glUniform1f(particleEffect.get_uniform_location("totalTime"), lifeTime - p.lifeTime);
-		p.render();
+		// Add particle to vertexdata
+		vertexdata[vertNum] = { { p.x, p.y, p.z }, { lifeTime - p.lifeTime } };
+		vertNum++;
 	}
+
+
+	// Create and bind a VAO
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	// Create and bind a BO for vertex data
+	GLuint vbuffer;
+	glGenBuffers(1, &vbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+
+	// copy data into the buffer object
+	glBufferData(GL_ARRAY_BUFFER, NUM_VERTS * sizeof(Vertex), vertexdata, GL_STATIC_DRAW);
+
+	delete[] vertexdata;
+
+	int posAttrib = glGetAttribLocation(particleEffect.get_program(), "position");
+	int totalTimeAttrib = glGetAttribLocation(particleEffect.get_program(), "totalTime");
+	
+	// set up vertex attributes
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(totalTimeAttrib);
+	glVertexAttribPointer(totalTimeAttrib, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, vertTime));
+
+
+	// Remder the string
+	renderer::bind(tex, 0);
+	glAlphaFunc(GL_GREATER, 0.2f);
+	glEnable(GL_ALPHA_TEST);
+	glDrawArrays(GL_POINTS, 0, NUM_VERTS);
+	glDisable(GL_ALPHA_TEST);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(posAttrib);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffersARB(1, &vbuffer);
+
 	glDisable(GL_ALPHA_TEST);
 }
 

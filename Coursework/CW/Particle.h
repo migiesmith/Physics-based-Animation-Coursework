@@ -29,7 +29,6 @@ public:
 	void addForce(const vec3& f);
 	void awaken(const vec3& v, const vec3& force, const float lifeTime);
 	void update(const float delta_time);
-	void render();
 
 	void setLifeTime(const float t);
 	void setPosition(const vec3& v);

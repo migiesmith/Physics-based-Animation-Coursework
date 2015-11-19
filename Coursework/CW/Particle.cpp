@@ -40,14 +40,6 @@ void Particle::update(const float delta_time){
 	if (lifeTime <= 0.0) isAlive = false;
 }
 
-
-void Particle::render(){
-	if (!isAlive) return;
-	glBegin(GL_POINTS);
-	glVertex3f(x,y,z);
-	glEnd();
-}
-
 void Particle::setLifeTime(const float t){
 	lifeTime = t - fmod(rand(), t*0.1f) / 100.0f;
 	isAlive = true;

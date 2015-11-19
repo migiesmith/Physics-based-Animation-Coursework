@@ -33,10 +33,10 @@ float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physic
 IntersectionData rayTest;
 
 //TODO
-//SphereCollider sphereA = SphereCollider(vec3(0, 5, 0), 1.0);
-//SphereCollider sphereB = SphereCollider(vec3(0, 100, 0.0), 1.0);
-CubeCollider sphereB = CubeCollider(vec3(31, 5, 5), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
-CubeCollider sphereA = CubeCollider(vec3(40, 10, 2.0f), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+//SphereCollider sphereA = SphereCollider(vec3(-12, 10, 0), 1.0);
+//SphereCollider sphereB = SphereCollider(vec3(-10, 10, 0), 1.0);
+CubeCollider sphereB = CubeCollider(vec3(-10, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
+CubeCollider sphereA = CubeCollider(vec3(-12, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE);
 PlaneCollider ground = PlaneCollider(vec3(0, 0, 0), vec3(0, 1, 0));
 IntersectionData dataTODO;
 
@@ -205,8 +205,8 @@ bool load_content()
 
 	//TODO
 	particManager = new ParticleEmitterManager();
-	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 100, vec3(0, 18, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 10, 15), 3.0f, "particles\\bouncyball3x3.png", 3, 3));
+	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 1000, vec3(0, 80, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
+	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 1000, vec3(15, 0, 15), 3.0f, "particles\\bouncyball3x3.png", 3, 3));
 	//particManager->remove("particles");
 	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
 
@@ -645,6 +645,8 @@ void updatePhysics(){
 
 		totalPhysicsTime += PHYSICS_TIME_STEP;
 
+		SPGrid::getInstance().update(sceneObjects);
+
 		endLinks["root"]->update();
 		endLinks["rightHand"]->reach(sphereA.position, PHYSICS_TIME_STEP);
 
@@ -686,9 +688,9 @@ void updatePhysics(){
 		sceneObjects["sphereA"].get_transform().position = sphereA.position;
 		sceneObjects["sphereB"].get_transform().position = sphereB.position;
 
-		SPGrid::getInstance().update(sceneObjects);
-
 		particManager->update(PHYSICS_TIME_STEP);
+
+
 	}
 }
 
@@ -716,10 +718,10 @@ bool update(float delta_time)
 		sphereA.addForce(vec3(0.0, 0.0, -velocity));
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
-		sphereA.addForce(vec3(0.0, velocity, 0.0));
+		sphereA.addForce(vec3(0.0, velocity*6.0f, 0.0));
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
-		sphereA.addForce(vec3(0.0, -velocity, 0.0));
+		sphereA.addForce(vec3(0.0, -velocity*4.0f, 0.0));
 
 	updateCameras(delta_time);
 	updateLighting(delta_time);

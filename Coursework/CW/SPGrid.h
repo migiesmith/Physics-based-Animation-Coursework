@@ -25,7 +25,6 @@ private:
 
 	// The cells within the grid
 	SPCell* _cells;
-	vector<Collider*> checked;
 
 	int cellIndex(const int& x, const int& y, const int& z);
 	int incremenetedCellIndex(const int& currentIndex, const int& x, const int& y, const int& z);

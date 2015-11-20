@@ -26,7 +26,7 @@
                         "angle": 1.92356
                       },
                       "name": "LeftEye",
-                      "size": 0.25,
+                      "size": 0.15,
                       "reach": 2
                     },
                     {
@@ -47,7 +47,7 @@
                         "angle": 2.28433
                       },
                       "name": "RightEye",
-                      "size": 0.25,
+                      "size": 0.15,
                       "reach": 2
                     }
                   ],
@@ -69,7 +69,8 @@
                   },
                   "name": "Head",
                   "size": 0.5,
-                  "reach": 1
+                  "reach": 1,
+                  "modelName": "head.obj"
                 }
               ],
               "angleLimits": {
@@ -89,96 +90,8 @@
                 "angle": 0
               },
               "name": "Neck",
-              "size": 0.3
-            },
-            {
-              "children": [
-                {
-                  "children": [
-                    {
-                      "children": [
-                        {
-                          "angleLimits": {
-                            "minX": -0.785,
-                            "maxX": 0.785,
-                            "minY": -0.785,
-                            "maxY": 0.785,
-                            "minZ": -0.785,
-                            "maxZ": 0.785
-                          },
-                          "rotation": {
-                            "axis": [
-                              0,
-                              0,
-                              1
-                            ],
-                            "angle": 0
-                          },
-                          "name": "leftHand",
-                          "size": 0.3,
-                          "reach": 3
-                        }
-                      ],
-                      "angleLimits": {
-                        "minX": -0.785,
-                        "maxX": 0.785,
-                        "minY": 0,
-                        "maxY": 0.785,
-                        "minZ": 0,
-                        "maxZ": 0.785
-                      },
-                      "rotation": {
-                        "axis": [
-                          0,
-                          0,
-                          1
-                        ],
-                        "angle": 0
-                      },
-                      "name": "lowerArmLeft",
-                      "size": 1,
-                      "isEndLink": true,
-                      "reach": 2
-                    }
-                  ],
-                  "angleLimits": {
-                    "minX": -0.785,
-                    "maxX": 0.785,
-                    "minY": 0,
-                    "maxY": 0.785,
-                    "minZ": -0.785,
-                    "maxZ": 0.785
-                  },
-                  "rotation": {
-                    "axis": [
-                      0,
-                      1,
-                      0
-                    ],
-                    "angle": 0.785
-                  },
-                  "name": "upperArm",
-                  "size": 1.2
-                }
-              ],
-              "angleLimits": {
-                "minX": -0.785,
-                "maxX": 0.785,
-                "minY": -0.785,
-                "maxY": 0.785,
-                "minZ": -0.785,
-                "maxZ": 0.785
-              },
-              "rotation": {
-                "axis": [
-                  0,
-                  1,
-                  0
-                ],
-                "angle": 1.57
-              },
-              "name": "leftShoulder",
-              "size": 0.5
+              "size": 0.3,
+              "modelName": "genericLimb.obj"
             },
             {
               "children": [
@@ -204,8 +117,9 @@
                             "angle": 0
                           },
                           "name": "rightHand",
-                          "size": 0.3,
-                          "reach": 3
+                          "size": 0.45,
+                          "reach": 3,
+                          "modelName": "hand.obj"
                         }
                       ],
                       "angleLimits": {
@@ -227,7 +141,101 @@
                       "name": "lowerArmRight",
                       "size": 1,
                       "isEndLink": true,
-                      "reach": 2
+                      "reach": 2,
+                      "modelName": "genericLimb.obj"
+                    }
+                  ],
+                  "angleLimits": {
+                    "minX": -0.785,
+                    "maxX": 0.785,
+                    "minY": 0,
+                    "maxY": 0.785,
+                    "minZ": -0.785,
+                    "maxZ": 0.785
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      1,
+                      0
+                    ],
+                    "angle": 0.785
+                  },
+                  "name": "upperArm",
+                  "size": 1.2,
+                  "modelName": "genericLimb.obj"
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.785,
+                "maxX": 0.785,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0.785
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "angle": 1.57
+              },
+              "name": "rightShoulder",
+              "size": 0.5,
+              "modelName": "genericLimb.obj"
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "angleLimits": {
+                            "minX": -0.785,
+                            "maxX": 0.785,
+                            "minY": -0.785,
+                            "maxY": 0.785,
+                            "minZ": -0.785,
+                            "maxZ": 0.785
+                          },
+                          "rotation": {
+                            "axis": [
+                              0,
+                              0,
+                              1
+                            ],
+                            "angle": 0
+                          },
+                          "name": "leftHand",
+                          "size": 0.45,
+                          "reach": 3,
+                          "modelName" : "hand.obj"
+                        }
+                      ],
+                      "angleLimits": {
+                        "minX": -0.785,
+                        "maxX": 0.785,
+                        "minY": 0,
+                        "maxY": 0.785,
+                        "minZ": 0,
+                        "maxZ": 0.785
+                      },
+                      "rotation": {
+                        "axis": [
+                          0,
+                          0,
+                          1
+                        ],
+                        "angle": 0
+                      },
+                      "name": "lowerArmLeft",
+                      "size": 1,
+                      "isEndLink": true,
+                      "reach": 2,
+                      "modelName": "genericLimb.obj"
                     }
                   ],
                   "angleLimits": {
@@ -247,7 +255,8 @@
                     "angle": -0.785
                   },
                   "name": "upperArm",
-                  "size": 1.2
+                  "size": 1.2,
+                  "modelName": "genericLimb.obj"
                 }
               ],
               "angleLimits": {
@@ -266,8 +275,9 @@
                 ],
                 "angle": -1.57
               },
-              "name": "rightShoulder",
-              "size": 0.5
+              "name": "leftShoulder",
+              "size": 0.5,
+              "modelName": "genericLimb.obj"
             }
           ],
           "angleLimits": {
@@ -287,7 +297,8 @@
             "angle": 0
           },
           "name": "Chest",
-          "size": 1.4
+          "size": 1.4,
+          "modelName": "chest.obj"
         }
       ],
       "angleLimits": {
@@ -307,94 +318,8 @@
         "angle": 0
       },
       "name": "Waist",
-      "size": 0.8
-    },
-    {
-      "children": [
-        {
-          "children": [
-            {
-              "children": [
-                {
-                  "angleLimits": {
-                    "minX": 0,
-                    "maxX": 0,
-                    "minY": 0,
-                    "maxY": 0,
-                    "minZ": -0.785,
-                    "maxZ": 0
-                  },
-                  "rotation": {
-                    "axis": [
-                      0,
-                      0,
-                      1
-                    ],
-                    "angle": 1.57
-                  },
-                  "name": "leftFoot",
-                  "size": 0.4,
-                  "reach": 3
-                }
-              ],
-              "angleLimits": {
-                "minX": -0.1,
-                "maxX": 0.1,
-                "minY": -0.785,
-                "maxY": 0.785,
-                "minZ": -0.785,
-                "maxZ": 0
-              },
-              "rotation": {
-                "axis": [
-                  0,
-                  0,
-                  1
-                ],
-                "angle": 0
-              },
-              "name": "lowerLeg",
-              "size": 1
-            }
-          ],
-          "angleLimits": {
-            "minX": -0.785,
-            "maxX": 0.785,
-            "minY": -0.785,
-            "maxY": 0.785,
-            "minZ": -0.785,
-            "maxZ": 0
-          },
-          "rotation": {
-            "axis": [
-              0,
-              1,
-              0
-            ],
-            "angle": 1.57
-          },
-          "name": "upperLeg",
-          "size": 1.2
-        }
-      ],
-      "angleLimits": {
-        "minX": -0.785,
-        "maxX": 0.785,
-        "minY": -0.785,
-        "maxY": 0.785,
-        "minZ": -0.785,
-        "maxZ": 0.785
-      },
-      "rotation": {
-        "axis": [
-          0,
-          1,
-          0
-        ],
-        "angle": 1.57
-      },
-      "name": "leftHip",
-      "size": 0.4
+      "size": 0.8,
+      "modelName": "genericLimb.obj"
     },
     {
       "children": [
@@ -421,7 +346,8 @@
                   },
                   "name": "rightFoot",
                   "size": 0.4,
-                  "reach": 3
+                  "reach": 3,
+                  "modelName": "foot.obj"
                 }
               ],
               "angleLimits": {
@@ -441,7 +367,99 @@
                 "angle": 0
               },
               "name": "lowerLeg",
-              "size": 1
+              "size": 1,
+              "modelName": "genericLimb.obj"
+            }
+          ],
+          "angleLimits": {
+            "minX": -0.785,
+            "maxX": 0.785,
+            "minY": -0.785,
+            "maxY": 0.785,
+            "minZ": -0.785,
+            "maxZ": 0
+          },
+          "rotation": {
+            "axis": [
+              0,
+              1,
+              0
+            ],
+            "angle": 1.57
+          },
+          "name": "upperLeg",
+          "size": 1.2,
+          "modelName": "genericLimb.obj"
+        }
+      ],
+      "angleLimits": {
+        "minX": -0.785,
+        "maxX": 0.785,
+        "minY": -0.785,
+        "maxY": 0.785,
+        "minZ": -0.785,
+        "maxZ": 0.785
+      },
+      "rotation": {
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "angle": 1.57
+      },
+      "name": "rightHip",
+      "size": 0.4,
+      "modelName": "genericLimb.obj"
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "angleLimits": {
+                    "minX": 0,
+                    "maxX": 0,
+                    "minY": 0,
+                    "maxY": 0,
+                    "minZ": -0.785,
+                    "maxZ": 0
+                  },
+                  "rotation": {
+                    "axis": [
+                      0,
+                      0,
+                      1
+                    ],
+                    "angle": 1.57
+                  },
+                  "name": "leftFoot",
+                  "size": 0.4,
+                  "reach": 3,
+                  "modelName": "foot.obj"
+                }
+              ],
+              "angleLimits": {
+                "minX": -0.1,
+                "maxX": 0.1,
+                "minY": -0.785,
+                "maxY": 0.785,
+                "minZ": -0.785,
+                "maxZ": 0
+              },
+              "rotation": {
+                "axis": [
+                  0,
+                  0,
+                  1
+                ],
+                "angle": 0
+              },
+              "name": "lowerLeg",
+              "size": 1,
+              "modelName": "genericLimb.obj"
             }
           ],
           "angleLimits": {
@@ -461,7 +479,8 @@
             "angle": -1.57
           },
           "name": "upperLeg",
-          "size": 1.2
+          "size": 1.2,
+          "modelName": "genericLimb.obj"
         }
       ],
       "angleLimits": {
@@ -480,8 +499,9 @@
         ],
         "angle": -1.57
       },
-      "name": "rightHip",
-      "size": 0.4
+      "name": "leftHip",
+      "size": 0.4,
+      "modelName": "genericLimb.obj"
     }
   ],
   "angleLimits": {

@@ -22,8 +22,10 @@ void SceneObject::update(float delta_time){
 		SPGrid::getInstance().intersects(*_collider, velocity*delta_time, data);
 
 		get_transform().position = _collider->position;
-		//if (_collider->getType() == ColliderTypes::OBBCUBE)
-		//	get_transform().orientation = toQuat(((CubeCollider&)_collider).rotation);
+		if (_collider->getType() == ColliderTypes::OBBCUBE){
+			get_transform().scale = ((CubeCollider*)_collider)->dimensions;
+			get_transform().orientation = toQuat(((CubeCollider*)_collider)->rotation);
+		}
 	}
 }
 

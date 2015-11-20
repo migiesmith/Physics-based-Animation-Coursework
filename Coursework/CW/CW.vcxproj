@@ -66,7 +66,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;glew32.lib;glfw3dll.lib;FreeImage.lib;assimp.lib;tinyxml.lib;jsoncpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;glew32.lib;glfw3dll.lib;FreeImage.lib;assimp.lib;tinyxml.lib;jsoncppDEBUG.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,6 +79,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,6 +100,7 @@
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GraphRenderer.cpp" />
     <ClCompile Include="IKHierarchy.cpp" />
+    <ClCompile Include="IKManager.cpp" />
     <ClCompile Include="IntersectionData.cpp" />
     <ClCompile Include="LineCollider.cpp" />
     <ClCompile Include="Link.cpp" />
@@ -121,6 +123,8 @@
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GraphRenderer.h" />
     <ClInclude Include="IKHierarchy.h" />
+    <ClInclude Include="IKManager.h" />
+    <ClInclude Include="IKModels.h" />
     <ClInclude Include="IntersectionData.h" />
     <ClInclude Include="LineCollider.h" />
     <ClInclude Include="Link.h" />

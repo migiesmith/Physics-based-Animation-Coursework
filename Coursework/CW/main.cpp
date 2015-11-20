@@ -9,7 +9,6 @@
 
 // Camera Variables
 target_camera targetCam;
-chase_camera chaseCam;
 free_camera freeCam;
 vec3 camPos; // The position of the current camera
 
@@ -22,7 +21,7 @@ mesh skyBox[3]; // The meshs for the skybox
 
 bool isWireframe = false; // Whether or not to render in wireframe
 
-vec3 ambientLightPosition = vec3(300, 600, 0); // Set the position of the ambient light
+vec3 ambientLightPosition = vec3(0, 400, 0); // Set the position of the ambient light
 
 double cursor_x = 0.0; // Stores the position X of the cursor
 double cursor_y = 0.0; // Stores the position Y of the cursor
@@ -34,7 +33,7 @@ float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physic
 //TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
 ParticleEmitterManager* particManager;
 
-map<string, IKHierarchy> ikHierarchies;
+IKManager ikManager;
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
 
@@ -146,18 +145,7 @@ bool load_content()
 	// *************
 	// Load in models
 	// *************
-	/*
-	meshes["barn"] = Util::loadModel("barn\\barn.obj");
-	meshes["character"] = Util::loadModel("character\\character.3ds");
-	meshes["hay"] = Util::loadModel("hay\\hay.3ds");
-	meshes["bridge"] = Util::loadModel("bridge\\bridge.obj");
-	meshes["cloth"] = Util::loadModel("cloth\\cloth1.obj");
-	meshes["smallRock"] = Util::loadModel("island\\smallRock.obj");
-	meshes["largeRock"] = Util::loadModel("island\\largeRock.obj");
-	meshes["silo"] = Util::loadModel("silo\\silo.obj");
-	meshes["farmhouse"] = Util::loadModel("farmhouse\\farmhouse.obj");
-	meshes["glass"] = Util::loadModel("glass\\glass.obj");
-	*/
+
 	meshes["sphere"] = Util::loadModel("primitives\\sphere.obj");
 	meshes["cube"] = Util::loadModel("primitives\\cube.obj");
 	meshes["ground"] = Util::loadModel("primitives\\plane.obj");
@@ -184,10 +172,27 @@ bool load_content()
 	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
 
 	// Set up IK
-	ikHierarchies["walkingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
-	//ikHierarchies["reachingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
-	ikHierarchies["reachTester"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
-	ikHierarchies["reachTester"].rootBone->origin = vec3(20, 0, 20);
+	ikManager = IKManager();
+	ikManager["walkingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
+	ikManager["walkingMan"].rootBone->toRender = false;
+	ikManager["reachingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
+	ikManager["reachingMan"].rootBone->origin = vec3(-20, 0, 20);
+
+	// IK for testing reach
+	ikManager["reachTester0"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
+	ikManager["reachTester0"].rootBone->origin = vec3(23, 10, 25);
+
+	ikManager["reachTester1"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
+	ikManager["reachTester1"].rootBone->origin = vec3(24, 10, 25);
+
+	ikManager["reachTester2"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
+	ikManager["reachTester2"].rootBone->origin = vec3(25, 10, 25);
+
+	ikManager["reachTester3"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
+	ikManager["reachTester3"].rootBone->origin = vec3(26, 10, 25);
+
+	ikManager["reachTester4"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
+	ikManager["reachTester4"].rootBone->origin = vec3(27, 10, 25);
 
 	// Set up the particle manager
 	particManager = new ParticleEmitterManager();
@@ -326,7 +331,7 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["cubeA"].setCollider(new CubeCollider(vec3(-19, 15, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
+	sceneObjects["cubeA"].setCollider(new CubeCollider(vec3(-21, 15, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 
 
@@ -350,7 +355,7 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["cubeB"].setCollider(new CubeCollider(vec3(-21.5f, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
+	sceneObjects["cubeB"].setCollider(new CubeCollider(vec3(-21, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 
 	sceneObjects["cubeC"] = meshes["cube"];
@@ -362,14 +367,14 @@ void initSceneObjects(){
 		50.0f);
 	sceneObjects["cubeC"].setCollider(new CubeCollider(vec3(40, 20, 20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
-	sceneObjects["cubeD"] = meshes["cube"];
-	sceneObjects["cubeD"].set_texture(texs["white"]); // Sets the texture
+	sceneObjects["sphereA"] = meshes["sphere"];
+	sceneObjects["sphereA"].set_texture(texs["white"]); // Sets the texture
 	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
-	sceneObjects["cubeD"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
+	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["cubeD"].setCollider(new CubeCollider(vec3(-40, 30, -20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
+	sceneObjects["sphereA"].setCollider(new CubeCollider(vec3(-40, 30, -20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 	sceneObjects["reachTesterTarget"] = meshes["sphere"];
 	sceneObjects["reachTesterTarget"].get_transform().scale = vec3(0.2f,0.2f,0.2f);
@@ -378,7 +383,9 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
-	sceneObjects["reachTesterTarget"].get_transform().position = vec3(25,10,25);
+	sceneObjects["reachTesterTarget"].get_transform().position = vec3(25,15,25);
+
+	sceneObjects["reachingManTarget"] = sceneObjects["reachTesterTarget"];
 
 	//cubeB.rotate(vec3(0,0,1), 45.0f);
 	//sceneObjects["cubeB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
@@ -399,8 +406,8 @@ void initCameras(){
 	*/
 
 	//Target Camera
-	targetCam.set_position(vec3(1200.0f, 650.0f, 1200.0f));
-	targetCam.set_target(vec3(0.0f, -200.0f, 0.0f));
+	targetCam.set_position(vec3(100.0f, 70.0f, 100.0f));
+	targetCam.set_target(vec3(0.0f, 0.0f, 0.0f));
 	targetCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 
 	// Free Camera
@@ -454,56 +461,6 @@ void updateCameras(float delta_time)
 
 	// Update the camera
 	switch (currentCamera){
-	case Camera::Chase:
-		{
-			// The target object
-			static SceneObject &target_mesh = sceneObjects["island"];//.get_children())["character"];
-
-
-			/*
-				Rotate the camera around the y axis
-			*/
-			chaseCam.rotate(vec3((float)delta_y / 360.0f, 0, 0));
-
-
-			/*
-				rotate target mesh
-			*/
-			target_mesh.get_transform().rotate(vec3(0, -(float)delta_x / 360.0f, 0));
-
-
-			/*
-				Move the target mesh using keypresses
-			*/
-			quat ori = inverse(target_mesh.get_transform().orientation);
-
-			if (glfwGetKey(renderer::get_window(), GLFW_KEY_W))
-				target_mesh.get_transform().translate(vec3(0, 0, -20) * ori * delta_time);
-			if (glfwGetKey(renderer::get_window(), GLFW_KEY_S))
-				target_mesh.get_transform().translate(vec3(0, 0, 20) * ori * delta_time);
-			if (glfwGetKey(renderer::get_window(), GLFW_KEY_A))
-				target_mesh.get_transform().translate(vec3(-20, 0, 0) * ori * delta_time);
-			if (glfwGetKey(renderer::get_window(), GLFW_KEY_D))
-				target_mesh.get_transform().translate(vec3(20, 0, 0) * ori * delta_time);
-
-			target_mesh.update(delta_time);
-
-
-			/*
-				Move the camera to the targets position and orientation
-			*/
-			chaseCam.move(target_mesh.get_transform().position, eulerAngles(target_mesh.get_transform().orientation));
-
-
-			/*
-				update the camera
-			*/
-			chaseCam.update(delta_time);
-
-
-			camPos = chaseCam.get_position();
-		}
-		break;
 	case Camera::Target:
 			{
 
@@ -573,7 +530,7 @@ void updateLighting(float delta_time)
 {
 	mat4 rotationMat(1);
 	rotationMat = rotate(rotationMat, (quarter_pi<float>() / 6.0f)*delta_time, vec3(0.0, 1.0, 0.0));
-	ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
+	//ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
 
 	//Rotate the skyboxes (part of this method since the skybox contains the sun)
 	skyBox[1].get_transform().rotate(vec3(0, (quarter_pi<float>() / 12.0f)*delta_time, 0));
@@ -586,23 +543,49 @@ void updatePhysics(){
 
 		totalPhysicsTime += PHYSICS_TIME_STEP;
 
+		// Cube movement
+		float movementForce = 20.0f;
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(movementForce, 0.0, 0.0));
+
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN))
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(-movementForce, 0.0, 0.0));
+
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_LEFT))
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, movementForce));
+
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, -movementForce));
+
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, movementForce + 9.8, 0.0));
+
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, -movementForce, 0.0));
+
+		// refresh the spatial partioning grid with the sceneobjects
 		SPGrid::getInstance().update(sceneObjects);
 
-		for (auto& ikHierarchy : ikHierarchies){
-			ikHierarchy.second.update();
-		}
-		//ikHierarchy.endLinks["rightHand"]->reach(cubeA.position, PHYSICS_TIME_STEP);
-		ikHierarchies["walkingMan"].endLinks["leftFoot"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
-		ikHierarchies["walkingMan"].endLinks["rightFoot"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
-		ikHierarchies["walkingMan"].endLinks["lowerArmLeft"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
-		ikHierarchies["walkingMan"].endLinks["lowerArmRight"]->reach(ikHierarchies["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
+		// Update IK
+		ikManager.update();
+
+		// IK Demonstration updating - START
+		ikManager["walkingMan"].endLinks["leftFoot"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
+		ikManager["walkingMan"].endLinks["rightFoot"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
+		ikManager["walkingMan"].endLinks["lowerArmLeft"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
+		ikManager["walkingMan"].endLinks["lowerArmRight"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
+
+		sceneObjects["reachingManTarget"].get_transform().position = ikManager["reachingMan"].rootBone->origin + vec3(5, 5 + sin(totalPhysicsTime*2.0f) * 2.0f, sin(totalPhysicsTime*0.8f) * 4.0f);
+		ikManager["reachingMan"].endLinks["leftHand"]->reach(sceneObjects["reachingManTarget"].get_transform().position, PHYSICS_TIME_STEP);
+
+		ikManager["reachTester0"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+		ikManager["reachTester1"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+		ikManager["reachTester2"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+		ikManager["reachTester3"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+		ikManager["reachTester4"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+		// IK Demonstration updating - END
+
 		
-		ikHierarchies["reachTester"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
-
-		vec3 velocity = vec3(0,0,0);
-
-		SPGrid& spGrid = SPGrid::getInstance();
-
 		for (auto &e : sceneObjects)
 		{
 			e.second.update(PHYSICS_TIME_STEP);
@@ -625,21 +608,24 @@ bool update(float delta_time)
 	float fps = 1.0f / delta_time;
 	graphRen->pushData(fps);
 
-	float movementForce = 20.0f;
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_UP))
-		sceneObjects["cubeA"].getCollider()->addForce(vec3(movementForce, 0.0, 0.0));
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_DOWN))
-		sceneObjects["cubeA"].getCollider()->addForce(vec3(-movementForce, 0.0, 0.0));
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_LEFT))
-		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, movementForce));
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
-		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, -movementForce));
+	// IK target movement
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_I))
+		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, 0, 10) * delta_time;
 
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
-		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, movementForce + 9.8, 0.0));
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_K))
+		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, 0, -10) * delta_time;
 
-	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
-		sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, -movementForce, 0.0));
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_J))
+			sceneObjects["reachTesterTarget"].get_transform().position += vec3(-10, 0, 0) * delta_time;
+
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_L))
+			sceneObjects["reachTesterTarget"].get_transform().position += vec3(10, 0, 0) * delta_time;
+
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_T))
+		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, 10, 0) * delta_time;
+
+	if (glfwGetKey(renderer::get_window(), GLFW_KEY_Y))
+		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, -10, 0) * delta_time;
 
 	updateCameras(delta_time);
 	updateLighting(delta_time);
@@ -663,11 +649,6 @@ bool render()
 	mat4 V, P;
 	vec3 camDir;
 	switch (currentCamera){
-	case Camera::Chase:
-		V = chaseCam.get_view();
-		P = chaseCam.get_projection();
-		camDir = normalize(chaseCam.get_target() - chaseCam.get_position())*vec3(-1, -1, -1);
-		break;
 	case Camera::Target:
 		V = targetCam.get_view();
 		P = targetCam.get_projection();
@@ -696,11 +677,6 @@ bool render()
 
 	// Set the skybox positions relative to the current camera
 	switch (currentCamera){
-	case Camera::Chase:
-		skyBox[0].get_transform().position = chaseCam.get_position();
-		skyBox[1].get_transform().position = chaseCam.get_position();
-		skyBox[2].get_transform().position = chaseCam.get_position();
-		break;
 	case Camera::Target:
 		skyBox[0].get_transform().position = targetCam.get_position();
 		skyBox[1].get_transform().position = targetCam.get_position();
@@ -747,20 +723,23 @@ bool render()
 	// Render the list of SceneObjects
 	renderSceneObjects(V, P);
 
+
+	// Render IK
+	renderer::bind(texs["white"], 0);
+	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(-normalize(ambientLightPosition)));
+	ikManager.render(P * V, &mainEffect);
+	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
+
 	renderer::bind(texs["white"], 0);
 	renderer::bind(sceneObjects["cubeA"].get_material(), "mat");
-	
-
 	particManager->render(P*V);
 
 
 	glDisable(GL_DEPTH_TEST);
-
-
-
+	
 
 	LineCollider lineA = LineCollider(vec3(12.5f, 7.5f, 10), vec3(7.5f, 7.5f, 10), 1.0f);
-	LineCollider lineB = LineCollider(vec3(10, 5, 10), vec3(10, 10, 10), 1.0f);
+	LineCollider lineB = LineCollider(vec3(10 + sin(totalPhysicsTime), 5, 10), vec3(10 + sin(totalPhysicsTime), 10, 10), 1.0f);
 	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
 
 	IntersectionData lineIntersectionData = IntersectionData();
@@ -769,6 +748,10 @@ bool render()
 
 	vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
 	textRen->render3D((P * V), right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
+
+	// Render Object Controls
+	textRen->render3D((P * V), right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position);
+	textRen->render3D((P * V), right, "Q = up  _  E = down  _  arrow keys = forwardleft  back  right", sceneObjects["cubeA"].get_transform().position + vec3(0,2,0));
 
 	renderer::bind(colourPassThroughEffect);
 	//glPointSize(6.0f);
@@ -790,19 +773,6 @@ bool render()
 	// Render the spatial partitioning grid
 	if (toggleDebugMenu)
 		SPGrid::getInstance().render(colourPassThroughEffect);
-
-	// Render IK
-	for (auto& ikHierarchy : ikHierarchies){
-		ikHierarchy.second.render(P * V, colourPassThroughEffect);
-	}
-
-	// TODO IK
-	glDisable(GL_DEPTH_TEST);
-	renderer::bind(colourPassThroughEffect);
-	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 0, 1)));
-
-
-	glEnable(GL_DEPTH_TEST);
 
 	
 	// Disable wireframe

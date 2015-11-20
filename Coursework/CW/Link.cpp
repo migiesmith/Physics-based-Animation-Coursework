@@ -186,8 +186,11 @@ void Link::render(mat4& PV, effect& currentEffect){
 	if (toRender){
 		vec3 base = translationFromMat4(m_base);
 		vec3 end = vec4ToVec3(m_base * vec4(m_length, 0, 0, 1));
-		glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
-		Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect); //Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect);
+		//glUniform4fv(currentEffect.get_uniform_location("colour"), 1, value_ptr(vec4(0.6f, 0.6f, 0.6f, 1)));
+		if (_geom)
+			Util::renderIKModel(base, end, m_length, m_length, PV, currentEffect, *_geom);
+		else
+			Util::renderArrow(base, end, m_length, 0.5f, PV, currentEffect); //Util::renderArrow(base, end, m_length, 0.4f, PV, currentEffect);
 
 		/* TODO
 		if (debugRender){

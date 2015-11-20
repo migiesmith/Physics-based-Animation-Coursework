@@ -14,10 +14,16 @@ using namespace Util;
 
 	geometry arrowGeom;
 	geometry planeGeom;
+	material utilMaterial;
 
 	void Util::init(){
 		arrowGeom = loadModel("primitives\\arrow2.obj");
 		planeGeom = loadModel("primitives\\plane.obj");
+
+		utilMaterial.set_emissive(vec4(0.8,0.8,0.8, 1));
+		utilMaterial.set_diffuse(vec4(0.9, 0.9, 0.9, 1));
+		utilMaterial.set_specular(vec4(1, 1, 1, 1));
+		utilMaterial.set_shininess(5.0f);
 	}
 
 
@@ -131,6 +137,21 @@ using namespace Util;
 	}
 
 	void Util::renderArrow(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& PV, effect& currentEffect){
+		// Set up the rendering
+		setUpModelRendering(start, end, length, radius, PV, currentEffect);
+		// Render the arrow
+		renderer::render(arrowGeom);
+	}
+
+	void Util::renderIKModel(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& PV, effect& currentEffect, const geometry& geom){
+		// Set up the rendering
+		setUpModelRendering(start, end, length, radius, PV, currentEffect);
+		// Render the model
+		renderer::render(geom);
+	}
+
+
+	void Util::setUpModelRendering(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& PV, effect& currentEffect){
 		// Create a transform to store the rotation, translation and scale of the arrow
 		graphics_framework::transform t;
 
@@ -154,8 +175,9 @@ using namespace Util;
 			GL_FALSE, // Transpose the matrix?
 			value_ptr(MVP)); // Pointer to matrix data
 
-		// Render the arrow
-		renderer::render(arrowGeom);
+		glUniformMatrix4fv(currentEffect.get_uniform_location("M"), 1, GL_FALSE, value_ptr(t.get_transform_matrix()));
+		renderer::bind(utilMaterial, "mat");
+
 	}
 
 	void Util::renderPlane(const vec3& pos, const  vec3 scale, const  mat4& VP, effect& currentEffect){

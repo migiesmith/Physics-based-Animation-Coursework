@@ -17,6 +17,10 @@ using namespace Util;
 
 class Link
 {
+private:
+	
+	geometry* _geom;
+
 public:
 
 	mat4 m_base;
@@ -44,6 +48,8 @@ public:
 	void removeChild(Link* l);
 	void setParent(string childName, Link* l);
 	Link* getRoot();
+
+	void setGeometry(geometry* geom){ _geom = geom; }
 
 	void reach(vec3& target, float physicsTimeStep);
 	void update();

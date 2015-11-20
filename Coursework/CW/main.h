@@ -20,7 +20,7 @@
 #include "ParticleEmitterManager.h"
 
 #include "SPGrid.h"
-#include "IKHierarchy.h"
+#include "IKManager.h"
 
 class SceneObject;
 
@@ -49,7 +49,7 @@ static mesh menuQuad; // Quad used for rendering the menu
 // Enum for current camera values
 enum Camera
 {
-	Chase, Target, Free
+	Target, Free
 };
 
 // Enum for menu buttons
@@ -69,9 +69,6 @@ short targetCamDirection = -1; // The direction that the targetCam rotates
 TextRenderer* textRen;
 GraphRenderer* graphRen;
 
-texture loadTexture(string textureName, bool mipmaps, bool antisoptrics);
-texture loadTexture(string textureName);
-geometry loadModel(string modelName);
 
 void finishFrame();
 void initSceneObjects();

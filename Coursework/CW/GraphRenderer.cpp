@@ -82,21 +82,21 @@ void GraphRenderer::render(const mat4 &orthoMVP, const float x, const float y){
 	// Render max value
 	mat4 maxTextM = Util::translationMat4(vec3(textRenderer->getStringWidth(xText) + width, -height * 0.5f + textRenderer->getFontHeight()*0.5f + textRenderer->getFontHeight(), 0));
 	std::ostringstream maxStr;
-	maxStr << std::setprecision(2) << getMaxDataValue();
+	maxStr << std::setprecision(3) << getMaxDataValue();
 	string maxValue = maxStr.str() + " max";
 	textRenderer->render(orthoMVP * maxTextM, maxValue, x, y);
 
 	// Render avg value
 	mat4 avgTextM = Util::translationMat4(vec3(textRenderer->getStringWidth(xText) + width, -height * 0.5f + textRenderer->getFontHeight()*0.5f, 0));
 	std::ostringstream avgStr;
-	avgStr << std::setprecision(2) << getAverageDataValue();
+	avgStr << std::setprecision(3) << getAverageDataValue();
 	string averageValue = avgStr.str() + " avg";
 	textRenderer->render(orthoMVP * avgTextM, averageValue, x, y);
 
 	// Render min value
 	mat4 minTextM = Util::translationMat4(vec3(textRenderer->getStringWidth(xText) + width, -height * 0.5f + textRenderer->getFontHeight()*0.5f - textRenderer->getFontHeight(), 0));
 	std::ostringstream minStr;
-	minStr << std::setprecision(2) << getMinDataValue();
+	minStr << std::setprecision(3) << getMinDataValue();
 	string minValue = minStr.str() + " min";
 	textRenderer->render(orthoMVP * minTextM, minValue, x, y);
 }

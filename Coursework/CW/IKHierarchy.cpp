@@ -1,6 +1,5 @@
 #include "IKHierarchy.h"
 
-
 IKHierarchy::IKHierarchy(char* filepath)
 {
 	std::string line;
@@ -72,6 +71,11 @@ Link* IKHierarchy::parseBone(Json::Value jsonBone){
 	if (!jsonBone["reach"].isNull())
 		link->linkReach = jsonBone["reach"].asInt();
 	
+	if (!jsonBone["modelName"].isNull()){
+		IKModels::getInstance().addModel(jsonBone["modelName"].asString());
+		link->setGeometry(&IKModels::getInstance()[jsonBone["modelName"].asString()]);
+	}
+
 	return link;
 }
 

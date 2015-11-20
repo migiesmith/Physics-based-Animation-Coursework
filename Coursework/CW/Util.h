@@ -16,6 +16,7 @@ using namespace glm;
 
 namespace Util
 {
+
 	// Loads in a model and returns it
 	geometry loadModel(string modelName);
 	// Loads in a texture and returns it
@@ -37,6 +38,9 @@ namespace Util
 	vec3 vec4ToVec3(vec4 v);
 
 	void renderArrow(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& VP, effect& currentEffect);
+	void renderIKModel(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& PV, effect& currentEffect, const geometry& geom);
+	void setUpModelRendering(const vec3& start, const vec3& end, const float length, const float radius, const  mat4& PV, effect& currentEffect);
+
 	void renderPlane(const vec3& pos, const vec3 scale, const mat4& VP, effect& currentEffect);
 
 	mat4 mult(const mat4& a, const mat4& b);

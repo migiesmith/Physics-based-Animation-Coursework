@@ -7,6 +7,7 @@
 
 #include "Link.h"
 #include "LineCollider.h"
+#include "IKModels.h"
 
 using namespace std;
 

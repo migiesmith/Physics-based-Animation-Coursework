@@ -48,7 +48,6 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 void main() {
 
-	// Generate the blade
 	for (int i = 0; i < quadPoints.length(); i++){
 		vec4 position = gl_in[0].gl_Position + (quadPoints[i] * particle_size ) * rotationMatrix(vec3(0, 0, 1), testTime[0] * length(gl_in[0].gl_Position.xyz));
 		gl_Position = position;

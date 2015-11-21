@@ -12,7 +12,7 @@ TODO
 	axis and angle representing the default rotation
 	inAngleLimits representing the min and max values the link can rotate (relative to the initial orientation from axis-angle)
 */
-Link::Link(vec3 &axis, float angle, vector<vec3>* inAngleLimits){
+Link::Link(vec3 &axis, const float& angle, vector<vec3>* inAngleLimits){
 	origin = vec3(0, 0, 0); // Set the origin to zero
 	m_quat = angleAxis(angle, axis); // Create a quaternian representing the axis and angle
 	m_qWorld = quat(); // Create a world space quaternian for later use
@@ -44,7 +44,7 @@ Link::Link(vec3 &axis, float angle, vector<vec3>* inAngleLimits){
 	inAngleLimits representing the min and max values the link can rotate (relative to the initial orientation from axis-angle)
 	length stating how long the link should be
 */
-Link::Link(vec3 &axis, float angle, vector<vec3>* inAngleLimits, float length) : Link(axis, angle, inAngleLimits){
+Link::Link(vec3 &axis, const float& angle, vector<vec3>* inAngleLimits, const float& length) : Link(axis, angle, inAngleLimits){
 	m_length = length; // Set the link length to length and pass the rest to the other constructor
 }
 
@@ -84,7 +84,7 @@ Link* Link::getRoot(){
 	return parent != NULL ? parent->getRoot() : this;
 }
 
-void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
+void Link::privateReach(const Link& endLink, const vec3& target, const float& physicsTimeStep){
 	// The position of the end of the end link
 	vec3 endVec = vec4ToVec3(endLink.m_base * vec4(endLink.m_length, 0, 0, 1));
 	//     +
@@ -110,7 +110,6 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 	// Calculate the rotation angle
 	float angle = acos( fmin(fmax(dot(currToEnd, currToTarget), -1.0f), 1.0f) );
 
-	angle *= priority;
 	if (angle == 0.0f) return;
 	
 	// Calculate the quaternian of the rotation
@@ -149,15 +148,22 @@ void Link::privateReach(Link& endLink, vec3& target, float physicsTimeStep){
 
 
 
-void Link::reach(vec3& target, float physicsTimeStep){
+void Link::reach(const vec3& target, const float& physicsTimeStep){
+	// Check if the target would cause an error to this link
 	if (!Util::equals(target, translationFromMat4(m_base)))
+		// Reach for the target
 		privateReach(*this, target, physicsTimeStep);
 
 	Link* p = parent;
 	int linksUpdated = 0;
+	// Loop up through the hierarchy towards the root until the
+	// root it reached or until the reach limit for this link is met
 	while (p != NULL && (linksUpdated < linkReach || linkReach == -1)){
+		// Reach for the target as the parent
 		p->privateReach(*this, target, physicsTimeStep);
+		// Next parent
 		p = p->parent;
+		// Keep track of how many we have checked (so we only reach for our limit)
 		linksUpdated++;
 	}
 
@@ -166,23 +172,32 @@ void Link::reach(vec3& target, float physicsTimeStep){
 
 void Link::update(){
 
+	// Get the rotation Matrix by converting the quaternion rotation to a matrix
 	mat4 R1 = transpose(glm::mat4_cast(m_quat));
+	// Get the translation
 	mat4 T1 = translationMat4(origin + (parent ? vec3(parent->m_length,0,0) : vec3(0,0,0)));
+	// Merge the two matrices
 	m_base = T1 * R1;
-	
+
+	// Set the world rotation
 	m_qWorld = m_quat;
 
-	if (parent) m_base = parent->m_base * m_base;
+	// Apply the parent's matrices if there is a parent
+	if (parent){
+		m_qWorld = m_quat * parent->m_qWorld;
+		m_base = parent->m_base * m_base;
+	}
 
-	if (parent) m_qWorld = m_quat * parent->m_qWorld;
+	// Normalize the world rotation quaternion
 	m_qWorld = normalize(m_qWorld);
 
+	// Update the children of this link
 	for (auto& child : children){
 		child.second->update();
 	}
 }
 
-void Link::render(mat4& PV, effect& currentEffect){
+void Link::render(const mat4& PV, effect& currentEffect){
 	if (toRender){
 		vec3 base = translationFromMat4(m_base);
 		vec3 end = vec4ToVec3(m_base * vec4(m_length, 0, 0, 1));

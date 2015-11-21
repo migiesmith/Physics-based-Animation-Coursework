@@ -1,7 +1,7 @@
 #include "TornadoParticleEmitter.h"
 
 
-TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const string texturePath, const int columns, const int rows) : ParticleEmitter(v, particleCount, force, lifeTime, texturePath, columns, rows)
+TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const int columns, const int rows) : ParticleEmitter(v, particleCount, force, lifeTime, columns, rows)
 {
 }
 

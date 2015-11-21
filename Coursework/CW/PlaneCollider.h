@@ -29,6 +29,8 @@ public:
 	void intersects(Collider& other, const vec3& velocity, IntersectionData& data);
 	void cubeIntersection(CubeCollider& other, const vec3& velocity, IntersectionData& data);
 
+	vec3 rayIntersection(vec3& start, vec3& direction);
+
 	~PlaneCollider();
 };
 

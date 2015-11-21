@@ -47,6 +47,17 @@ void PlaneCollider::intersects(Collider& other, const vec3& velocity, Intersecti
 	}
 }
 
+vec3 PlaneCollider::rayIntersection(vec3& start, vec3& direction){
+	vec3 P;
+	
+	float d = -dot(position, normal);
+	float t = -(dot(start, normal + d)) / dot(direction, normal);
+
+	P = start + t * direction;
+
+	return P;
+}
+
 void PlaneCollider::cubeIntersection(CubeCollider& other, const vec3& velocity, IntersectionData& data){
 
 
@@ -60,18 +71,19 @@ void PlaneCollider::cubeIntersection(CubeCollider& other, const vec3& velocity, 
 		// Calculate the distance between the plane and the sphere
 		float d = dot(normal, (corner - position)) - d0;
 
-		if (d <= minDist)
+		if (d <= minDist){
 			minDist = d;
+
+			// Set the point of intersection to the closest colliding corner
+			data.intersection = corner;
+		}
 	}
 
 	// Set the intersection amount to d
 	data.amount = minDist;
 	// If the intersection amount is less than or equal to 0 then there is an intersection
 	data.doesIntersect = data.amount <= 0;
-
-	// Set the point of intersection to the closest point between the plane and the sphere
-	data.intersection = other.position - normal*data.amount;
-
+	
 	data.direction = normal;
 
 }

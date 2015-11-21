@@ -24,7 +24,7 @@ void SPCell::intersects(Collider& inCollider, const vec3& velocity, Intersection
 				
 				inCollider.addForce(data.direction * dot(data.direction, inCollider.velocity));
 				inCollider.addForce(vec3(0, 9.8, 0) * dot(vec3(0, 1, 0), data.direction)*2.0f);
-
+				
 			}
 
 			testCount++;

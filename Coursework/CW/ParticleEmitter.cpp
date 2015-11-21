@@ -1,25 +1,17 @@
 #include "ParticleEmitter.h"
 
 
-ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const string texturePath, const int columns, const int rows) : vec3(v)
+ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const int columns, const int rows) : vec3(v)
 {
 	this->force = force;
 	this->lifeTime = lifeTime;
 	this->particleCount = particleCount;
 	for (int i = 0; i < particleCount; i++){
-		Particle& p = Particle(v, 0.1f);
+		Particle& p = Particle(v, 0.5f);
 		p.isAlive = false;
 		particles.push_back(p);
 	}
-	// Add Shaders
-	particleEffect.add_shader("..\\resources\\shaders\\passthrough_shaders\\texture_passthrough.vert", GL_VERTEX_SHADER);
-	particleEffect.add_shader("..\\resources\\shaders\\particle_shader\\particle_shader.geo", GL_GEOMETRY_SHADER);
-	particleEffect.add_shader("..\\resources\\shaders\\particle_shader\\particle_shader.frag", GL_FRAGMENT_SHADER);
 
-	// Build effect
-	particleEffect.build();
-
-	tex = Util::loadTexture(texturePath);
 	this->columns = columns;
 	this->rows = rows;
 
@@ -58,20 +50,20 @@ void ParticleEmitter::render(const mat4& PV){
 
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
-	renderer::bind(particleEffect);
+	renderer::bind(*particleShader);
 
 	glUniformMatrix4fv(
-		particleEffect.get_uniform_location("MVP"), // Location of uniform
+		particleShader->get_uniform_location("MVP"), // Location of uniform
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
 		value_ptr(PV)); // Pointer to matrix data
 
-	renderer::bind(tex, 0);
+	renderer::bind(*tex, 0);
 
-	glUniform4fv(particleEffect.get_uniform_location("colour"), 1, value_ptr(colour));
-	glUniform1f(particleEffect.get_uniform_location("lifeTime"), lifeTime);
-	glUniform1f(particleEffect.get_uniform_location("xCoordInterval"), 1.0f / columns);
-	glUniform1f(particleEffect.get_uniform_location("yCoordInterval"), 1.0f / rows);
+	glUniform4fv(particleShader->get_uniform_location("colour"), 1, value_ptr(colour));
+	glUniform1f(particleShader->get_uniform_location("lifeTime"), lifeTime);
+	glUniform1f(particleShader->get_uniform_location("xCoordInterval"), 1.0f / columns);
+	glUniform1f(particleShader->get_uniform_location("yCoordInterval"), 1.0f / rows);
 
 
 	struct Vertex {
@@ -84,7 +76,7 @@ void ParticleEmitter::render(const mat4& PV){
 	int vertNum = 0;
 	for (Particle& p : particles){
 		// Add particle to vertexdata
-		vertexdata[vertNum] = { { p.x, p.y, p.z }, { lifeTime - p.lifeTime } };
+		vertexdata[vertNum] = { { p.x, p.y, p.z }, { p.lifeTime } };
 		vertNum++;
 	}
 
@@ -104,8 +96,8 @@ void ParticleEmitter::render(const mat4& PV){
 
 	delete[] vertexdata;
 
-	int posAttrib = glGetAttribLocation(particleEffect.get_program(), "position");
-	int totalTimeAttrib = glGetAttribLocation(particleEffect.get_program(), "totalTime");
+	int posAttrib = glGetAttribLocation(particleShader->get_program(), "position");
+	int totalTimeAttrib = glGetAttribLocation(particleShader->get_program(), "totalTime");
 	
 	// set up vertex attributes
 	glEnableVertexAttribArray(posAttrib);
@@ -114,8 +106,7 @@ void ParticleEmitter::render(const mat4& PV){
 	glVertexAttribPointer(totalTimeAttrib, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, vertTime));
 
 
-	// Remder the string
-	renderer::bind(tex, 0);
+	// Remder the particles
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
 	glDrawArrays(GL_POINTS, 0, NUM_VERTS);

@@ -20,6 +20,7 @@ class Link
 private:
 	
 	geometry* _geom;
+	void privateReach(const Link& endLink, const vec3& target, const float& physicsTimeStep);
 
 public:
 
@@ -32,7 +33,6 @@ public:
 	bool ignoreCollision;
 	bool toRender = true;
 	bool debugRender = false;
-	float priority = 1.0f;
 	vector<vec3> angleLimits;
 
 	int linkReach = -1; // Determines how many links this link can affect
@@ -40,8 +40,8 @@ public:
 	Link* parent;
 	map<string, Link*> children;
 
-	Link(vec3& axis, float angle, vector<vec3>* angleLimits);
-	Link(vec3& axis, float angle, vector<vec3>* angleLimits, float length);
+	Link(vec3& axis, const float& angle, vector<vec3>* angleLimits);
+	Link(vec3& axis, const float& angle, vector<vec3>* angleLimits, const float& length);
 	
 	void addChild(string name, Link* l);
 	void removeChild(string name);
@@ -51,13 +51,11 @@ public:
 
 	void setGeometry(geometry* geom){ _geom = geom; }
 
-	void reach(vec3& target, float physicsTimeStep);
+	void reach(const vec3& target, const float& physicsTimeStep);
 	void update();
-	void render(mat4& PV, effect& currentEffect);
+	void render(const mat4& PV, effect& currentEffect);
 
 	~Link();
 
-private:
-	void privateReach(Link& endLink, vec3& target, float physicsTimeStep);
 };
 

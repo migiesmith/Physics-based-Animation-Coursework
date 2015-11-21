@@ -10,9 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "models", "models", "{2A7C624E-4CC2-4A47-BBEF-5441FA222F5B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shaders", "shaders", "{2194805E-ABC9-4D12-A0CD-98C0073AEC73}"
-	ProjectSection(SolutionItems) = preProject
-		resources\shaders\particle_shader.comp = resources\shaders\particle_shader.comp
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "textures", "textures", "{CFBA0286-F119-4C28-B1EE-F2F1B076D8DA}"
 	ProjectSection(SolutionItems) = preProject

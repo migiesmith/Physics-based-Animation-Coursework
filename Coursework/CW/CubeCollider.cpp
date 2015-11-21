@@ -162,7 +162,7 @@ void CubeCollider::oBBCollision(CubeCollider& other, const vector<vec3*>& norms,
 	vector<float> depth = {};
 	vector<vec3> axis = {};
 
-	for (int i = 0; i < norms.size(); i++){
+	for (int i = 0; i < (int)norms.size(); i++){
 		if (!isZeroVec3(*norms[i])){
 			pair<bool, float> out = checkProjectedIntersection(getCorners(2.0f), other.getCorners(2.0f), *norms[i], offset);
 
@@ -213,9 +213,9 @@ pair<bool, float> CubeCollider::checkProjectedIntersection(vector<vec3>& corners
 	return pair<bool, float>((longSpan <= sumSpan), (sumSpan - longSpan));
 }
 
-void CubeCollider::setRotation(vec3 axis, float degrees){
+void CubeCollider::setRotation(const mat4& rotation){
 	if (colliderType == ColliderTypes::OBBCUBE){
-		rotation = Util::rotationMat4(axis, degrees);
+		this->rotation = rotation;
 		vector<vec3> newNorms{
 			vec3(1.0, 0.0, 0.0),
 			vec3(0.0, 1.0, 0.0),
@@ -260,56 +260,6 @@ vector<vec3> CubeCollider::getCorners(const float& scale){
 			position + Util::vec4ToVec3(Util::vec3ToVec4(vec3(halfDimen.x, -halfDimen.y, -halfDimen.z)) * rotation)//Vec3(1.0,-1.0,-1.0)
 		};
 	}
-}
-
-IntersectionData CubeCollider::rayCast(vec3& start, vec3& direction){
-	return rayCast(start, direction, std::numeric_limits<float>::max());
-}
-
-IntersectionData CubeCollider::rayCast(vec3& start, vec3& direction, float distance){
-	IntersectionData data = IntersectionData();
-
-	data.amount = distance;
-
-	vec3 delta = normalize(position - start);
-
-	float tMin = 0.0f;
-	float tMax = distance;
-
-	vec3 minPoint = -dimensions * 0.25f;
-	vec3 maxPoint = dimensions * 0.25f;
-
-	for (int i = 0; i < normals.size(); i++){
-
-		float e = dot(normals[i], delta);
-		float f = dot(direction, normals[i]);
-
-		if (fabs(f) > 0.0f){
-			// Beware, don't do the division if f is near 0 ! See full source code for details. 
-			float t1 = (e + minPoint[i]) / f; // Intersection with the "left" plane
-			float t2 = (e + maxPoint[i]) / f; // Intersection with the "right" plane
-
-			if (t1 > t2){ // if wrong order
-				float w = t1; t1 = t2; t2 = w; // swap t1 and t2
-			}
-			// tMax is the nearest "far" intersection (amongst the X,Y and Z planes pairs)
-			if (t2 < tMax) tMax = t2;
-			// tMin is the farthest "near" intersection (amongst the X,Y and Z planes pairs)
-			if (t1 > tMin) tMin = t1;
-
-			if (tMax < tMin)
-				return data;
-		}
-		else{
-			if (-e + minPoint[i] > 0.0f || -e + maxPoint[i] < 0.0f)
-				return data;
-		}
-	}
-	data.intersection = position + (direction*-tMax);
-	data.amount = magnitude(data.intersection - start);
-	data.direction = direction;
-	data.doesIntersect = true;
-	return data;
 }
 
 float CubeCollider::sqdDistPointAABB(vec3 p, CubeCollider aabb){

@@ -40,7 +40,7 @@ public:
 	void oBBCollision(CubeCollider& other, const vector<vec3*>& norms, IntersectionData& data);
 	pair<bool, float> checkProjectedIntersection(vector<vec3>& corners0, vector<vec3>& corners1, const vec3& axis, const vec3& offset);
 	vector<vec3> getCorners(const float& scale);
-	void setRotation(vec3 axis, float degrees);
+	void setRotation(const mat4& rotation);
 	float sqdDistPointAABB(vec3 p, CubeCollider aabb);
 	float sqdValue(float pVal, float bmin, float bmax);
 
@@ -49,9 +49,6 @@ public:
 	void sphereToCubeCollision(SphereCollider& sphere, vec3 velocity, IntersectionData& data);
 	bool testSphereObb(SphereCollider& sphere, vec3 pt);
 	vec3 closestPtOnOBB(vec3 v);
-
-	IntersectionData rayCast(vec3& start, vec3& direction);
-	IntersectionData rayCast(vec3& start, vec3& direction, float distance);
 
 	// Returns AABB Min
 	vec3 getMin();

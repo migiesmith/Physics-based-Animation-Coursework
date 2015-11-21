@@ -29,6 +29,7 @@ double cursor_y = 0.0; // Stores the position Y of the cursor
 float totalTime = 0.0f; // Stores how much time has passed (used for time based events like model bobbing and light movement)
 float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physics engine (used for time based events such as ik walking)
 
+vec3 rayDir, rayStart, rayEnd;
 
 //TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
 ParticleEmitterManager* particManager;
@@ -64,10 +65,48 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 
 	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
 
-		//pair<vec3, vec3> posAndDir = Util::screenToWorld
-		vec3 pos = freeCam.get_position();
-		vec3 camDir = normalize(freeCam.get_target() - freeCam.get_position());
+		/*
+		Gets the current mouse position
+		*/
+		double current_x;
+		double current_y;
+		glfwGetCursorPos(renderer::get_window(), &current_x, &current_y);
 		
+		// Initialize variables required to create ray
+		float dx, dy;
+		auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
+		mat4 invMatrix, viewMatrix;
+		
+		// Get the screen coords for projecting
+		dx = tanf(quarter_pi<float>()*0.5f)*((current_x / (float)renderer::get_screen_width() - 0.5f)*2.0f) * aspect;
+		dy = tanf(quarter_pi<float>()*0.5f)*((1.0f - current_y / (float)renderer::get_screen_height() - 0.5f)*2.0f);
+
+		// Project the coords into world space
+		viewMatrix = freeCam.get_view();
+		invMatrix = inverse(viewMatrix);
+		rayStart = vec3(dx*MYNEAR, dy*MYNEAR, -MYNEAR);
+		rayEnd = vec3(dx*MYFAR, dy*MYFAR, -MYFAR);
+		
+		rayStart = vec4ToVec3(invMatrix * vec3ToVec4(rayStart));
+		rayEnd = vec4ToVec3(invMatrix * vec3ToVec4(rayEnd));
+
+		// Get the ray direction
+		rayDir = normalize(rayEnd - rayStart);
+
+		// Get the intersection point
+		vec3 P = ((PlaneCollider*)sceneObjects["ground"].getCollider())->rayIntersection(rayStart, rayDir);
+
+		// Check if the ray is within scene bounds
+		if (SPGrid::getInstance().getPosInGrid(P) != -1){
+			//cout << vec3ToString(P) << endl;
+			ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 15 + ((int)totalTime) % 100, 0), 10, vec3(15, 0, 15), 3.0f, 3, 3);
+			newEmitter->emitSpeed = 3.5f;
+			static int AddedParticleCounter = 1;
+			std::ostringstream os;
+			os << AddedParticleCounter++;
+
+			particManager->add(os.str(), newEmitter, "particles\\bouncyball3x3.png");
+		}
 
 		if (toggleDebugMenu){
 			// Get the current mouse pos
@@ -197,9 +236,10 @@ bool load_content()
 	// Set up the particle manager
 	particManager = new ParticleEmitterManager();
 	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 1000, vec3(0, 80, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	particManager->add("particles", new ParticleEmitter(vec3(40, 40, 0), 300, vec3(15, 0, 15), 3.0f, "particles\\bouncyball3x3.png", 3, 3));
-	//particManager->remove("particles");
-	particManager->getEmitter("particles")->setColour(vec4(0.1325, 0.35, 0.523, 1));
+	ParticleEmitter* waterEmitter = new ParticleEmitter(vec3(40, 40, 0), 100, vec3(45, 0, 0), 5.0f, 3, 3);
+	waterEmitter->setColour(vec4(0.1325, 0.35, 0.523, 1));
+	waterEmitter->emitSpeed = 30.0f;
+	particManager->add("particles", waterEmitter, "particles\\bouncyball3x3.png");
 
 	textRen = new TextRenderer("Quikhand\\font", &passThroughEffect);
 	textRen->setFontSize(10.0f);
@@ -387,7 +427,7 @@ void initSceneObjects(){
 
 	sceneObjects["reachingManTarget"] = sceneObjects["reachTesterTarget"];
 
-	//cubeB.rotate(vec3(0,0,1), 45.0f);
+	//((CubeCollider*)sceneObjects["cubeB"].getCollider())->setRotation(rotationMat4(vec3(0, 0, 1), 45.0f));
 	//sceneObjects["cubeB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
 
 }
@@ -395,23 +435,14 @@ void initSceneObjects(){
 void initCameras(){
 	// Set camera properties
 	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
-
-	//Chase Camera
-	/*
-	chaseCam.set_pos_offset(vec3(0.0f, 25.0f, 15.0f));
-	chaseCam.set_springiness(0.5f);
-	chaseCam.move( (*sceneObjects["island"].get_children())["character"].get_transform_with_parent().position,
-		eulerAngles((*sceneObjects["island"].get_children())["character"].get_transform_with_parent().orientation));
-	chaseCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
-	*/
-
+	
 	//Target Camera
 	targetCam.set_position(vec3(100.0f, 70.0f, 100.0f));
 	targetCam.set_target(vec3(0.0f, 0.0f, 0.0f));
 	targetCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 
 	// Free Camera
-	freeCam.set_position(vec3(0.0f, 85.0f, 0.0f));
+	freeCam.set_position(vec3(0.0f, 5.0f, 30.0f));
 	freeCam.set_projection(quarter_pi<float>(), aspect, MYNEAR, MYFAR);
 
 	// MVP for post processing (Orthographics projection)
@@ -438,7 +469,7 @@ void updateCameras(float delta_time)
 	*/
 	double delta_x = 0;
 	double delta_y = 0;
-
+	
 	if (glfwGetMouseButton(renderer::get_window(), GLFW_MOUSE_BUTTON_2)){
 		delta_x = current_x - cursor_x;
 		delta_y = cursor_y - current_y;
@@ -524,17 +555,6 @@ void updateCameras(float delta_time)
 	cursor_x = current_x;
 	cursor_y = current_y;
 
-}
-
-void updateLighting(float delta_time)
-{
-	mat4 rotationMat(1);
-	rotationMat = rotate(rotationMat, (quarter_pi<float>() / 6.0f)*delta_time, vec3(0.0, 1.0, 0.0));
-	//ambientLightPosition = vec3(rotationMat * vec4(ambientLightPosition, 1.0f));
-
-	//Rotate the skyboxes (part of this method since the skybox contains the sun)
-	skyBox[1].get_transform().rotate(vec3(0, (quarter_pi<float>() / 12.0f)*delta_time, 0));
-	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
 }
 
 void updatePhysics(){
@@ -628,14 +648,16 @@ bool update(float delta_time)
 		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, -10, 0) * delta_time;
 
 	updateCameras(delta_time);
-	updateLighting(delta_time);
+
+	//Rotate the skyboxes (part of this method since the skybox contains the sun)
+	skyBox[1].get_transform().rotate(vec3(0, (quarter_pi<float>() / 12.0f)*delta_time, 0));
+	skyBox[2].get_transform().rotate(vec3(0, -(quarter_pi<float>() / 12.0f)*delta_time, 0));
 
 	return true;
 }
 
 // Renders a SceneObject and it's children
-void renderSceneObjects(const mat4 &V, const mat4 &P){
-	mat4 VP = P * V;
+void renderSceneObjects(const mat4 &VP){
 	// Render the SceneObjects
 	for (auto& mapObj : sceneObjects){
 		mapObj.second.render(VP, mainEffect);
@@ -646,20 +668,23 @@ bool render()
 {
 
 	// Set up the view, projection and camera direction
-	mat4 V, P;
+	mat4 tempV, tempP;
 	vec3 camDir;
 	switch (currentCamera){
 	case Camera::Target:
-		V = targetCam.get_view();
-		P = targetCam.get_projection();
+		tempV = targetCam.get_view();
+		tempP = targetCam.get_projection();
 		camDir = normalize(targetCam.get_target() - targetCam.get_position())*vec3(-1, -1, -1);
 		break;
 	case Camera::Free:
-		V = freeCam.get_view();
-		P = freeCam.get_projection();
+		tempV = freeCam.get_view();
+		tempP = freeCam.get_projection();
 		camDir = normalize(freeCam.get_target() - freeCam.get_position())*vec3(-1, -1, -1);
 		break;
 	}
+
+
+	mat4 VP = tempP * tempV;
 
 	// Bind the main framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -698,7 +723,7 @@ bool render()
 	// Render each sky box
 	for (int i = 0; i < 3; i++){
 		mat4 M = skyBox[i].get_transform().get_transform_matrix();
-		mat4 MVP = P * V * M;
+		mat4 MVP = VP * M;
 		glUniformMatrix4fv(
 			passThroughEffect.get_uniform_location("MVP"), // Location of uniform
 			1, // Number of values - 1 mat4
@@ -721,18 +746,18 @@ bool render()
 	glUniform1f(mainEffect.get_uniform_location("totalTime"), totalTime);
 	
 	// Render the list of SceneObjects
-	renderSceneObjects(V, P);
+	renderSceneObjects(VP);
 
 
 	// Render IK
 	renderer::bind(texs["white"], 0);
 	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(-normalize(ambientLightPosition)));
-	ikManager.render(P * V, &mainEffect);
+	ikManager.render(VP, &mainEffect);
 	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
 
 	renderer::bind(texs["white"], 0);
 	renderer::bind(sceneObjects["cubeA"].get_material(), "mat");
-	particManager->render(P*V);
+	particManager->render(VP);
 
 
 	glDisable(GL_DEPTH_TEST);
@@ -747,11 +772,11 @@ bool render()
 	lineA.intersects(lineB, vec3(0, 0, 0), lineIntersectionData);
 
 	vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
-	textRen->render3D((P * V), right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
+	textRen->render3D(VP, right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
 
 	// Render Object Controls
-	textRen->render3D((P * V), right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position);
-	textRen->render3D((P * V), right, "Q = up  _  E = down  _  arrow keys = forwardleft  back  right", sceneObjects["cubeA"].get_transform().position + vec3(0,2,0));
+	textRen->render3D(VP, right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position);
+	textRen->render3D(VP, right, "Q = up  _  E = down  _  arrow keys = forwardleft  back  right", sceneObjects["cubeA"].get_transform().position + vec3(0, 2, 0));
 
 	renderer::bind(colourPassThroughEffect);
 	//glPointSize(6.0f);
@@ -760,13 +785,19 @@ bool render()
 		colourPassThroughEffect.get_uniform_location("MVP"), // Location of uniform
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
-		value_ptr(P * V)); // Pointer to matrix data
+		value_ptr(VP)); // Pointer to matrix data
 	glBegin(GL_LINES);
 	glVertex3f(lineA.position.x, lineA.position.y, lineA.position.z);
 	glVertex3f(lineA.endPosition.x, lineA.endPosition.y, lineA.endPosition.z);
 	glVertex3f(lineB.position.x, lineB.position.y, lineB.position.z);
 	glVertex3f(lineB.endPosition.x, lineB.endPosition.y, lineB.endPosition.z);
 	glEnd();
+
+	glBegin(GL_LINES);
+	glVertex3f(rayStart.x, rayStart.y, rayStart.z);
+	glVertex3f(rayDir.x * MYFAR, rayDir.y * MYFAR, rayDir.z * MYFAR);
+	glEnd();
+
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -811,7 +842,7 @@ void finishFrame(){
 
 	std::ostringstream avgStr;
 	avgStr << particManager->getParticleCount();
-	textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.79);
+	textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.79f);
 	graphRen->render(orthoMVP, 0.005f, 0.01f);
 
 	glEnable(GL_DEPTH_TEST);

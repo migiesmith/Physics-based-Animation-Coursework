@@ -47,7 +47,7 @@ void ParticleEmitter::awakenParticle(Particle& p){
 }
 
 void ParticleEmitter::render(const mat4& PV){
-
+	
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
 	renderer::bind(*particleShader);
@@ -62,8 +62,8 @@ void ParticleEmitter::render(const mat4& PV){
 
 	glUniform4fv(particleShader->get_uniform_location("colour"), 1, value_ptr(colour));
 	glUniform1f(particleShader->get_uniform_location("lifeTime"), lifeTime);
-	glUniform1f(particleShader->get_uniform_location("xCoordInterval"), 1.0f / columns);
-	glUniform1f(particleShader->get_uniform_location("yCoordInterval"), 1.0f / rows);
+	glUniform1f(particleShader->get_uniform_location("xCoordInterval"), 1.0f / (float)columns);
+	glUniform1f(particleShader->get_uniform_location("yCoordInterval"), 1.0f / (float)rows);
 
 
 	struct Vertex {
@@ -76,7 +76,7 @@ void ParticleEmitter::render(const mat4& PV){
 	int vertNum = 0;
 	for (Particle& p : particles){
 		// Add particle to vertexdata
-		vertexdata[vertNum] = { { p.x, p.y, p.z }, { p.lifeTime } };
+		vertexdata[vertNum] = { { p.x, p.y, p.z }, { lifeTime -  p.lifeTime } };
 		vertNum++;
 	}
 

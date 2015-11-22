@@ -65,48 +65,6 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 
 	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
 
-		/*
-		Gets the current mouse position
-		*/
-		double current_x;
-		double current_y;
-		glfwGetCursorPos(renderer::get_window(), &current_x, &current_y);
-		
-		// Initialize variables required to create ray
-		float dx, dy;
-		auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
-		mat4 invMatrix, viewMatrix;
-		
-		// Get the screen coords for projecting
-		dx = tanf(quarter_pi<float>()*0.5f)*((current_x / (float)renderer::get_screen_width() - 0.5f)*2.0f) * aspect;
-		dy = tanf(quarter_pi<float>()*0.5f)*((1.0f - current_y / (float)renderer::get_screen_height() - 0.5f)*2.0f);
-
-		// Project the coords into world space
-		viewMatrix = freeCam.get_view();
-		invMatrix = inverse(viewMatrix);
-		rayStart = vec3(dx*MYNEAR, dy*MYNEAR, -MYNEAR);
-		rayEnd = vec3(dx*MYFAR, dy*MYFAR, -MYFAR);
-		
-		rayStart = vec4ToVec3(invMatrix * vec3ToVec4(rayStart));
-		rayEnd = vec4ToVec3(invMatrix * vec3ToVec4(rayEnd));
-
-		// Get the ray direction
-		rayDir = normalize(rayEnd - rayStart);
-
-		// Get the intersection point
-		vec3 P = ((PlaneCollider*)sceneObjects["ground"].getCollider())->rayIntersection(rayStart, rayDir);
-
-		// Check if the ray is within scene bounds
-		if (SPGrid::getInstance().getPosInGrid(P) != -1){
-			//cout << vec3ToString(P) << endl;
-			ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 15 + ((int)totalTime) % 100, 0), 10, vec3(15, 0, 15), 3.0f, 3, 3);
-			newEmitter->emitSpeed = 3.5f;
-			static int AddedParticleCounter = 1;
-			std::ostringstream os;
-			os << AddedParticleCounter++;
-
-			particManager->add(os.str(), newEmitter, "particles\\bouncyball3x3.png");
-		}
 
 		if (toggleDebugMenu){
 			// Get the current mouse pos
@@ -124,25 +82,96 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 			double buttonWidth = (ratio * 0.63f);
 			double buttonHeight = (ratio * 0.5f);
 
+			bool buttonClicked = false;
+
 			// Loop through to check what button has been pressed
 			for (int i = 1; i < 8; i++){
 				for (int j = 0; j < 2; j++){
 					if (current_x < buttonWidth*i && current_x > buttonWidth*(i - 1)
 						&& current_y < 1.0 - buttonHeight*j && current_y > 1.0 - buttonHeight*(j + 1)){
 						switch (i + (7 * j) - 1){
-						case Buttons::Vignette:
-							// TODO buttons?
+						case Buttons::Particles:
+							toggleParticles = !toggleParticles;
+							buttonClicked = true;
+							break;
+						case Buttons::IK:
+							toggleIK = !toggleIK;
+							buttonClicked = true;
+							break;
+						case Buttons::FullSPGrid:
+							toggleFullSPGrid = !toggleFullSPGrid;
+							buttonClicked = true;
+							break;
+						case Buttons::SPGrid:
+							toggleSPGrid = !toggleSPGrid;
+							buttonClicked = true;
+							break;
+						case Buttons::ResetParticles:
+							initParticleManager();
+							buttonClicked = true;
 							break;
 						}
 					}
 				}
 			}
+
+			if (!buttonClicked)
+				attemptToMakeAParticleEmitter();
+		}
+		else{
+			attemptToMakeAParticleEmitter();
 		}
 
 	}
 
 }
 
+void attemptToMakeAParticleEmitter(){
+	if (!toggleParticles) return;
+	/*
+	Gets the current mouse position
+	*/
+	double current_x;
+	double current_y;
+	glfwGetCursorPos(renderer::get_window(), &current_x, &current_y);
+
+	// Initialize variables required to create ray
+	float dx, dy;
+	float aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
+	mat4 invMatrix, viewMatrix;
+
+	// Get the screen coords for projecting
+	dx = tanf(quarter_pi<float>()*0.5f)*(((float)current_x / (float)renderer::get_screen_width() - 0.5f)*2.0f) * aspect;
+	dy = tanf(quarter_pi<float>()*0.5f)*((1.0f - (float)current_y / (float)renderer::get_screen_height() - 0.5f)*2.0f);
+
+	// Project the coords into world space
+	viewMatrix = freeCam.get_view();
+	invMatrix = inverse(viewMatrix);
+	rayStart = vec3(dx*MYNEAR, dy*MYNEAR, -MYNEAR);
+	rayEnd = vec3(dx*MYFAR, dy*MYFAR, -MYFAR);
+
+	rayStart = vec4ToVec3(invMatrix * vec3ToVec4(rayStart));
+	rayEnd = vec4ToVec3(invMatrix * vec3ToVec4(rayEnd));
+
+	// Get the ray direction
+	rayDir = normalize(rayEnd - rayStart);
+
+	// Get the intersection point
+	vec3 P = ((PlaneCollider*)sceneObjects["ground"].getCollider())->rayIntersection(rayStart, rayDir);
+
+	// Check if the ray is within scene bounds
+	if (SPGrid::getInstance().getPosInGrid(P) != -1){
+		//cout << vec3ToString(P) << endl;
+		ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 15 + ((int)totalTime) % 100, 0), 10, vec3(rand() % 1600 - 800, 0, rand() % 1600 - 800), 3.0f, 3, 3);
+		newEmitter->setColour(vec4(rand() % 80 * 0.01f + 0.2f, rand() % 80 * 0.01f + 0.2f, rand() % 80 * 0.01f + 0.2f, 1));
+		newEmitter->emitSpeed = 3.5f;
+		static int AddedParticleCounter = 1;
+		std::ostringstream os;
+		os << AddedParticleCounter++;
+
+		particManager->add(os.str(), newEmitter, "particles\\bouncyball3x3.png");
+	}
+}
 
 bool initialise()
 {
@@ -173,7 +202,7 @@ bool initialise()
 
 	Util::init();
 
-	SPGrid::getInstance().init(20, 10, 20, 10, vec3(0, 0, 0));
+	SPGrid::getInstance().init(20, 7, 20, 10, vec3(0, 0, 0));
 	SPGrid::getInstance().setBasePos(0, -6, 0);
 	
 	return true;
@@ -204,8 +233,10 @@ bool load_content()
 
 	texs["red"] = Util::loadTexture("solidRed.jpg");
 	texs["white"] = Util::loadTexture("white.jpg");
+	texs["rock"] = Util::loadTexture("rock.jpg");
+	texs["rock-normal"] = Util::loadTexture("rock-normal.jpg");
 	texs["tiles"] = Util::loadTexture("whiteTiles.jpg");
-	texs["greenTiles"] = Util::loadTexture("greenTiles.jpg");
+	texs["ground"] = Util::loadTexture("ground.jpg");
 
 	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
 	texs["menuoff"] = Util::loadTexture("buttons\\off.png");
@@ -233,13 +264,7 @@ bool load_content()
 	ikManager["reachTester4"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
 	ikManager["reachTester4"].rootBone->origin = vec3(27, 10, 25);
 
-	// Set up the particle manager
-	particManager = new ParticleEmitterManager();
-	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 1000, vec3(0, 80, 0), 5.0f, "particles\\watersplash3x3.png", 3, 3));
-	ParticleEmitter* waterEmitter = new ParticleEmitter(vec3(40, 40, 0), 100, vec3(45, 0, 0), 5.0f, 3, 3);
-	waterEmitter->setColour(vec4(0.1325, 0.35, 0.523, 1));
-	waterEmitter->emitSpeed = 30.0f;
-	particManager->add("particles", waterEmitter, "particles\\bouncyball3x3.png");
+	initParticleManager();
 
 	textRen = new TextRenderer("Quikhand\\font", &passThroughEffect);
 	textRen->setFontSize(10.0f);
@@ -267,6 +292,19 @@ bool load_content()
 	cout << "F5: Toggle lighting mode" << endl << endl << endl;
 
 	return true;
+}
+
+void initParticleManager(){
+	if (particManager)
+		delete particManager;
+
+	// Set up the particle manager
+	particManager = new ParticleEmitterManager();
+	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 1000, vec3(0, 80, 0), 5.0f, "particles\\water3x3.png", 3, 3));
+	ParticleEmitter* waterEmitter = new ParticleEmitter(vec3(40, 40, 0), 250, vec3(800, 0, 20), 5.0f, 3, 3);
+	waterEmitter->setColour(vec4(0.265, 0.7, 0.8, 1));
+	waterEmitter->emitSpeed = 30.0f;
+	particManager->add("particles", waterEmitter, "particles\\water3x3.png");
 }
 
 void initShaders(){
@@ -356,8 +394,6 @@ void initScreenQuads(){
 
 void initSceneObjects(){
 
-	//TODO IK INIT
-
 	float scale = 1.0f;
 
 	// ***************
@@ -365,8 +401,8 @@ void initSceneObjects(){
 	// ***************
 	
 	sceneObjects["cubeA"] = meshes["cube"];
-	sceneObjects["cubeA"].set_texture(texs["white"]); // Sets the texture
-	//sceneObjects["cubeA"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
+	sceneObjects["cubeA"].set_texture(texs["rock"]); // Sets the texture
+	sceneObjects["cubeA"].set_normal_texture(texs["rock-normal"]); // Sets the normal texture
 	sceneObjects["cubeA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
@@ -376,7 +412,7 @@ void initSceneObjects(){
 
 
 	sceneObjects["ground"] = meshes["ground"];
-	sceneObjects["ground"].set_texture(texs["greenTiles"]); // Sets the texture
+	sceneObjects["ground"].set_texture(texs["ground"]); // Sets the texture
 	//sceneObjects["ground"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["ground"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
@@ -572,10 +608,10 @@ void updatePhysics(){
 			sceneObjects["cubeA"].getCollider()->addForce(vec3(-movementForce, 0.0, 0.0));
 
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_LEFT))
-			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, movementForce));
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, -movementForce));
 
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_RIGHT))
-			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, -movementForce));
+			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, 0.0, movementForce));
 
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_E))
 			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, movementForce + 9.8, 0.0));
@@ -586,32 +622,33 @@ void updatePhysics(){
 		// refresh the spatial partioning grid with the sceneobjects
 		SPGrid::getInstance().update(sceneObjects);
 
-		// Update IK
-		ikManager.update();
+		if (toggleIK){
+			// Update IK
+			ikManager.update();
 
-		// IK Demonstration updating - START
-		ikManager["walkingMan"].endLinks["leftFoot"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
-		ikManager["walkingMan"].endLinks["rightFoot"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
-		ikManager["walkingMan"].endLinks["lowerArmLeft"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
-		ikManager["walkingMan"].endLinks["lowerArmRight"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
+			// IK Demonstration updating - START
+			ikManager["walkingMan"].endLinks["leftFoot"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), -0.4), PHYSICS_TIME_STEP);
+			ikManager["walkingMan"].endLinks["rightFoot"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime), fmax(0.0f, sin(totalPhysicsTime)), 0.4), PHYSICS_TIME_STEP);
+			ikManager["walkingMan"].endLinks["lowerArmLeft"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(-sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), -0.55), PHYSICS_TIME_STEP);
+			ikManager["walkingMan"].endLinks["lowerArmRight"]->reach(ikManager["walkingMan"].rootBone->origin + vec3(sin(totalPhysicsTime)*2.0f, 1.8f + fmax(0.0f, sin(totalPhysicsTime)), 0.55), PHYSICS_TIME_STEP);
 
-		sceneObjects["reachingManTarget"].get_transform().position = ikManager["reachingMan"].rootBone->origin + vec3(5, 5 + sin(totalPhysicsTime*2.0f) * 2.0f, sin(totalPhysicsTime*0.8f) * 4.0f);
-		ikManager["reachingMan"].endLinks["leftHand"]->reach(sceneObjects["reachingManTarget"].get_transform().position, PHYSICS_TIME_STEP);
+			sceneObjects["reachingManTarget"].get_transform().position = ikManager["reachingMan"].rootBone->origin + vec3(5, 5 + sin(totalPhysicsTime*2.0f) * 2.0f, sin(totalPhysicsTime*0.8f) * 4.0f);
+			ikManager["reachingMan"].endLinks["leftHand"]->reach(sceneObjects["reachingManTarget"].get_transform().position, PHYSICS_TIME_STEP);
 
-		ikManager["reachTester0"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
-		ikManager["reachTester1"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
-		ikManager["reachTester2"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
-		ikManager["reachTester3"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
-		ikManager["reachTester4"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
-		// IK Demonstration updating - END
-
+			ikManager["reachTester0"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+			ikManager["reachTester1"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+			ikManager["reachTester2"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+			ikManager["reachTester3"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+			ikManager["reachTester4"].endLinks["End"]->reach(sceneObjects["reachTesterTarget"].get_transform().position, PHYSICS_TIME_STEP);
+			// IK Demonstration updating - END
+		}
 		
 		for (auto &e : sceneObjects)
 		{
 			e.second.update(PHYSICS_TIME_STEP);
 		}
 		
-		particManager->update(PHYSICS_TIME_STEP);
+		if (toggleParticles)particManager->update(PHYSICS_TIME_STEP);
 
 	}
 }
@@ -636,10 +673,10 @@ bool update(float delta_time)
 		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, 0, -10) * delta_time;
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_J))
-			sceneObjects["reachTesterTarget"].get_transform().position += vec3(-10, 0, 0) * delta_time;
+			sceneObjects["reachTesterTarget"].get_transform().position += vec3(10, 0, 0) * delta_time;
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_L))
-			sceneObjects["reachTesterTarget"].get_transform().position += vec3(10, 0, 0) * delta_time;
+			sceneObjects["reachTesterTarget"].get_transform().position += vec3(-10, 0, 0) * delta_time;
 
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_T))
 		sceneObjects["reachTesterTarget"].get_transform().position += vec3(0, 10, 0) * delta_time;
@@ -750,33 +787,33 @@ bool render()
 
 
 	// Render IK
-	renderer::bind(texs["white"], 0);
-	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(-normalize(ambientLightPosition)));
-	ikManager.render(VP, &mainEffect);
-	glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
+	if (toggleIK){
+		renderer::bind(texs["white"], 0);
+		glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
+		ikManager.render(VP, &mainEffect);
+	}
 
 	renderer::bind(texs["white"], 0);
 	renderer::bind(sceneObjects["cubeA"].get_material(), "mat");
-	particManager->render(VP);
+
+	// Render the particles
+	if(toggleParticles)particManager->render(VP);
 
 
 	glDisable(GL_DEPTH_TEST);
-	
+
 
 	LineCollider lineA = LineCollider(vec3(12.5f, 7.5f, 10), vec3(7.5f, 7.5f, 10), 1.0f);
 	LineCollider lineB = LineCollider(vec3(10 + sin(totalPhysicsTime), 5, 10), vec3(10 + sin(totalPhysicsTime), 10, 10), 1.0f);
-	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
 
 	IntersectionData lineIntersectionData = IntersectionData();
-
 	lineA.intersects(lineB, vec3(0, 0, 0), lineIntersectionData);
 
 	vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
-	textRen->render3D(VP, right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
-
 	// Render Object Controls
 	textRen->render3D(VP, right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position);
 	textRen->render3D(VP, right, "Q = up  _  E = down  _  arrow keys = forwardleft  back  right", sceneObjects["cubeA"].get_transform().position + vec3(0, 2, 0));
+	textRen->render3D(VP, right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
 
 	renderer::bind(colourPassThroughEffect);
 	//glPointSize(6.0f);
@@ -786,6 +823,10 @@ bool render()
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
 		value_ptr(VP)); // Pointer to matrix data
+	
+
+	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
+
 	glBegin(GL_LINES);
 	glVertex3f(lineA.position.x, lineA.position.y, lineA.position.z);
 	glVertex3f(lineA.endPosition.x, lineA.endPosition.y, lineA.endPosition.z);
@@ -793,17 +834,11 @@ bool render()
 	glVertex3f(lineB.endPosition.x, lineB.endPosition.y, lineB.endPosition.z);
 	glEnd();
 
-	glBegin(GL_LINES);
-	glVertex3f(rayStart.x, rayStart.y, rayStart.z);
-	glVertex3f(rayDir.x * MYFAR, rayDir.y * MYFAR, rayDir.z * MYFAR);
-	glEnd();
-
-
 	glEnable(GL_DEPTH_TEST);
 
 	// Render the spatial partitioning grid
-	if (toggleDebugMenu)
-		SPGrid::getInstance().render(colourPassThroughEffect);
+	if (toggleSPGrid)
+		SPGrid::getInstance().render(colourPassThroughEffect, toggleFullSPGrid);
 
 	
 	// Disable wireframe
@@ -832,17 +867,31 @@ void finishFrame(){
 	// Render the menu onto the screen
 	if (toggleDebugMenu){
 		renderer::bind(texs["menuon"], 2);
+		glUniform1i(passThroughEffect.get_uniform_location("tex"), 2);
+		renderer::render(menuQuad);
+
+		textRen->setFontSize(7.0f);
+
+		textRen->render(orthoMVP, "Toggle\nParticles", 0.0125f, 0.925f);
+		textRen->render(orthoMVP, "Toggle\nIK", 0.1f, 0.925f);
+		textRen->render(orthoMVP, "Toggle\nFull Grid", 0.189f, 0.925f);
+		textRen->render(orthoMVP, "Toggle\nSPGrid", 0.29f, 0.925f);
+		textRen->render(orthoMVP, "Reset\nParticles", 0.375f, 0.925f);
+
+		textRen->setFontSize(10.0f);
 	}
 	else{
 		renderer::bind(texs["menuoff"], 2);
+		glUniform1i(passThroughEffect.get_uniform_location("tex"), 2);
+		renderer::render(menuQuad);
 	}
-	glUniform1i(passThroughEffect.get_uniform_location("tex"), 2);
-	renderer::render(menuQuad);
 
-
-	std::ostringstream avgStr;
-	avgStr << particManager->getParticleCount();
-	textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.79f);
+	if (toggleParticles){
+		std::ostringstream avgStr;
+		avgStr << particManager->getParticleCount();
+		textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.85f);
+	}
+		
 	graphRen->render(orthoMVP, 0.005f, 0.01f);
 
 	glEnable(GL_DEPTH_TEST);

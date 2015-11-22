@@ -97,7 +97,6 @@
   <ItemGroup>
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="CubeCollider.cpp" />
-    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GraphRenderer.cpp" />
     <ClCompile Include="IKHierarchy.cpp" />
     <ClCompile Include="IKManager.cpp" />
@@ -120,7 +119,6 @@
   <ItemGroup>
     <ClInclude Include="Collider.h" />
     <ClInclude Include="CubeCollider.h" />
-    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GraphRenderer.h" />
     <ClInclude Include="IKHierarchy.h" />
     <ClInclude Include="IKManager.h" />

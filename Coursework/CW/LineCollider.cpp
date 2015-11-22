@@ -27,29 +27,26 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 			float h = magnitude(cross(dirB, aToB));
 			float k = magnitude(cross(dirB, dirA));
 
-			vec3 toIntersection = h / k * dirA;
-
 			if (h == 0.0f || k == 0.0f){
 				data.doesIntersect = false;
 				return;
 			}
 
+			vec3 toIntersection = h / k * dirA;
 
 			vec3 intersectionPoint = position - toIntersection;
 
 			vec3 normal = normalize(position - intersectionPoint);
 
-			float intersectAmount = abs(dot(normal, position - intersectionPoint) - dot(normal, position));
+			float intersectAmount = abs(dot(normal, intersectionPoint) - dot(normal, position));
 
 			data.intersection = intersectionPoint;
 			data.amount = intersectAmount;
 
-			if (abs(dot(normal, position - intersectionPoint) - dot(normal, position)) <= radius + otherLine.radius)
+			if (intersectAmount <= radius + otherLine.radius)
 				data.doesIntersect = true;
 
 			data.direction = aToB;
-
-
 
 		}
 		

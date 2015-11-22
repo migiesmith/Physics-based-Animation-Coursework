@@ -37,6 +37,8 @@ void Particle::update(const float delta_time){
 	collider->force = vec3(0, 0, 0);
 	acceleration *= 0.9f;
 
+	collider->velocity *= 0.999f;
+
 	lifeTime -= delta_time;
 	if (lifeTime <= 0.0) isAlive = false;
 }

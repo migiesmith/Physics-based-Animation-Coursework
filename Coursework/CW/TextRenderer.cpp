@@ -60,6 +60,7 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 	glUniform1i(shader->get_uniform_location("tex"), 0);
 
 	int xOffset = 0;
+	int yOffset = 0;
 	struct Vertex {
 		GLfloat position[3];
 		GLfloat texcoord[2];
@@ -73,6 +74,9 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 		if (c == ' '){
 			// If the current character is a space, just increment the xOffset
 			xOffset += (int)((characters['!']->width + characters['!']->xAdvance) * fontSize * 2.0f);
+		}else if(c == '\n'){
+			yOffset -= getFontHeight();
+			xOffset = 0;
 		}else{
 			// Get the next character using the current char
 			TextRendChar* character = characters[c];
@@ -89,22 +93,22 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 			float w = (float)character->width / (float)tex.get_width();
 			float h = -(float)character->height / (float)tex.get_height();
 			
-			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY - yPos, 0.0f }, { xCoord, yCoord } };
+			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY + yOffset - yPos, 0.0f }, { xCoord, yCoord } };
 			vertNum++;
 
-			vertexdata[vertNum] = { { quadX + xOffset - xPos, -quadY - yPos, 0.0f }, { xCoord + w, yCoord + h } };
+			vertexdata[vertNum] = { { quadX + xOffset - xPos, -quadY + yOffset - yPos, 0.0f }, { xCoord + w, yCoord + h } };
 			vertNum++;
 
-			vertexdata[vertNum] = { { quadX + xOffset - xPos, quadY - yPos, 0.0f }, { xCoord + w, yCoord } };
+			vertexdata[vertNum] = { { quadX + xOffset - xPos, quadY + yOffset - yPos, 0.0f }, { xCoord + w, yCoord } };
 			vertNum++;
 
-			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY - yPos, 0.0f }, { xCoord, yCoord } };
+			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY + yOffset - yPos, 0.0f }, { xCoord, yCoord } };
 			vertNum++;
 
-			vertexdata[vertNum] = { { -quadX + xOffset - xPos, -quadY - yPos, 0.0f }, { xCoord, yCoord + h } };
+			vertexdata[vertNum] = { { -quadX + xOffset - xPos, -quadY + yOffset - yPos, 0.0f }, { xCoord, yCoord + h } };
 			vertNum++;
 
-			vertexdata[vertNum] = { { quadX + xOffset - xPos, -quadY - yPos, 0.0f }, { xCoord + w, yCoord + h } };
+			vertexdata[vertNum] = { { quadX + xOffset - xPos, -quadY + yOffset - yPos, 0.0f }, { xCoord + w, yCoord + h } };
 			vertNum++;
 
 			// Increment the xOffset to move the character along
@@ -177,6 +181,7 @@ void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string tex
 
 
 	int xOffset = 0;
+	int yOffset = 0;
 	geometry screenQuadGeom = geometry();
 	vector<vec3> positions;
 	vector<vec3> texCoords;
@@ -185,6 +190,11 @@ void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string tex
 		if (c == ' '){
 			// If the current character is a space, just increment the xOffset
 			xOffset += (int)((characters['!']->width + characters['!']->xAdvance) * fontSize * 2.0f);
+		}
+		else if (c == '\n'){
+			yOffset -= getFontHeight();
+			xOffset = 0;
+
 		}
 		else{
 			// Get the next character using the current char
@@ -195,13 +205,13 @@ void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string tex
 			float quadY = character->height * fontSize;
 
 			// Push the current character's quad onto the positions vector
-			positions.push_back(vec3(-quadX + xOffset, quadY , 0));
-			positions.push_back(vec3(quadX + xOffset , -quadY , 0));
-			positions.push_back(vec3(quadX + xOffset , quadY , 0));
+			positions.push_back(vec3(-quadX + xOffset, quadY + yOffset, 0));
+			positions.push_back(vec3(quadX + xOffset, -quadY + yOffset, 0));
+			positions.push_back(vec3(quadX + xOffset, quadY + yOffset, 0));
 
-			positions.push_back(vec3(-quadX + xOffset , quadY , 0));
-			positions.push_back(vec3(-quadX + xOffset , -quadY, 0));
-			positions.push_back(vec3(quadX + xOffset , -quadY , 0));
+			positions.push_back(vec3(-quadX + xOffset, quadY + yOffset, 0));
+			positions.push_back(vec3(-quadX + xOffset, -quadY + yOffset, 0));
+			positions.push_back(vec3(quadX + xOffset, -quadY + yOffset, 0));
 
 			// Get the tex coord values for the current character quad
 			float xCoord = (float)character->xPos / (float)tex.get_width();
@@ -237,7 +247,7 @@ void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string tex
 }
 
 float TextRenderer::getFontHeight(){
-	return (characters['T']->height + characters['T']->yOffset)* fontSize * 2.0f;
+	return (characters['T']->height + characters['T']->yOffset)* fontSize * 2.2f;
 }
 
 float TextRenderer::getStringWidth(const string& text){

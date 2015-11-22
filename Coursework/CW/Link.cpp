@@ -34,9 +34,7 @@ Link::Link(vec3 &axis, const float& angle, vector<vec3>* inAngleLimits){
 	if (!validLimits){
 		angleLimits = { vec3(-pi<float>(), -pi<float>(), -pi<float>()), vec3(pi<float>(), pi<float>(), pi<float>()) };
 	}
-
-	ignoreCollision = false;
-
+	
 }
 
 /*
@@ -146,8 +144,6 @@ void Link::privateReach(const Link& endLink, const vec3& target, const float& ph
 	
 }
 
-
-
 void Link::reach(const vec3& target, const float& physicsTimeStep){
 	// Check if the target would cause an error to this link
 	if (!Util::equals(target, translationFromMat4(m_base)))
@@ -168,7 +164,6 @@ void Link::reach(const vec3& target, const float& physicsTimeStep){
 	}
 
 }
-
 
 void Link::update(){
 

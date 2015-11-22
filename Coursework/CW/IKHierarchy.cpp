@@ -11,9 +11,7 @@ IKHierarchy::IKHierarchy(char* filepath)
 	parseIKTree(root, NULL);
 	
 	rootBone->update();
-
-	rootBone->ignoreCollision = true;
-
+	
 	ready = true;
 }
 

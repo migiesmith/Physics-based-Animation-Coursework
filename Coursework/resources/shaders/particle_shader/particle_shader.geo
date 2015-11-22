@@ -55,18 +55,17 @@ void main() {
 
 		float xCount = 1.0f / xCoordInterval;
 		float yCount = 1.0f / yCoordInterval;
-		float currentImage = (lifeTime - testTime[0]) / lifeTime;
+		float currentImage = testTime[0] / lifeTime;
 		currentImage *= (xCount * yCount);
 
-		float xCoord = xCoordInterval * currentImage;
-		xCoord = mod(xCoord, 1.0f);
-		xCoord -= mod(xCoord, xCoordInterval);
-		xCoord -= xCoordInterval;
-		float yCoord = yCoordInterval * currentImage;
-		yCoord = (yCoord - mod(yCoord, 1.0f)) * yCoordInterval;
+		float xCoord = mod(currentImage, yCount);
+		xCoord = floor(xCoord);
+
+		float yCoord = yCount-1 - (currentImage - mod(currentImage, yCount)) / xCount;
 
 
-		tex_coord = vec2(quadCoords[i].x == 0.0 ? xCoord : xCoord + xCoordInterval, quadCoords[i].y == 0.0 ? yCoord : yCoord + yCoordInterval);
+
+		tex_coord = vec2(quadCoords[i].x == 0.0 ? xCoord*xCoordInterval : xCoord*xCoordInterval + xCoordInterval, quadCoords[i].y == 0.0 ? yCoord*yCoordInterval : yCoord*yCoordInterval + yCoordInterval);
 		EmitVertex();
 	}
 	EndPrimitive();

@@ -10,7 +10,6 @@
 #include <graphics_framework.h>
 #include "renderer.h"
 #include "SceneObject.h"
-#include "FrameBuffer.h"
 
 #include "Link.h"
 #include "SphereCollider.h"
@@ -36,6 +35,10 @@ float PHYSICS_TIME_STEP = 0.01f;
 
 // Debug menu toggle
 bool toggleDebugMenu = false;
+bool toggleParticles = true;
+bool toggleIK = true;
+bool toggleFullSPGrid = false;
+bool toggleSPGrid = true;
 
 
 static effect mainEffect; // The main effect used
@@ -55,7 +58,7 @@ enum Camera
 // Enum for menu buttons
 enum Buttons
 {
-	Vignette, Motion_Blur, Glow, Grey_Scale, Depth_of_Field, DoF_Debug,
+	Particles, IK, FullSPGrid, SPGrid, ResetParticles, DoF_Debug,
 	Free_Cam, SSAO_Only, SSAO, WireFrame, Lens_Flare, Spot_Light, Target_Cam, Chase_Cam
 };
 
@@ -69,9 +72,10 @@ short targetCamDirection = -1; // The direction that the targetCam rotates
 TextRenderer* textRen;
 GraphRenderer* graphRen;
 
-
+void attemptToMakeAParticleEmitter();
 void finishFrame();
 void initSceneObjects();
 void initScreenQuads();
+void initParticleManager();
 void initShaders();
 void initCameras();

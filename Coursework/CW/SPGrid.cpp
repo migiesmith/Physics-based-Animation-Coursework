@@ -33,13 +33,6 @@ vec3 SPGrid::getXYZInGrid(const vec3& v){
 	return vec3(row, col, cell);
 }
 
-vec3 SPGrid::xyzCellPosition(const int& pos){
-	int z = pos / (_WIDTH * _HEIGHT);
-	int y = (pos - z * _WIDTH * _HEIGHT) / _WIDTH;
-	int x = pos - _WIDTH * (y + _HEIGHT * z);
-	return vec3(x, y, z);
-}
-
 void SPGrid::intersects(Collider& inCollider, const vec3& velocity, IntersectionData& data){
 	int posInGrid = getPosInGrid(inCollider.position);
 
@@ -89,13 +82,13 @@ void SPGrid::update(const map<string, SceneObject>& sceneObjects){
 }
 
 // Render the grid, only for debugging
-void SPGrid::render(effect& shader){
+void SPGrid::render(effect& shader, bool renderFullGrid){
 	for (int x = 0; x < _WIDTH; x++){
 
 		for (int y = 0; y < _HEIGHT; y++){
 
 			for (int z = 0; z < _DEPTH; z++){
-				if (_cells[cellIndex(x, y, z)].testCount > 0 || _cells[cellIndex(x, y, z)].beenChecked){
+				if (_cells[cellIndex(x, y, z)].testCount > 0 || _cells[cellIndex(x, y, z)].beenChecked || renderFullGrid){
 					int col = _cells[cellIndex(x, y, z)].testCount / 5.0f;
 					if (col > 5){
 						glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(1,0,0,1)));
@@ -104,7 +97,10 @@ void SPGrid::render(effect& shader){
 						glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(0,1,0, 1)));
 					}
 					else{
-						glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(0,0,1, 1)));
+						if (_cells[cellIndex(x, y, z)].beenChecked)
+							glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(0,0,1, 1)));
+						else
+							glUniform4fv(shader.get_uniform_location("colour"), 1, value_ptr(vec4(0.1f,0.1f,0.1f, 1)));
 					}
 
 					vec3 p = vec3(_offset.x + x*_cellSize, _offset.y + y*_cellSize, _offset.z + z*_cellSize);

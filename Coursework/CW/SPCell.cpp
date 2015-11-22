@@ -11,7 +11,7 @@ void SPCell::intersects(Collider& inCollider, const vec3& velocity, Intersection
 			data.reset();
 			c->intersects(inCollider, velocity, data);
 
-			vec3 correctiveVelocity = data.direction * dot(data.direction, (inCollider.velocity - c->velocity));
+			vec3 correctiveVelocity = data.direction * dot(data.direction, (inCollider.velocity - c->velocity)) * 0.9f;
 
 			if (data.doesIntersect){
 				if (c->staticPos){

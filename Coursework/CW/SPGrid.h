@@ -47,10 +47,9 @@ public:
 
 	vec3 getXYZInGrid(const vec3& v);
 	int getPosInGrid(const vec3& v);
-	vec3 xyzCellPosition(const int& pos);
 
 	
-	void render(effect& shader);
+	void render(effect& shader, bool renderFullGrid);
 
 
 	SPGrid(SPGrid const&) = delete;

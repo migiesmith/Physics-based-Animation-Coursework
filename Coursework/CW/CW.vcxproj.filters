@@ -51,9 +51,6 @@
     <ClCompile Include="SceneObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FrameBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Collider.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
@@ -106,7 +103,7 @@
       <Filter>Source Files\Inverse Kinematics</Filter>
     </ClCompile>
     <ClCompile Include="IKManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Inverse Kinematics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -114,9 +111,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collider.h">
@@ -173,10 +167,10 @@
     <ClInclude Include="IKHierarchy.h">
       <Filter>Header Files\Inverse Kinematics</Filter>
     </ClInclude>
-    <ClInclude Include="IKManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IKModels.h">
+      <Filter>Header Files\Inverse Kinematics</Filter>
+    </ClInclude>
+    <ClInclude Include="IKManager.h">
       <Filter>Header Files\Inverse Kinematics</Filter>
     </ClInclude>
   </ItemGroup>

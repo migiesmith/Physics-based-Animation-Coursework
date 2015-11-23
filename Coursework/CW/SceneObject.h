@@ -3,7 +3,7 @@
 	Grant Smith (40111906)
 
 	Stores the transform and mesh of the object for the scene.
-	Also stores the parent and child of itself so that sceneobjects can be attatched to eachother
+	Stores the collider for the object so that it can use collisions
 
 */
 
@@ -32,7 +32,11 @@ public:
 
 	vec3 velocity, force; // Velocity and Force
 
-	SceneObject();
+	// Constructor for the scene object
+	SceneObject(){
+		velocity = vec3(0, 0, 0);
+		force = vec3(0, 0, 0);
+	}
 
 	// Creates a mesh object with the provided geometry
 	SceneObject(geometry &geom) : mesh(geom){ }
@@ -44,13 +48,12 @@ public:
 		_texture = other._texture;
 		_normal = other._normal;
 	}
-
-	SceneObject& operator=(const SceneObject &rhs) = default;
-	// Destroys the mesh object
-	~SceneObject();
-
+	
+	// Set the scene object's texture
 	void set_texture(texture &value) { _texture = &value; }
+	// Returns the scene object's texture
 	texture get_texture() { return *_texture; }
+	// Set the scene object's normal texture
 	void set_normal_texture(texture &value) { _normal = &value; }
 
 	// Sets all of the material values 
@@ -67,20 +70,13 @@ public:
 	void setCollider(Collider* c){ _collider = c; }
 	Collider* getCollider(){ return _collider; }
 
+	// Checks for an intersection between this object's collider and collider c
 	void intersects(Collider& c, const vec3& velocity, IntersectionData& data);
 
 	// Render the mesh of the object
 	void render(const mat4& VP, const effect& shader);
-	// Render the mesh of the object (for the depth render)
-	void renderDepth(const mat4& VP, const effect& shader);
-
-	inline bool operator==(SceneObject b){
-		cout << "Test for operator== in SceneObject:" << this << " | " << &b << endl;
-
-		if (this == &b){
-			return true;
-		}
-		return false;
-	}
+	
+	// Delete the sceneobject
+	~SceneObject(){}
 
 };

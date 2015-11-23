@@ -1,6 +1,7 @@
 #include "ParticleEmitter.h"
 
 
+// Constructor for the emitter
 ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const int columns, const int rows) : vec3(v)
 {
 	this->force = force;
@@ -17,6 +18,7 @@ ParticleEmitter::ParticleEmitter(const vec3& v, const int particleCount, const v
 
 }
 
+// Update the particles
 void ParticleEmitter::update(const float delta_time){
 	IntersectionData& data = IntersectionData();
 	SPGrid& spGrid = SPGrid::getInstance();
@@ -35,6 +37,7 @@ void ParticleEmitter::update(const float delta_time){
 	emitTimer -= delta_time;
 }
 
+// awaken particle p
 void ParticleEmitter::awakenParticle(Particle& p){
 	vec3 offset = normalize(force);
 
@@ -46,18 +49,20 @@ void ParticleEmitter::awakenParticle(Particle& p){
 	emitTimer = 1.0f / emitSpeed;
 }
 
+//Render the particles
 void ParticleEmitter::render(const mat4& PV){
 	
-	glAlphaFunc(GL_GREATER, 0.2f);
-	glEnable(GL_ALPHA_TEST);
+	// Bind the shader
 	renderer::bind(*particleShader);
 
+	// Set the mvp matrix
 	glUniformMatrix4fv(
 		particleShader->get_uniform_location("MVP"), // Location of uniform
 		1, // Number of values - 1 mat4
 		GL_FALSE, // Transpose the matrix?
 		value_ptr(PV)); // Pointer to matrix data
 
+	// Bind the texture
 	renderer::bind(*tex, 0);
 
 	glUniform4fv(particleShader->get_uniform_location("colour"), 1, value_ptr(colour));
@@ -65,21 +70,23 @@ void ParticleEmitter::render(const mat4& PV){
 	glUniform1f(particleShader->get_uniform_location("xCoordInterval"), 1.0f / (float)columns);
 	glUniform1f(particleShader->get_uniform_location("yCoordInterval"), 1.0f / (float)rows);
 
-
+	// Create a structure to store the particles in
 	struct Vertex {
 		GLfloat position[3];
 		GLfloat vertTime;
 	};
+	// The number of vertex objects needed
 	const int NUM_VERTS = particles.size();
+	// create the vertex data
 	Vertex* vertexdata = new Vertex[NUM_VERTS];
 
+	// Add all particles to the vertex data
 	int vertNum = 0;
 	for (Particle& p : particles){
 		// Add particle to vertexdata
 		vertexdata[vertNum] = { { p.x, p.y, p.z }, { lifeTime -  p.lifeTime } };
 		vertNum++;
 	}
-
 
 	// Create and bind a VAO
 	GLuint vao;
@@ -94,8 +101,10 @@ void ParticleEmitter::render(const mat4& PV){
 	// copy data into the buffer object
 	glBufferData(GL_ARRAY_BUFFER, NUM_VERTS * sizeof(Vertex), vertexdata, GL_STATIC_DRAW);
 
+	// Delete the vertex data
 	delete[] vertexdata;
 
+	// Get the attribute positions from the shader
 	int posAttrib = glGetAttribLocation(particleShader->get_program(), "position");
 	int totalTimeAttrib = glGetAttribLocation(particleShader->get_program(), "totalTime");
 	
@@ -106,13 +115,14 @@ void ParticleEmitter::render(const mat4& PV){
 	glVertexAttribPointer(totalTimeAttrib, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, vertTime));
 
 
-	// Remder the particles
+	// don't render transparency below 0.2f
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
+	// Remder the particles
 	glDrawArrays(GL_POINTS, 0, NUM_VERTS);
 	glDisable(GL_ALPHA_TEST);
 
-
+	// Clean up the buffers and unbind the texture
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(posAttrib);
 	glBindVertexArray(0);
@@ -124,17 +134,14 @@ void ParticleEmitter::render(const mat4& PV){
 	glDisable(GL_ALPHA_TEST);
 }
 
+// Set the emitter's position
 void ParticleEmitter::setPosition(const vec3& v){
 	x = v.x;
 	y = v.y;
 	z = v.z;
 }
 
+// set the emitter's colour
 void ParticleEmitter::setColour(const vec4& v){
 	this->colour = v;
-}
-
-ParticleEmitter::~ParticleEmitter()
-{
-
 }

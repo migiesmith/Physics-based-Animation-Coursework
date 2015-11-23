@@ -8,6 +8,7 @@ TODO
 
 #include "PlaneCollider.h"
 
+//Check for intersection between this plane and collider other
 void PlaneCollider::intersects(Collider& other, const vec3& velocity, IntersectionData& data){
 	data.reset();
 	
@@ -47,6 +48,7 @@ void PlaneCollider::intersects(Collider& other, const vec3& velocity, Intersecti
 	}
 }
 
+// Check for a ray intersection
 vec3 PlaneCollider::rayIntersection(vec3& start, vec3& direction){
 	vec3 P;
 	
@@ -58,6 +60,7 @@ vec3 PlaneCollider::rayIntersection(vec3& start, vec3& direction){
 	return P;
 }
 
+// Check for cube plane intersection
 void PlaneCollider::cubeIntersection(CubeCollider& other, const vec3& velocity, IntersectionData& data){
 
 
@@ -86,8 +89,4 @@ void PlaneCollider::cubeIntersection(CubeCollider& other, const vec3& velocity, 
 	
 	data.direction = normal;
 
-}
-
-PlaneCollider::~PlaneCollider()
-{
 }

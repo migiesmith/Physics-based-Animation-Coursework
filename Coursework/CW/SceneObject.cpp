@@ -1,26 +1,15 @@
-/*
-
-Grant Smith (40111906)
-
-Constructor/Destructor of the SceneObject
-
-*/
 #include "SceneObject.h"
 #include "SPGrid.h"
 
-
-SceneObject::SceneObject()
-{
-	velocity = vec3(0, 0, 0);
-	force = vec3(0, 0, 0);
-}
-
+// Update the scene object
 void SceneObject::update(float delta_time){
 	if (_collider){
 		_collider->update(delta_time);
 		IntersectionData data = IntersectionData();
+		// Check for a collision, resolve it if there is
 		SPGrid::getInstance().intersects(*_collider, velocity*delta_time, data);
 
+		// If the collider is a cube, apply scale and rotation
 		get_transform().position = _collider->position;
 		if (_collider->getType() == ColliderTypes::OBBCUBE){
 			get_transform().scale = ((CubeCollider*)_collider)->dimensions;
@@ -29,6 +18,7 @@ void SceneObject::update(float delta_time){
 	}
 }
 
+// Checks for an intersection between this object's collider and collider c
 void SceneObject::intersects(Collider& c, const vec3& velocity, IntersectionData& data){
 	if (_collider)
 		_collider->intersects(c, velocity, data);
@@ -67,20 +57,3 @@ void SceneObject::render(const mat4& VP, const effect& shader){
 	renderer::render(*this);
 }
 
-void SceneObject::renderDepth(const mat4& VP, const effect& shader){
-	mat4 MVP = VP * get_transform().get_transform_matrix();
-	// Set MVP matrix uniform
-	glUniformMatrix4fv(
-		shader.get_uniform_location("MVP"), // Location of uniform
-		1, // Number of values - 1 mat4
-		GL_FALSE, // Transpose the matrix?
-		value_ptr(MVP)); // Pointer to matrix data
-
-	// Render the current SceneObject
-	renderer::render(*this);
-}
-
-
-SceneObject::~SceneObject()
-{
-}

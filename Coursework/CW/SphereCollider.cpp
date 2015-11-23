@@ -1,13 +1,6 @@
-/*
-
-Grant Smith (40111906) - 9/11/2015
-
-The collider that handles sphere related intersection (sphere-sphere, sphere-plane, sphere-cube, etc.)
-
-*/
-
 #include "SphereCollider.h"
 
+// Checks for collision between the sphere and collider other
 void  SphereCollider::intersects(Collider& other, const vec3& velocity, IntersectionData& data){
 
 	switch(other.getType()){
@@ -42,11 +35,4 @@ void  SphereCollider::intersects(Collider& other, const vec3& velocity, Intersec
 		}
 	}
 
-}
-
-
-
-
-SphereCollider::~SphereCollider()
-{
 }

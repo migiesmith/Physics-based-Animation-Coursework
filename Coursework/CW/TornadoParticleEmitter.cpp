@@ -1,10 +1,15 @@
 #include "TornadoParticleEmitter.h"
 
 
+// Constructor for the emitter
 TornadoParticleEmitter::TornadoParticleEmitter(const vec3& v, const int particleCount, const vec3& force, const float lifeTime, const int columns, const int rows) : ParticleEmitter(v, particleCount, force, lifeTime, columns, rows)
 {
+	for (Particle& p : particles){
+		p.collider->ignoreGravity = true;
+	}
 }
 
+// Update the particles
 void TornadoParticleEmitter::update(const float delta_time){
 	IntersectionData& data = IntersectionData();
 	SPGrid& spGrid = SPGrid::getInstance();
@@ -13,16 +18,15 @@ void TornadoParticleEmitter::update(const float delta_time){
 		if (p.isAlive){
 
 			data.reset();
+			p.update(delta_time);
 			spGrid.intersects(*p.collider, p.collider->velocity, data);
 
-			if (data.doesIntersect){
-				p.addForce(data.direction * data.amount);
-				p.collider->velocity -= data.direction*dot(data.direction, p.collider->velocity);
-			}
+			// If the particle isn't right on the emitter
 			if (!Util::isZeroVec3(*this - p)){
+				// Apply a force to rotate it around the emitter and upwards
 				vec3 offset = normalize(*this - p);
-				vec3 dir = -cross(offset, normalize(force));
-				//p.addForce(force + dir*4.0f);
+				vec3 dir = -normalize(normalize(cross(offset, normalize(force))) - normalize(offset)*4.0f);
+				p.addForce(force + dir*magnitude(force));
 			}
 			p.update(delta_time);
 		}
@@ -31,8 +35,4 @@ void TornadoParticleEmitter::update(const float delta_time){
 		}
 	}
 	emitTimer -= delta_time;
-}
-
-TornadoParticleEmitter::~TornadoParticleEmitter()
-{
 }

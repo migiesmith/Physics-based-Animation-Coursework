@@ -1,3 +1,11 @@
+/*
+
+Grant Smith (40111906) - 23/11/2015
+
+Stores the data about each character loaded for the text renderer
+
+*/
+
 #pragma once
 
 using namespace std;
@@ -18,6 +26,7 @@ public:
 		page,
 		channel;
 
+	// Constructor for the character
 	TextRendChar(int id, int xPos, int yPos, int width, int height, int xOffset, int yOffset, int xAdvance, int page, int channel){
 		this->id = id;
 		this->xPos = xPos;
@@ -31,6 +40,7 @@ public:
 		this->channel = channel;
 	}
 
+	// Character information for debugging
 	string toString(){
 		ostringstream os;
 		os << "char '" << (char)id << "': " <<
@@ -47,6 +57,7 @@ public:
 		return os.str();
 	}
 
-	~TextRendChar();
+	// delete the character
+	~TextRendChar(){}
 };
 

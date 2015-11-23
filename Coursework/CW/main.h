@@ -27,27 +27,25 @@ using namespace std;
 using namespace graphics_framework;
 
 
-float MYNEAR = 2.414f;
-float MYFAR = 3500.0f;
+float MYNEAR = 2.414f; // The near value of the camera (for the camera and ray casting)
+float MYFAR = 3500.0f; // The far value of the camera (for the camera and ray casting)
 
-float accumDeltaTime = 0.0f;
-float PHYSICS_TIME_STEP = 0.01f;
+float accumDeltaTime = 0.0f; // total time past when updating
+float PHYSICS_TIME_STEP = 0.01f; // total time past for the physics engine
 
 // Debug menu toggle
-bool toggleDebugMenu = false;
-bool toggleParticles = true;
-bool toggleIK = true;
-bool toggleFullSPGrid = false;
-bool toggleSPGrid = true;
+bool toggleDebugMenu = false; // toggles the debug menu
+bool toggleParticles = true; // toggle the particle manager
+bool toggleIK = true; // toggle the inverse kinematics manager
+bool toggleFullSPGrid = false; // toggle the rendering of the full spatial partitioning grid
+bool toggleSPGrid = true; // toggles the spatial partitioning grid (whether it should render at all)
 
 
 static effect mainEffect; // The main effect used
 static effect passThroughEffect; // The effect used for the skybox
 static effect colourPassThroughEffect; // The effect used for the skybox
 
-static mesh screenQuad; // Quad used for post processing
-static mesh cornerCamQuad; // Quad used for rendering a texture to the corner of the screen
-static mesh menuQuad; // Quad used for rendering the menu
+static mesh menuQuad; // Quad used for rendering the menu background
 
 // Enum for current camera values
 enum Camera
@@ -64,18 +62,25 @@ enum Buttons
 
 mat4 orthoMVP; // MVP used for postprocessing
 
-bool movingCam = false;
-
 int currentCamera = 1; // Default to Target Camera
 short targetCamDirection = -1; // The direction that the targetCam rotates
 
+// The text renderer used within the scene (for ui and debug info)
 TextRenderer* textRen;
+// The graph renderer used within the scene (for fps rendering)
 GraphRenderer* graphRen;
 
+// Sends a ray out, if it hits the plane, it creates an emitter at the intersection point
 void attemptToMakeAParticleEmitter();
+// Finish rendering the frame
 void finishFrame();
+// Initialise the scene objects
 void initSceneObjects();
-void initScreenQuads();
+// Initialise the menu background quad
+void initMenuQuad();
+// Initialise the particle manager
 void initParticleManager();
+// Initialise the shaders
 void initShaders();
+// Initialise the cameras
 void initCameras();

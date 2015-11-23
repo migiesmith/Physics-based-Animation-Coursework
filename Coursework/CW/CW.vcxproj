@@ -100,7 +100,6 @@
     <ClCompile Include="GraphRenderer.cpp" />
     <ClCompile Include="IKHierarchy.cpp" />
     <ClCompile Include="IKManager.cpp" />
-    <ClCompile Include="IntersectionData.cpp" />
     <ClCompile Include="LineCollider.cpp" />
     <ClCompile Include="Link.cpp" />
     <ClCompile Include="main.cpp" />

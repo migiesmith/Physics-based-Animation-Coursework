@@ -1,8 +1,8 @@
 /*
 
-Grant Smith (40111906)
+Grant Smith (40111906) - 9/11/2015
 
-TODO
+The collider that handles sphere related intersection (sphere-sphere, sphere-plane, sphere-cube, etc.)
 
 */
 
@@ -21,15 +21,17 @@ private:
 
 public:
 
-	float radius = 0.0f;
+	float radius = 0.0f; // radius of the sphere
 
+	// Constructor for the sphere
 	SphereCollider(vec3 position, float radius) : Collider(position, ColliderTypes::SPHERE){
 		this->radius = radius;
 	}
 	
-
+	// Checks for collision between the sphere and collider other
 	void intersects(Collider& other, const vec3& velocity, IntersectionData& data) ;
 
+	// Delete the sphere collider
 	~SphereCollider();
 };
 

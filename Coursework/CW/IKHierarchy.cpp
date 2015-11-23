@@ -1,5 +1,6 @@
 #include "IKHierarchy.h"
 
+// Load in the hierarchy from filePath
 IKHierarchy::IKHierarchy(char* filepath)
 {
 	std::string line;
@@ -15,6 +16,7 @@ IKHierarchy::IKHierarchy(char* filepath)
 	ready = true;
 }
 
+// Parses the entire JSON file
 void IKHierarchy::parseIKTree(Json::Value& json, Link* parentLink){
 
 	Link* parsedBone;
@@ -47,6 +49,7 @@ void IKHierarchy::parseIKTree(Json::Value& json, Link* parentLink){
 	}
 }
 
+// Parses a bone json object
 Link* IKHierarchy::parseBone(Json::Value jsonBone){
 	Link* link;
 
@@ -77,6 +80,7 @@ Link* IKHierarchy::parseBone(Json::Value jsonBone){
 	return link;
 }
 
+// Delete the hierarchy
 IKHierarchy::~IKHierarchy()
 {
 }

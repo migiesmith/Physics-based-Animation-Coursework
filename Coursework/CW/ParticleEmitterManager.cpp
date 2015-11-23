@@ -12,12 +12,15 @@ ParticleEmitterManager::ParticleEmitterManager()
 	particleShader.build();
 }
 
+// Update the emitters
 void ParticleEmitterManager::update(const float delta_time){
-	for (pair<string, ParticleEmitter*> e : emitters){
-		e.second->update(delta_time);
+	typedef map<string, ParticleEmitter*>::iterator it_type;
+	for (it_type iterator = emitters.begin(); iterator != emitters.end(); ++iterator) {
+		iterator->second->update(delta_time);
 	}
 }
 
+// add an emitter with a name
 void ParticleEmitterManager::add(const string &emitterName, ParticleEmitter* emitter, const string texturePath){
 	if (textures.find(texturePath) == textures.end())
 		textures[texturePath] = Util::loadTexture(texturePath);
@@ -27,20 +30,19 @@ void ParticleEmitterManager::add(const string &emitterName, ParticleEmitter* emi
 	emitters[emitterName] = emitter;
 }
 
+// render the emitters
+void ParticleEmitterManager::render(const mat4& PV){
+	typedef map<string, ParticleEmitter*>::iterator it_type;
+	for (it_type iterator = emitters.begin(); iterator != emitters.end(); ++iterator) {
+		iterator->second->render(PV);
+	}
+}
+
+// get the number of particles within this manager
 int ParticleEmitterManager::getParticleCount(){
 	int sum = 0;
 	for (pair<string, ParticleEmitter*> e : emitters){
 		sum += e.second->particleCount;
 	}
 	return sum;
-}
-
-void ParticleEmitterManager::render(const mat4& PV){
-	for (pair<string, ParticleEmitter*> e : emitters){
-		e.second->render(PV);
-	}
-}
-
-ParticleEmitterManager::~ParticleEmitterManager()
-{
 }

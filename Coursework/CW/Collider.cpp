@@ -33,27 +33,30 @@ void Collider::addForce(const vec3& f){
 	force += f;
 }
 
+// Integrate the velocity and position
 void Collider::update(const float delta_time){
+	// If this collider doesn't move then return
 	if (staticPos)
 		return;
 
+	// Only apply gravity if needed
 	if(!ignoreGravity)
 		addForce(vec3(0, -9.8, 0));
 
+	// Calculate the acceleration
 	vec3 acceleration = force * invMass;
+	// Calculate the velocity
 	velocity += acceleration * delta_time;
+	// Add the velocity over delta time to the position
 	setPosition(position + (velocity * delta_time));
 
+	// Reset the force and dampen the acceleration and velocity
 	force = vec3(0, 0, 0);
 	acceleration *= 0.9f;
-
 	velocity *= 0.999f;
 }
 
+// Set the mass of the collider
 void Collider::setMass(const float m){
 	invMass = 1.0f / m;
-}
-
-Collider::~Collider()
-{
 }

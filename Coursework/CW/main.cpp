@@ -42,19 +42,10 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 		isWireframe = !isWireframe;
 	}
 	else  if (key == GLFW_KEY_F2 && action == GLFW_PRESS){
-		//currentCamera = Camera::Chase;
-	}
-	else if (key == GLFW_KEY_F3 && action == GLFW_PRESS){
 		currentCamera = Camera::Target;
 	}
-	else if (key == GLFW_KEY_F4 && action == GLFW_PRESS){
+	else if (key == GLFW_KEY_F3 && action == GLFW_PRESS){
 		currentCamera = Camera::Free;
-	}
-	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS){
-		//TODO
-		//SPGrid& grid = SPGrid::getInstance();
-		//cout << grid.getPosInGrid(cubeA.position) << endl;
-		//ikHierarchy.resolveCollisions();
 	}
 	else if (key == GLFW_KEY_H && action == GLFW_PRESS){
 		toggleDebugMenu = !toggleDebugMenu;
@@ -64,7 +55,6 @@ void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods
 void mouseListener(GLFWwindow* window, int button, int action, int mods){
 
 	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
-
 
 		if (toggleDebugMenu){
 			// Get the current mouse pos
@@ -126,6 +116,7 @@ void mouseListener(GLFWwindow* window, int button, int action, int mods){
 
 }
 
+// Sends a ray out, if it hits the plane, it creates an emitter at the intersection point
 void attemptToMakeAParticleEmitter(){
 	if (!toggleParticles) return;
 	/*
@@ -162,7 +153,7 @@ void attemptToMakeAParticleEmitter(){
 	// Check if the ray is within scene bounds
 	if (SPGrid::getInstance().getPosInGrid(P) != -1){
 		//cout << vec3ToString(P) << endl;
-		ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 15 + ((int)totalTime) % 100, 0), 10, vec3(rand() % 1600 - 800, 0, rand() % 1600 - 800), 3.0f, 3, 3);
+		ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 10 + ((int)totalTime) % 100, 0), 10, vec3(rand() % 1600 - 800, rand() % 800, rand() % 1600 - 800), 3.0f, 3, 3);
 		newEmitter->setColour(vec4(rand() % 80 * 0.01f + 0.2f, rand() % 80 * 0.01f + 0.2f, rand() % 80 * 0.01f + 0.2f, 1));
 		newEmitter->emitSpeed = 3.5f;
 		static int AddedParticleCounter = 1;
@@ -264,11 +255,14 @@ bool load_content()
 	ikManager["reachTester4"] = IKHierarchy("..\\resources\\ik\\reachTester.json");
 	ikManager["reachTester4"].rootBone->origin = vec3(27, 10, 25);
 
+	// Initialise the particle Manager
 	initParticleManager();
 
+	// Initialise the text renderer
 	textRen = new TextRenderer("Quikhand\\font", &passThroughEffect);
 	textRen->setFontSize(10.0f);
 
+	// Initialise the graph renderer
 	graphRen = new GraphRenderer(textRen, &colourPassThroughEffect, 200.0f, 100.0f);
 	graphRen->setText("fps", "time");
 	graphRen->setLimit(80);
@@ -278,8 +272,8 @@ bool load_content()
 	// Set up the scene
 	initSceneObjects();
 
-	// Set up the screen quads
-	initScreenQuads();
+	// Set up the menu background quad
+	initMenuQuad();
 
 	// Set up the shaders
 	initShaders();
@@ -294,19 +288,29 @@ bool load_content()
 	return true;
 }
 
+// Initialise the particle manager
 void initParticleManager(){
+	// Check if there is already a manager, if there is, remove it
 	if (particManager)
 		delete particManager;
 
 	// Set up the particle manager
 	particManager = new ParticleEmitterManager();
-	//particManager->add("tornado", new TornadoParticleEmitter(vec3(5, 5, 5), 1000, vec3(0, 80, 0), 5.0f, "particles\\water3x3.png", 3, 3));
+
+	// Create the water emitter
 	ParticleEmitter* waterEmitter = new ParticleEmitter(vec3(40, 40, 0), 250, vec3(800, 0, 20), 5.0f, 3, 3);
 	waterEmitter->setColour(vec4(0.265, 0.7, 0.8, 1));
 	waterEmitter->emitSpeed = 30.0f;
-	particManager->add("particles", waterEmitter, "particles\\water3x3.png");
+	particManager->add("waterParticles", waterEmitter, "particles\\water3x3.png");
+
+	// Create the tornado emitter
+	TornadoParticleEmitter* tornadoEmitter = new TornadoParticleEmitter(vec3(20, 15, -30), 500, vec3(0, 20, 0), 5.0f, 3, 3);
+	tornadoEmitter->setColour(vec4(0.15f, 0.15f, 0.15f, 1));
+	tornadoEmitter->emitSpeed = 160.0f;
+	particManager->add("tornadoParticles", tornadoEmitter, "particles\\smoke3x3.png");
 }
 
+// Initialise the shaders
 void initShaders(){
 	// Add Shaders
 	mainEffect.add_shader("..\\resources\\shaders\\main_shader\\main_shader.vert", GL_VERTEX_SHADER);
@@ -325,56 +329,12 @@ void initShaders(){
 
 }
 
-void initScreenQuads(){
-	// Create the Quad for rendering the screen to
-	geometry screenQuadGeom = geometry();
+// Initialise the menu background quad
+void initMenuQuad(){
+	// Create the Quad for rendering the menu background to
+	float ratio = (50.0f / 350.0f);
 	double halfW = renderer::get_screen_width() / 2.0f;
 	double halfH = renderer::get_screen_height() / 2.0f;
-	vector<vec3> positions
-	{
-		vec3(-halfW, halfH, 0.0f),
-		vec3(halfW, -halfH, 0.0f),
-		vec3(halfW, halfH, 0.0f),
-
-		vec3(-halfW, halfH, 0.0f),
-		vec3(-halfW, -halfH, 0.0f),
-		vec3(halfW, -halfH, 0.0f)
-	};
-	vector<vec3> texCoords
-	{
-		vec3(0.0f, 1.0f, 0.0f),
-		vec3(1.0f, 0.0f, 0.0f),
-		vec3(1.0f, 1.0f, 0.0f),
-
-		vec3(0.0f, 1.0f, 0.0f),
-		vec3(0.0f, 0.0f, 0.0f),
-		vec3(1.0f, 0.0f, 0.0f)
-	};
-	// Create the mesh for rendering the screen to
-	screenQuadGeom.add_buffer(positions, BUFFER_INDEXES::POSITION_BUFFER);
-	screenQuadGeom.add_buffer(texCoords, BUFFER_INDEXES::TEXTURE_COORDS_0);
-	screenQuad = screenQuadGeom;
-
-	// Create the Quad for rendering the corner cam to
-	float cornerCamScale = 0.5f;
-	geometry cornerCamQuadGeom = geometry();
-	vector<vec3> positionsCornerCam
-	{
-		vec3(halfW*cornerCamScale, halfH, 0.0f),
-		vec3(halfW*cornerCamScale + halfW * cornerCamScale, halfH - halfH * cornerCamScale, 0.0f),
-		vec3(halfW*cornerCamScale + halfW * cornerCamScale, halfH, 0.0f),
-
-		vec3(halfW*cornerCamScale, halfH, 0.0f),
-		vec3(halfW*cornerCamScale, halfH - halfH * cornerCamScale, 0.0f),
-		vec3(halfW*cornerCamScale + halfW * cornerCamScale, halfH - halfH * cornerCamScale, 0.0f)
-	};
-	// Create the mesh for rendering the corner cam to
-	cornerCamQuadGeom.add_buffer(positionsCornerCam, BUFFER_INDEXES::POSITION_BUFFER);
-	cornerCamQuadGeom.add_buffer(texCoords, BUFFER_INDEXES::TEXTURE_COORDS_0);
-	cornerCamQuad = cornerCamQuadGeom;
-
-	// Create the Quad for rendering the menu to
-	float ratio = (50.0f / 350.0f);
 	geometry menuQuadGeom = geometry();
 	vector<vec3> positionsMenuQuad
 	{
@@ -386,15 +346,24 @@ void initScreenQuads(){
 		vec3(-halfW, -halfH, 0.0f),
 		vec3((halfW*2.0f*ratio), -halfH, 0.0f)
 	};
+	vector<vec3> texCoords
+	{
+		vec3(0.0f, 1.0f, 0.0f),
+		vec3(1.0f, 0.0f, 0.0f),
+		vec3(1.0f, 1.0f, 0.0f),
+
+		vec3(0.0f, 1.0f, 0.0f),
+		vec3(0.0f, 0.0f, 0.0f),
+		vec3(1.0f, 0.0f, 0.0f)
+	};
 	// Create the mesh for rendering the menu to
 	menuQuadGeom.add_buffer(positionsMenuQuad, BUFFER_INDEXES::POSITION_BUFFER);
 	menuQuadGeom.add_buffer(texCoords, BUFFER_INDEXES::TEXTURE_COORDS_0);
 	menuQuad = menuQuadGeom;
 }
 
+// Initialise the scene objects
 void initSceneObjects(){
-
-	float scale = 1.0f;
 
 	// ***************
 	// Set up SceneObjects
@@ -407,13 +376,13 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	// Set the collider
 	sceneObjects["cubeA"].setCollider(new CubeCollider(vec3(-21, 15, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 
 
 	sceneObjects["ground"] = meshes["ground"];
 	sceneObjects["ground"].set_texture(texs["ground"]); // Sets the texture
-	//sceneObjects["ground"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["ground"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
@@ -421,35 +390,32 @@ void initSceneObjects(){
 	sceneObjects["ground"].setCollider(new PlaneCollider(vec3(0, 0, 0), vec3(0, 1, 0)));
 	sceneObjects["ground"].getCollider()->staticPos = true;
 
-	//SphereCollider cubeA = SphereCollider(vec3(-12, 10, 0), 1.0);
-	//SphereCollider cubeB = SphereCollider(vec3(-10, 10, 0), 1.0);
-	
 	sceneObjects["cubeB"] = meshes["cube"];
 	sceneObjects["cubeB"].set_texture(texs["white"]); // Sets the texture
-	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["cubeB"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	// Set the collider
 	sceneObjects["cubeB"].setCollider(new CubeCollider(vec3(-21, 10, 0), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 
 	sceneObjects["cubeC"] = meshes["cube"];
 	sceneObjects["cubeC"].set_texture(texs["white"]); // Sets the texture
-	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["cubeC"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	// Set the collider
 	sceneObjects["cubeC"].setCollider(new CubeCollider(vec3(40, 20, 20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 	sceneObjects["sphereA"] = meshes["sphere"];
 	sceneObjects["sphereA"].set_texture(texs["white"]); // Sets the texture
-	//sceneObjects["cubeB"].set_normal_texture(texs["island-Normal"]); // Sets the normal texture
 	sceneObjects["sphereA"].set_material(vec4(0.25, 0.25, 0.25, 1), // Sets the material properties
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	// Set the collider
 	sceneObjects["sphereA"].setCollider(new CubeCollider(vec3(-40, 30, -20), vec3(1.0, 1.0, 1.0), ColliderTypes::OBBCUBE));
 
 	sceneObjects["reachTesterTarget"] = meshes["sphere"];
@@ -459,15 +425,14 @@ void initSceneObjects(){
 		vec4(0.7, 0.7, 0.7, 1),
 		vec4(1, 1, 1, 1),
 		50.0f);
+	// Set the collider
 	sceneObjects["reachTesterTarget"].get_transform().position = vec3(25,15,25);
 
 	sceneObjects["reachingManTarget"] = sceneObjects["reachTesterTarget"];
-
-	//((CubeCollider*)sceneObjects["cubeB"].getCollider())->setRotation(rotationMat4(vec3(0, 0, 1), 45.0f));
-	//sceneObjects["cubeB"].get_transform().rotate(quat(1.0,0.0,0.0, cos(pi<float>() / 4.0f)));
-
+	
 }
 
+// Initialise the cameras
 void initCameras(){
 	// Set camera properties
 	auto aspect = static_cast<float>(renderer::get_screen_width()) / static_cast<float>(renderer::get_screen_height());
@@ -594,6 +559,7 @@ void updateCameras(float delta_time)
 }
 
 void updatePhysics(){
+	// While the accumulated delta time is greater than the physics time step, run the physics update and decrement accumDeltaTime by PHYSICS_TIME_STEP
 	while (accumDeltaTime > PHYSICS_TIME_STEP){
 		accumDeltaTime -= PHYSICS_TIME_STEP;
 
@@ -643,11 +609,13 @@ void updatePhysics(){
 			// IK Demonstration updating - END
 		}
 		
+		// Loop throug the sceneobjects and update them
 		for (auto &e : sceneObjects)
 		{
 			e.second.update(PHYSICS_TIME_STEP);
 		}
 		
+		// Update the particle manager
 		if (toggleParticles)particManager->update(PHYSICS_TIME_STEP);
 
 	}
@@ -657,12 +625,14 @@ void updatePhysics(){
 
 bool update(float delta_time)
 {
-
+	// Increment accumDeltaTime
 	accumDeltaTime += delta_time;
 	updatePhysics();
 
+	// Increment totalTime
 	totalTime += delta_time;
 	float fps = 1.0f / delta_time;
+	// Push fps data to the graph renderer
 	graphRen->pushData(fps);
 
 	// IK target movement
@@ -789,7 +759,6 @@ bool render()
 	// Render IK
 	if (toggleIK){
 		renderer::bind(texs["white"], 0);
-		glUniform3fv(mainEffect.get_uniform_location("ambientLightDir"), 1, value_ptr(normalize(ambientLightPosition)));
 		ikManager.render(VP, &mainEffect);
 	}
 
@@ -800,9 +769,7 @@ bool render()
 	if(toggleParticles)particManager->render(VP);
 
 
-	glDisable(GL_DEPTH_TEST);
-
-
+	// Create lineA and lineB, test for collision 
 	LineCollider lineA = LineCollider(vec3(12.5f, 7.5f, 10), vec3(7.5f, 7.5f, 10), 1.0f);
 	LineCollider lineB = LineCollider(vec3(10 + sin(totalPhysicsTime), 5, 10), vec3(10 + sin(totalPhysicsTime), 10, 10), 1.0f);
 
@@ -810,8 +777,10 @@ bool render()
 	lineA.intersects(lineB, vec3(0, 0, 0), lineIntersectionData);
 
 	vec3 right = normalize(cross(normalize(freeCam.get_target() - freeCam.get_position()), normalize(freeCam.get_up())));
+
 	// Render Object Controls
-	textRen->render3D(VP, right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position);
+
+	textRen->render3D(VP, right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position + vec3(0,1,0));
 	textRen->render3D(VP, right, "Q = up  _  E = down  _  arrow keys = forwardleft  back  right", sceneObjects["cubeA"].get_transform().position + vec3(0, 2, 0));
 	textRen->render3D(VP, right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
 
@@ -826,7 +795,7 @@ bool render()
 	
 
 	glUniform4fv(colourPassThroughEffect.get_uniform_location("colour"), 1, value_ptr(vec4(1, 0, 1, 1)));
-
+	// Render the line v line results (demonstrates line v line collision)
 	glBegin(GL_LINES);
 	glVertex3f(lineA.position.x, lineA.position.y, lineA.position.z);
 	glVertex3f(lineA.endPosition.x, lineA.endPosition.y, lineA.endPosition.z);
@@ -834,7 +803,12 @@ bool render()
 	glVertex3f(lineB.endPosition.x, lineB.endPosition.y, lineB.endPosition.z);
 	glEnd();
 
-	glEnable(GL_DEPTH_TEST);
+	// Render the reach testers debug info
+	ikManager["reachTester0"].rootBone->debugRender(VP, colourPassThroughEffect, sceneObjects["reachTesterTarget"].get_transform().position);
+	ikManager["reachTester1"].rootBone->debugRender(VP, colourPassThroughEffect, sceneObjects["reachTesterTarget"].get_transform().position);
+	ikManager["reachTester2"].rootBone->debugRender(VP, colourPassThroughEffect, sceneObjects["reachTesterTarget"].get_transform().position);
+	ikManager["reachTester3"].rootBone->debugRender(VP, colourPassThroughEffect, sceneObjects["reachTesterTarget"].get_transform().position);
+	ikManager["reachTester4"].rootBone->debugRender(VP, colourPassThroughEffect, sceneObjects["reachTesterTarget"].get_transform().position);
 
 	// Render the spatial partitioning grid
 	if (toggleSPGrid)
@@ -851,6 +825,7 @@ bool render()
 	return true;
 }
 
+// Finish rendering the frame
 void finishFrame(){
 
 	glDisable(GL_DEPTH_TEST);
@@ -872,6 +847,7 @@ void finishFrame(){
 
 		textRen->setFontSize(7.0f);
 
+		// Render the debug menu text
 		textRen->render(orthoMVP, "Toggle\nParticles", 0.0125f, 0.925f);
 		textRen->render(orthoMVP, "Toggle\nIK", 0.1f, 0.925f);
 		textRen->render(orthoMVP, "Toggle\nFull Grid", 0.189f, 0.925f);
@@ -886,12 +862,17 @@ void finishFrame(){
 		renderer::render(menuQuad);
 	}
 
+	// Render particle debug info
 	if (toggleParticles){
 		std::ostringstream avgStr;
 		avgStr << particManager->getParticleCount();
 		textRen->render(orthoMVP, "Particle Count: " + avgStr.str(), 0, 0.85f);
 	}
-		
+
+	// Render camera controls
+	textRen->render(orthoMVP, "WASD + Right Click to move the camera", 0.7f, 0.94f);
+
+	// Render the fps graph
 	graphRen->render(orthoMVP, 0.005f, 0.01f);
 
 	glEnable(GL_DEPTH_TEST);

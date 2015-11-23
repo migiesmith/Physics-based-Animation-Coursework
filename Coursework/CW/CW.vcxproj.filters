@@ -54,9 +54,6 @@
     <ClCompile Include="Collider.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="IntersectionData.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="SphereCollider.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>

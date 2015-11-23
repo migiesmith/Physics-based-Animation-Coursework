@@ -49,10 +49,15 @@ public:
 	void translate(vec3 translation);
 	virtual void intersects(Collider& other, const vec3& velocity, IntersectionData& data){ cout << "ERROR: Collider intersect miscalled" << endl; }
 
+	// Apply a force
 	void addForce(const vec3& f);
+	// Integrate the velocity and position
 	void update(const float delta_time);
 	void setMass(const float m);
 
+	// return the collider's type
 	ColliderTypes getType(){ return colliderType; }
-	~Collider();
+
+	// Delete the collider
+	~Collider(){}
 };

@@ -10,6 +10,7 @@ GraphRenderer::GraphRenderer(TextRenderer* textRenderer, effect* shader, const f
 	this->height = height;
 }
 
+// Push data onto the graph
 void GraphRenderer::pushData(const float y){
 	if(y >= 0)
 		data.push_back(y);
@@ -17,6 +18,7 @@ void GraphRenderer::pushData(const float y){
 		data.erase(data.begin());
 }
 
+// Returns the max highest value
 float GraphRenderer::getMaxDataValue(){
 	float max = numeric_limits<float>::min();
 	for (float d : data){
@@ -25,6 +27,7 @@ float GraphRenderer::getMaxDataValue(){
 	return max;
 }
 
+// returns the average data value
 float GraphRenderer::getAverageDataValue(){
 	float sum = 0.0f;
 	for (float d : data){
@@ -33,6 +36,7 @@ float GraphRenderer::getAverageDataValue(){
 	return sum / data.size();
 }
 
+// returns the lowest data value
 float GraphRenderer::getMinDataValue(){
 	float min = numeric_limits<float>::max();
 	for (float d : data){
@@ -41,6 +45,7 @@ float GraphRenderer::getMinDataValue(){
 	return min;
 }
 
+// Render the graph
 void GraphRenderer::render(const mat4 &orthoMVP, const float x, const float y){
 	float xPos = -(renderer::get_screen_width() / 2.0f) + x*renderer::get_screen_width() + textRenderer->getStringWidth(xText);
 	float yPos = renderer::get_screen_height() - ( (renderer::get_screen_height() / 2.0f) + (y*renderer::get_screen_height())) - height;
@@ -103,18 +108,18 @@ void GraphRenderer::render(const mat4 &orthoMVP, const float x, const float y){
 
 
 
+// set the x axis text
 void GraphRenderer::setXText(const string& xText){
 	this->xText = xText;
 }
+
+// set the y axis text
 void GraphRenderer::setYText(const string& yText){
 	this->yText = yText;
 }
+
+// set the x and y axis text
 void GraphRenderer::setText(const string& xText, const string& yText){
 	setXText(xText);
 	setYText(yText);
-}
-
-
-GraphRenderer::~GraphRenderer()
-{
 }

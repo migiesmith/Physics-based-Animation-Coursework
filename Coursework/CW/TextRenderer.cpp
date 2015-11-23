@@ -1,5 +1,6 @@
 #include "TextRenderer.h"
 
+// constructor for the text renderer
 TextRenderer::TextRenderer(string fontPath, effect* shader)
 {
 	loadFontTexture(("fonts\\" + fontPath + ".png").c_str());
@@ -8,10 +9,12 @@ TextRenderer::TextRenderer(string fontPath, effect* shader)
 	isReady = true;
 }
 
+// Load font texture from fontPath
 void TextRenderer::loadFontTexture(const char* fontPath){
 	tex = Util::loadTexture(fontPath);
 }
 
+// Load font character mapping from fontPath
 void TextRenderer::loadCharacterMapping(const char* fontPath){
 	TiXmlDocument doc(fontPath);
 	if (doc.LoadFile()){
@@ -47,11 +50,13 @@ void TextRenderer::loadCharacterMapping(const char* fontPath){
 	}
 }
 
-// Renders text to the screen at x, y where x and y are coordinates in the ran 0 to 1
+// Renders text to the screen at x, y where x and y are coordinates in the range 0 to 1
 void TextRenderer::render(const mat4& orthoMVP, const string text, float x, float y){
 	if (!isReady || text.size() == 0) return;
 
+	// Bind the shader
 	renderer::bind(*shader);
+	// Set the mvp matrix
 	glUniformMatrix4fv(
 		shader->get_uniform_location("MVP"), // Location of uniform
 		1, // Number of values - 1 mat4
@@ -59,23 +64,28 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 		value_ptr(orthoMVP)); // Pointer to matrix data
 	glUniform1i(shader->get_uniform_location("tex"), 0);
 
+	// The x and y offset from the original rendering position x, y
 	int xOffset = 0;
 	int yOffset = 0;
+	// Create a structure to store the characters in
 	struct Vertex {
 		GLfloat position[3];
 		GLfloat texcoord[2];
 	};
+	// The number of vertex objects needed
 	const int tSize = text.size();
 	const int NUM_VERTS = 6 * tSize;
+	// The number of vertex objects needed
 	Vertex* vertexdata = new Vertex[NUM_VERTS];
 
+	// Loop through each character and add it to the vertex data
 	int vertNum = 0;
 	for (char c : text){
 		if (c == ' '){
 			// If the current character is a space, just increment the xOffset
 			xOffset += (int)((characters['!']->width + characters['!']->xAdvance) * fontSize * 2.0f);
 		}else if(c == '\n'){
-			yOffset -= getFontHeight();
+			yOffset -= (int)getFontHeight();
 			xOffset = 0;
 		}else{
 			// Get the next character using the current char
@@ -93,6 +103,7 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 			float w = (float)character->width / (float)tex.get_width();
 			float h = -(float)character->height / (float)tex.get_height();
 			
+			// Add each corner to the vertex data
 			vertexdata[vertNum] = { { -quadX + xOffset - xPos, quadY + yOffset - yPos, 0.0f }, { xCoord, yCoord } };
 			vertNum++;
 
@@ -130,8 +141,10 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 	// copy data into the buffer object
 	glBufferData(GL_ARRAY_BUFFER, NUM_VERTS * sizeof(Vertex), vertexdata, GL_STATIC_DRAW);
 
+	// Delete the vertex data
 	delete[] vertexdata;
 
+	// Get the attribute positions from the shader
 	int posAttrib = glGetAttribLocation(shader->get_program(), "position");
 	int texAttrib = glGetAttribLocation(shader->get_program(), "tex_coord_in");
 
@@ -142,14 +155,16 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
 
 	
-	// Remder the string
+	// Bind the texture
 	renderer::bind(tex, 0);
+	// don't render transparency below 0.2f
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
+	// Remder the string
 	glDrawArrays(GL_TRIANGLES, 0, NUM_VERTS);
 	glDisable(GL_ALPHA_TEST);
 
-
+	// Clean up the buffers and unbind the texture
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(posAttrib);
 	glDisableVertexAttribArray(texAttrib);
@@ -161,6 +176,7 @@ void TextRenderer::render(const mat4& orthoMVP, const string text, float x, floa
 
 }
 
+// (3D) Renders text in the scene at pos, right is the camera's right so that the text faces the camera
 void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string text, vec3& pos){
 	if (!isReady || text.size() == 0) return;
 
@@ -180,21 +196,29 @@ void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string tex
 	glUniform1i(shader->get_uniform_location("tex"), 0);
 
 
+	// The x and y offset from the original rendering position x, y
 	int xOffset = 0;
 	int yOffset = 0;
-	geometry screenQuadGeom = geometry();
-	vector<vec3> positions;
-	vector<vec3> texCoords;
+	// Create a structure to store the characters in
+	struct Vertex {
+		GLfloat position[3];
+		GLfloat texcoord[2];
+	};
+	// The number of vertex objects needed
+	const int tSize = text.size();
+	const int NUM_VERTS = 6 * tSize;
+	// The number of vertex objects needed
+	Vertex* vertexdata = new Vertex[NUM_VERTS];
 
+	int vertNum = 0;
 	for (char c : text){
 		if (c == ' '){
 			// If the current character is a space, just increment the xOffset
 			xOffset += (int)((characters['!']->width + characters['!']->xAdvance) * fontSize * 2.0f);
 		}
 		else if (c == '\n'){
-			yOffset -= getFontHeight();
+			yOffset -= (int)getFontHeight();
 			xOffset = 0;
-
 		}
 		else{
 			// Get the next character using the current char
@@ -204,52 +228,90 @@ void TextRenderer::render3D(const mat4& MVP, const vec3& right, const string tex
 			float quadX = character->width * fontSize;
 			float quadY = character->height * fontSize;
 
-			// Push the current character's quad onto the positions vector
-			positions.push_back(vec3(-quadX + xOffset, quadY + yOffset, 0));
-			positions.push_back(vec3(quadX + xOffset, -quadY + yOffset, 0));
-			positions.push_back(vec3(quadX + xOffset, quadY + yOffset, 0));
-
-			positions.push_back(vec3(-quadX + xOffset, quadY + yOffset, 0));
-			positions.push_back(vec3(-quadX + xOffset, -quadY + yOffset, 0));
-			positions.push_back(vec3(quadX + xOffset, -quadY + yOffset, 0));
-
 			// Get the tex coord values for the current character quad
 			float xCoord = (float)character->xPos / (float)tex.get_width();
 			float yCoord = -(float)character->yPos / (float)tex.get_height();
 			float w = (float)character->width / (float)tex.get_width();
 			float h = -(float)character->height / (float)tex.get_height();
 
-			// Push the current character's texcoords onto the positions vector
-			texCoords.push_back(vec3(xCoord, yCoord, 0.0f));
-			texCoords.push_back(vec3(xCoord + w, yCoord + h, 0.0f));
-			texCoords.push_back(vec3(xCoord + w, yCoord, 0.0f));
+			// Add each corner to the vertex data
+			vertexdata[vertNum] = { { -quadX + xOffset, quadY + yOffset, 0 }, { xCoord, yCoord } };
+			vertNum++;
 
-			texCoords.push_back(vec3(xCoord, yCoord, 0.0f));
-			texCoords.push_back(vec3(xCoord, yCoord + h, 0.0f));
-			texCoords.push_back(vec3(xCoord + w, yCoord + h, 0.0f));
+			vertexdata[vertNum] = { { quadX + xOffset, -quadY + yOffset, 0 }, { xCoord + w, yCoord + h } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { quadX + xOffset, quadY + yOffset, 0 }, { xCoord + w, yCoord } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { -quadX + xOffset, quadY + yOffset, 0 }, { xCoord, yCoord } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { -quadX + xOffset, -quadY + yOffset, 0 }, { xCoord, yCoord + h } };
+			vertNum++;
+
+			vertexdata[vertNum] = { { quadX + xOffset, -quadY + yOffset, 0 }, { xCoord + w, yCoord + h } };
+			vertNum++;
 
 			// Increment the xOffset to move the character along
 			xOffset += (int)((characters[c]->width + characters[c]->xAdvance) * fontSize);
 		}
 	}
 
-	// Create the mesh for rendering the screen to
-	screenQuadGeom.add_buffer(positions, BUFFER_INDEXES::POSITION_BUFFER);
-	screenQuadGeom.add_buffer(texCoords, BUFFER_INDEXES::TEXTURE_COORDS_0);
+	// Create and bind a VAO
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
-	// Remder the string
+	// Create and bind a BO for vertex data
+	GLuint vbuffer;
+	glGenBuffers(1, &vbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+
+	// copy data into the buffer object
+	glBufferData(GL_ARRAY_BUFFER, NUM_VERTS * sizeof(Vertex), vertexdata, GL_STATIC_DRAW);
+
+	// Delete the vertex data
+	delete[] vertexdata;
+
+	// Get the attribute positions from the shader
+	int posAttrib = glGetAttribLocation(shader->get_program(), "position");
+	int texAttrib = glGetAttribLocation(shader->get_program(), "tex_coord_in");
+
+	// set up vertex attributes
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
+
+
+	// Bind the texture
 	renderer::bind(tex, 0);
+	// don't render transparency below 0.2f
 	glAlphaFunc(GL_GREATER, 0.2f);
 	glEnable(GL_ALPHA_TEST);
-	renderer::render(screenQuadGeom);
+	// Remder the string
+	glDrawArrays(GL_TRIANGLES, 0, NUM_VERTS);
 	glDisable(GL_ALPHA_TEST);
+
+	// Clean up the buffers and unbind the texture
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(posAttrib);
+	glDisableVertexAttribArray(texAttrib);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffersARB(1, &vbuffer);
 
 }
 
+// Returns the font height
 float TextRenderer::getFontHeight(){
 	return (characters['T']->height + characters['T']->yOffset)* fontSize * 2.2f;
 }
 
+// Returns the string width
 float TextRenderer::getStringWidth(const string& text){
 	float sum = 0.0f;
 	for (char c : text){
@@ -262,8 +324,4 @@ float TextRenderer::getStringWidth(const string& text){
 void TextRenderer::setFontSize(const float sizeInPt){
 	fontSize = (float)renderer::get_screen_width() / (float)renderer::get_screen_height();
 	fontSize *= sizeInPt * invInFontSize;
-}
-
-TextRenderer::~TextRenderer()
-{
 }

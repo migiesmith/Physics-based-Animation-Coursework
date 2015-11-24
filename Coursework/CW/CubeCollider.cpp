@@ -16,7 +16,6 @@ void CubeCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 	switch (other.colliderType){
 	case ColliderTypes::SPHERE: {
 		sphereToCubeCollision((SphereCollider&)(other), velocity, data);
-		data.amount *= -1.0f;
 		break;
 	}
 
@@ -24,7 +23,7 @@ void CubeCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 	{
 
 		if (colliderType == ColliderTypes::OBBCUBE){
-			rubOBBCollision((CubeCollider&)(other), velocity, data);
+			runOBBCollision((CubeCollider&)(other), velocity, data);
 			data.direction *= -1.0f;
 			data.amount *= -1.0f;
 
@@ -33,7 +32,7 @@ void CubeCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 
 			vec3 otherPos = other.position;
 			vec3 otherDimen = ((CubeCollider&)other).dimensions;
-
+			// Check if the bounds of each AABB cube overlaps
 			if (abs(position.x - otherPos.x) < dimensions.x + otherDimen.x) {
 				if (abs(position.y - otherPos.y) < dimensions.y + otherDimen.y) {
 					if (abs(position.z - otherPos.z) < dimensions.z + otherDimen.z) {
@@ -49,7 +48,7 @@ void CubeCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 
 	case ColliderTypes::OBBCUBE:
 	{
-		rubOBBCollision(((CubeCollider&)other), velocity, data);
+		runOBBCollision(((CubeCollider&)other), velocity, data);
 		//data.direction *= -1.0f;
 		data.amount *= -1.0f;
 		break;
@@ -87,7 +86,7 @@ vec3 CubeCollider::closestCollidingNormal(Collider& other){
 }
 
 // Start running the obb collision check (mostly set up)
-void CubeCollider::rubOBBCollision(CubeCollider& cube, const vec3& velocity, IntersectionData& data){
+void CubeCollider::runOBBCollision(CubeCollider& cube, const vec3& velocity, IntersectionData& data){
 	data.reset();
 	vec3 offset = cube.position - position;
 	// Set up the list of axis to check
@@ -123,6 +122,7 @@ void CubeCollider::sphereToCubeCollision(SphereCollider& sphere, const vec3& vel
 	vec3 pt = vec3(0, 0, 0);
 	data.doesIntersect = sphereVObbCollision(sphere, pt);
 	data.direction = closestCollidingNormal(sphere);
+	if (dot(data.direction, normalize(position - sphere.position)) < 0.0f) data.direction *= -1.0f;
 	data.amount = magnitude(velocity);
 }
 

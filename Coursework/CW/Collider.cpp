@@ -43,7 +43,7 @@ void Collider::update(const float delta_time){
 	if(!ignoreGravity)
 		addForce(vec3(0, -9.8, 0));
 
-	// Calculate the acceleration
+	// Calculate the acceleration (using Newton's second law)
 	vec3 acceleration = force * invMass;
 	// Calculate the velocity
 	velocity += acceleration * delta_time;

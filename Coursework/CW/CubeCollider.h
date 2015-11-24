@@ -48,7 +48,7 @@ public:
 	// Find the closest colliding normal between this and the other collider
 	vec3 closestCollidingNormal(Collider& other);
 	// Start running the obb collision check (mostly set up)
-	void rubOBBCollision(CubeCollider& cube, const vec3& velocity, IntersectionData& data);
+	void runOBBCollision(CubeCollider& cube, const vec3& velocity, IntersectionData& data);
 	// Run the bulk of the obb collision check
 	void checkOBBCollisionWithNormals(CubeCollider& other, const vector<vec3*>& norms, IntersectionData& data);
 	// Run the sphere v cube collision check

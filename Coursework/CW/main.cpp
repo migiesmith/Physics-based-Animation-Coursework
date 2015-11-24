@@ -237,6 +237,7 @@ bool load_content()
 	ikManager["walkingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
 	ikManager["walkingMan"].rootBone->toRender = false;
 	ikManager["reachingMan"] = IKHierarchy("..\\resources\\ik\\walkingMan.json");
+	ikManager["reachingMan"].rootBone->toRender = false;
 	ikManager["reachingMan"].rootBone->origin = vec3(-20, 0, 20);
 
 	// IK for testing reach

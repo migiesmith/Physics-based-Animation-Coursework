@@ -610,7 +610,7 @@ void updatePhysics(){
 			// IK Demonstration updating - END
 		}
 		
-		// Loop throug the sceneobjects and update them
+		// Loop through the sceneobjects and update them
 		for (auto &e : sceneObjects)
 		{
 			e.second.update(PHYSICS_TIME_STEP);

@@ -110,7 +110,7 @@ void SPGrid::render(effect& shader, bool renderFullGrid){
 			for (int z = 0; z < _DEPTH; z++){
 				// Render the cell if it has objects, has been checked or if the full grid is to be rendered
 				if (_cells[cellIndex(x, y, z)].testCount > 0 || _cells[cellIndex(x, y, z)].beenChecked || renderFullGrid){
-					int testCount = _cells[cellIndex(x, y, z)].testCount / 5;
+					int testCount = _cells[cellIndex(x, y, z)].testCount;
 
 					// Set the colour depending on how many checks have been done on this cell
 					if (testCount > 5){

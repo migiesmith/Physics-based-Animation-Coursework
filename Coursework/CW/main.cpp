@@ -29,11 +29,10 @@ double cursor_y = 0.0; // Stores the position Y of the cursor
 float totalTime = 0.0f; // Stores how much time has passed (used for time based events like model bobbing and light movement)
 float totalPhysicsTime = 0.0f; // Stores how much time has passed for the physics engine (used for time based events such as ik walking)
 
-vec3 rayDir, rayStart, rayEnd;
-
-//TornadoParticleEmitter partic = TornadoParticleEmitter(vec3(0, 140, 0), 20000, vec3(0, 30, 0), 15.0f);
+// The manager for the particle system
 ParticleEmitterManager* particManager;
 
+// The manager for the inverse kinematic system
 IKManager ikManager;
 
 void keyListener(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -138,14 +137,14 @@ void attemptToMakeAParticleEmitter(){
 	// Project the coords into world space
 	viewMatrix = freeCam.get_view();
 	invMatrix = inverse(viewMatrix);
-	rayStart = vec3(dx*MYNEAR, dy*MYNEAR, -MYNEAR);
-	rayEnd = vec3(dx*MYFAR, dy*MYFAR, -MYFAR);
+	vec3 rayStart = vec3(dx*MYNEAR, dy*MYNEAR, -MYNEAR);
+	vec3 rayEnd = vec3(dx*MYFAR, dy*MYFAR, -MYFAR);
 
 	rayStart = vec4ToVec3(invMatrix * vec3ToVec4(rayStart));
 	rayEnd = vec4ToVec3(invMatrix * vec3ToVec4(rayEnd));
 
 	// Get the ray direction
-	rayDir = normalize(rayEnd - rayStart);
+	vec3 rayDir = normalize(rayEnd - rayStart);
 
 	// Get the intersection point
 	vec3 P = ((PlaneCollider*)sceneObjects["ground"].getCollider())->rayIntersection(rayStart, rayDir);

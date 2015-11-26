@@ -153,7 +153,7 @@ void attemptToMakeAParticleEmitter(){
 	// Check if the ray is within scene bounds
 	if (SPGrid::getInstance().getPosInGrid(P) != -1){
 		//cout << vec3ToString(P) << endl;
-		ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 10 + ((int)totalTime) % 100, 0), 10, vec3(rand() % 1600 - 800, rand() % 800, rand() % 1600 - 800), 3.0f, 3, 3);
+		ParticleEmitter* newEmitter = new ParticleEmitter(P + vec3(0, 10 + ((int)totalTime) % 60, 0), 10, vec3(rand() % 1600 - 800, rand() % 800, rand() % 1600 - 800), 3.0f, 3, 3);
 		newEmitter->setColour(vec4(rand() % 80 * 0.01f + 0.2f, rand() % 80 * 0.01f + 0.2f, rand() % 80 * 0.01f + 0.2f, 1));
 		newEmitter->emitSpeed = 3.5f;
 		static int AddedParticleCounter = 1;
@@ -586,6 +586,9 @@ void updatePhysics(){
 		if (glfwGetKey(renderer::get_window(), GLFW_KEY_Q))
 			sceneObjects["cubeA"].getCollider()->addForce(vec3(0.0, -movementForce, 0.0));
 
+		if (glfwGetKey(renderer::get_window(), GLFW_KEY_P))
+			attemptToMakeAParticleEmitter();
+
 		// refresh the spatial partioning grid with the sceneobjects
 		SPGrid::getInstance().update(sceneObjects);
 
@@ -771,8 +774,8 @@ bool render()
 
 
 	// Create lineA and lineB, test for collision 
-	LineCollider lineA = LineCollider(vec3(12.5f, 7.5f, 10), vec3(7.5f, 7.5f, 10), 1.0f);
-	LineCollider lineB = LineCollider(vec3(10 + sin(totalPhysicsTime), 5, 10), vec3(10 + sin(totalPhysicsTime), 10, 10), 1.0f);
+	LineCollider lineA = LineCollider(vec3(12.5f, 7.5f, 10), vec3(7.5f, 7.5f, 10), 0.0f);
+	LineCollider lineB = LineCollider(vec3(9 + sin(totalPhysicsTime)*2.0f, 5, 10), vec3(9 + sin(totalPhysicsTime)*2.0f, 10, 10), 0.0f);
 
 	IntersectionData lineIntersectionData = IntersectionData();
 	lineA.intersects(lineB, vec3(0, 0, 0), lineIntersectionData);
@@ -783,7 +786,10 @@ bool render()
 
 	textRen->render3D(VP, right, "T = up  _  Y = down  _  IJKL = forward  left  back  right", sceneObjects["reachTesterTarget"].get_transform().position + vec3(0,1,0));
 	textRen->render3D(VP, right, "Q = up  _  E = down  _  arrow keys = forwardleft  back  right", sceneObjects["cubeA"].get_transform().position + vec3(0, 2, 0));
-	textRen->render3D(VP, right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
+	if (lineIntersectionData.doesIntersect)
+		textRen->render3D(VP, right, "Line Intersection: vec3(" + vec3ToString(lineIntersectionData.intersection) + ")", lineIntersectionData.intersection);
+	textRen->render3D(VP, right, "Line Intersection Test", lineA.position + (lineA.endPosition - lineA.position)*0.4f + vec3(0, 3, 0));
+	textRen->render3D(VP, right, "IK Reach Testers", ikManager["reachTester0"].rootBone->origin + vec3(0, 3, 0));
 
 	renderer::bind(colourPassThroughEffect);
 	//glPointSize(6.0f);
@@ -871,7 +877,8 @@ void finishFrame(){
 	}
 
 	// Render camera controls
-	textRen->render(orthoMVP, "WASD + Right Click to move the camera", 0.7f, 0.94f);
+	textRen->render(orthoMVP, "WASD + Right Click to move the camera", 1.0f - textRen->getStringWidth("WASD + Right Click to move the camera") *1.1f / renderer::get_screen_width(), 0.94f);
+	textRen->render(orthoMVP, "Left click to add one emitter, hold 'P' to add many", 1.0f - textRen->getStringWidth("Left click to add one emitter, hold 'P' to add many")*1.1f / renderer::get_screen_width(), 0.0f);
 
 	// Render the fps graph
 	graphRen->render(orthoMVP, 0.005f, 0.01f);

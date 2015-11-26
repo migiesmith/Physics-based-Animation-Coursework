@@ -8,7 +8,6 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 	switch (other.colliderType){
 	case ColliderTypes::LINE:
 		LineCollider& otherLine = (LineCollider&)other;
-
 		data.doesIntersect = true;
 		
 		// Get the direction of this line and the other
@@ -38,6 +37,7 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 
 			// calculate the distance to the intersection
 			vec3 toIntersection = h / k * dirA;
+
 			// Get the intersection point
 			vec3 intersectionPoint = position - toIntersection;
 
@@ -45,8 +45,7 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 			vec3 normal = normalize(position - intersectionPoint);
 
 			// calculate the amount of intersection
-			float intersectAmount = abs(dot(normal, intersectionPoint) - dot(normal, position));
-
+			float intersectAmount = dot(normal, intersectionPoint) - dot(normal, position);
 
 			data.intersection = intersectionPoint;
 			data.amount = intersectAmount;
@@ -55,11 +54,13 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 			if (intersectAmount <= radius + otherLine.radius)
 				data.doesIntersect = true;
 
+			if (magnitude(position - endPosition) < magnitude(position - intersectionPoint))
+				data.doesIntersect = false;
+
 			data.direction = aToB;
 
 		}
 		
-
 		break;
 	}
 }

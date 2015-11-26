@@ -12,7 +12,7 @@ void SPCell::intersects(Collider& inCollider, const vec3& velocity, Intersection
 			//If there was an intersection
 			if (data.doesIntersect){
 				// Calculate the correcting velocity
-				vec3 correctiveVelocity = data.direction * dot(data.direction, (inCollider.velocity - c->velocity)) * 0.9f;
+				vec3 correctiveVelocity = data.direction * dot(data.direction, (inCollider.velocity - c->velocity)) * 1.45f; // 1.45f is a constant for elasticity
 				// If the other collider is static
 				if (c->staticPos){
 					// only apply the correctiveVelocity to the inCollider
@@ -27,7 +27,7 @@ void SPCell::intersects(Collider& inCollider, const vec3& velocity, Intersection
 				// Add a force relative to the collision direction
 				inCollider.addForce(data.direction * dot(data.direction, inCollider.velocity));
 				// Add an extra force if the collision was with an object directly below (eg the ground)
-				inCollider.addForce(vec3(0, 9.8, 0) * dot(vec3(0, 1, 0), data.direction)*2.0f);
+				inCollider.addForce(vec3(0, 9.8 * inCollider.mass, 0) * dot(vec3(0, 1, 0), data.direction)*2.0f);
 				
 			}
 			// Increment the counter for tests this update

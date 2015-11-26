@@ -21,11 +21,17 @@ void TornadoParticleEmitter::update(const float delta_time){
 			p.update(delta_time);
 			spGrid.intersects(*p.collider, p.collider->velocity, data);
 
+			vec3 offset = *this - p;
 			// If the particle isn't right on the emitter
-			if (!Util::isZeroVec3(*this - p)){
+			if (!Util::isZeroVec3(offset) && !Util::isZeroVec3(force)){
 				// Apply a force to rotate it around the emitter and upwards
-				vec3 offset = normalize(*this - p);
-				vec3 dir = -normalize(normalize(cross(offset, normalize(force))) - normalize(offset)*4.0f);
+				offset = normalize(offset);
+				vec3 dir = cross(offset, normalize(force));
+				if (!Util::isZeroVec3(dir))
+					dir = normalize(dir);
+				dir -= offset*4.0f;
+				if (!Util::isZeroVec3(dir))
+					dir = -normalize(dir);
 				p.addForce(force + dir*magnitude(force));
 			}
 			p.update(delta_time);

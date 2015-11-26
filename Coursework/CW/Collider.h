@@ -37,6 +37,7 @@ public:
 	bool staticPos = false;
 	bool ignoreGravity = false;
 	float invMass;
+	float mass;
 
 	vec3 velocity, force; // Velocity and Force
 

@@ -34,7 +34,7 @@ void Particle::update(const float delta_time){
 
 	// Only apply gravity if needed
 	if(!collider->ignoreGravity)
-		addForce(vec3(0, -9.8, 0));
+		addForce(vec3(0, -9.8*collider->mass, 0));
 
 	// Calculate the acceleration
 	vec3 acceleration = collider->force * collider->invMass;

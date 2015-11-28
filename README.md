@@ -4,7 +4,7 @@
 To Run the simulation
 -------------------------
 
-Open 'CW.exe' inside '/Release'.
+Open 'CW.exe' inside 'Coursework/Release', see below for controls.
 
 Camera controls
 ------------------

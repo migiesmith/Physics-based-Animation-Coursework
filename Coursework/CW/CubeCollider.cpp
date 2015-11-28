@@ -221,7 +221,7 @@ pair<bool, float> CubeCollider::checkProjectedIntersection(vector<vec3>& corners
 	float longSpan = fmax(max0, max1) - fmin(min0, min1);
 	float sumSpan = max0 - min0 + max1 - min1;
 
-	// return if whether or not they intersect and by how much
+	// return whether or not they intersect and by how much
 	return pair<bool, float>((longSpan <= sumSpan), (sumSpan - longSpan));
 }
 

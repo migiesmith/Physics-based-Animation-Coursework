@@ -6,6 +6,13 @@ Constructor/Destructor of the SceneObject
 
 */
 
+#define DBG_HALT __asm {int 3}
+#if defined(DEBUG) | defined(_DEBUG)
+#define DBG_ASSERT(exp) {if(!(exp)) {DBG_HALT;}}
+#else
+#define DBG_ASSERT(exp) {}
+#endif
+
 #include "Collider.h"
 
 Collider::Collider(vec3 position, ColliderTypes colliderType)
@@ -58,6 +65,7 @@ void Collider::update(const float delta_time){
 
 // Set the mass of the collider
 void Collider::setMass(const float m){
+	DBG_ASSERT(m != 0.0f); // mass musn't be 0
 	mass = m;
 	invMass = 1.0f / m;
 }

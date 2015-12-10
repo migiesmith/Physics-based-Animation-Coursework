@@ -6,6 +6,13 @@ The collider that handles sphere related intersection (sphere-sphere, sphere-pla
 
 */
 
+#define DBG_HALT __asm {int 3}
+#if defined(DEBUG) | defined(_DEBUG)
+#define DBG_ASSERT(exp) {if(!(exp)) {DBG_HALT;}}
+#else
+#define DBG_ASSERT(exp) {}
+#endif
+
 #pragma once
 #include "Collider.h"
 #include "CubeCollider.h"
@@ -25,6 +32,7 @@ public:
 
 	// Constructor for the sphere
 	SphereCollider(vec3 position, float radius) : Collider(position, ColliderTypes::SPHERE){
+		DBG_ASSERT(radius > 0.0f);
 		this->radius = radius;
 	}
 	

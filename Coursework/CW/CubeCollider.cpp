@@ -1,10 +1,18 @@
 #include "CubeCollider.h"
 #include "SphereCollider.h"
 
+#define DBG_HALT __asm {int 3}
+#if defined(DEBUG) | defined(_DEBUG)
+#define DBG_ASSERT(exp) {if(!(exp)) {DBG_HALT;}}
+#else
+#define DBG_ASSERT(exp) {}
+#endif
+
 // Cube collider constructor
 CubeCollider::CubeCollider(vec3 position, vec3 dimensions, ColliderTypes type) : Collider(position, type){
-	if (type != ColliderTypes::CUBE || type != ColliderTypes::OBBCUBE)
-		type = ColliderTypes::CUBE;
+	DBG_ASSERT(type != ColliderTypes::CUBE || type != ColliderTypes::OBBCUBE);
+	DBG_ASSERT(!isZeroVec3(dimensions));
+	
 	this->dimensions = dimensions;
 
 	vec3 halfDimen = dimensions*0.5f;

@@ -1,10 +1,3 @@
-/*
-
-Grant Smith (40111906)
-
-TODO
-
-*/
 
 #include "Link.h"
 

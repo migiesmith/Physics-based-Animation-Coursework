@@ -247,7 +247,7 @@ void CubeCollider::setRotation(const mat4& rotation){
 // Get the corners of the cube
 vector<vec3> CubeCollider::getCorners(const float& scale){
 	vec3 halfDimen = dimensions * scale;
-	//TODO Add in the rotation code here? if(colliderType == ColliderTypes.OBBCUBE)
+
 	if (colliderType == ColliderTypes::CUBE){
 		return{
 			position + vec3(halfDimen.x, halfDimen.y, halfDimen.z),//Vec3(1.0,1.0,1.0),

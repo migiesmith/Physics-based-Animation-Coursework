@@ -1,10 +1,4 @@
-/*
 
-Grant Smith (40111906)
-
-TODO
-
-*/
 
 #include "Util.h"
 

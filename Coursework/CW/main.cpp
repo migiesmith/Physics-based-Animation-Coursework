@@ -150,7 +150,9 @@ void attemptToMakeAParticleEmitter(){
 	vec3 rayEnd = vec3(dx*MYFAR, dy*MYFAR, -MYFAR);
 
 	rayStart = vec4ToVec3(invMatrix * vec3ToVec4(rayStart));
+	DBG_ASSERT(rayStart == rayStart);
 	rayEnd = vec4ToVec3(invMatrix * vec3ToVec4(rayEnd));
+	DBG_ASSERT(rayEnd == rayEnd);
 
 	// Get the ray direction
 	vec3 rayDir = normalize(rayEnd - rayStart);

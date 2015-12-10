@@ -1,6 +1,13 @@
 
 #include "Link.h"
 
+#define DBG_HALT __asm {int 3}
+#if defined(DEBUG) | defined(_DEBUG)
+#define DBG_ASSERT(exp) {if(!(exp)) {DBG_HALT;}}
+#else
+#define DBG_ASSERT(exp) {}
+#endif
+
 /*
 	Create the link
 
@@ -137,7 +144,9 @@ void Link::privateReach(const Link& endLink, const vec3& target, const float& ph
 	
 	// Slerp and normalize the new rotation quat
 	qNew = normalize(slerp(m_quat, qNew, physicsTimeStep));
-	
+
+	DBG_ASSERT(qNew == qNew);
+
 	// Get the roll, pitch and yaw
 	vec3 rollPitchYaw = rollPitchYawFromQuat(qNew);
 

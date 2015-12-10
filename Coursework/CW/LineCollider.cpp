@@ -1,5 +1,11 @@
 #include "LineCollider.h"
 
+#define DBG_HALT __asm {int 3}
+#if defined(DEBUG) | defined(_DEBUG)
+#define DBG_ASSERT(exp) {if(!(exp)) {DBG_HALT;}}
+#else
+#define DBG_ASSERT(exp) {}
+#endif
 
 // check for an intersection between this line and another collider
 void LineCollider::intersects(Collider& other, const vec3& velocity, IntersectionData& data){
@@ -13,6 +19,8 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 		// Get the direction of this line and the other
 		vec3 dirA = position - endPosition;
 		vec3 dirB = otherLine.position - otherLine.endPosition;
+
+		DBG_ASSERT(dirB == dirB);
 
 		if (abs(dot(dirA, dirB)) == 1.0f){
 
@@ -43,6 +51,7 @@ void LineCollider::intersects(Collider& other, const vec3& velocity, Intersectio
 
 			// get the direction from this line's start to the intersection point
 			vec3 normal = normalize(position - intersectionPoint);
+			DBG_ASSERT(normal == normal);
 
 			// calculate the amount of intersection
 			float intersectAmount = dot(normal, intersectionPoint) - dot(normal, position);

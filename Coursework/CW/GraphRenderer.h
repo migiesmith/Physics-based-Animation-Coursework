@@ -24,10 +24,6 @@ private:
 	vec4 barColour = vec4(1,1,1,1); // colour of the bars
 	vec4 lineColour = vec4(1, 0, 0,1); // colour of the data line
 
-	float getMaxDataValue(); // Returns the max highest value
-	float getAverageDataValue(); // returns the average data value
-	float getMinDataValue(); // returns the lowest data value
-
 public:
 
 	// the width and height of the graph
@@ -53,6 +49,10 @@ public:
 	void setBarColour(const vec4& colour){ this->barColour = colour; }
 	// set the data line colour
 	void setLineColour(const vec4& colour){ this->lineColour = colour; }
+
+	float getMaxDataValue(); // Returns the max highest value
+	float getAverageDataValue(); // returns the average data value
+	float getMinDataValue(); // returns the lowest data value
 
 	// Delte the graph renderer
 	~GraphRenderer(){}

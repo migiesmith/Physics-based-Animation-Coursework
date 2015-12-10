@@ -5,7 +5,16 @@
 
 */
 
+
+#define DBG_HALT __asm {int 3}
+#if defined(DEBUG) | defined(_DEBUG)
+#define DBG_ASSERT(exp) {if(!(exp)) {DBG_HALT;}}
+#else
+#define DBG_ASSERT(exp) {}
+#endif
+
 #include "main.h"
+
 
 // Camera Variables
 target_camera targetCam;
@@ -225,7 +234,6 @@ bool load_content()
 	texs["white"] = Util::loadTexture("white.jpg");
 	texs["rock"] = Util::loadTexture("rock.jpg");
 	texs["rock-normal"] = Util::loadTexture("rock-normal.jpg");
-	texs["tiles"] = Util::loadTexture("whiteTiles.jpg");
 	texs["ground"] = Util::loadTexture("ground.jpg");
 
 	texs["menuon"] = Util::loadTexture("buttons\\buttons.png");
@@ -637,6 +645,7 @@ bool update(float delta_time)
 	float fps = 1.0f / delta_time;
 	// Push fps data to the graph renderer
 	graphRen->pushData(fps);
+	DBG_ASSERT(graphRen->getAverageDataValue() > 15.0f);
 
 	// IK target movement
 	if (glfwGetKey(renderer::get_window(), GLFW_KEY_I))

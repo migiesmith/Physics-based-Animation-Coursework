@@ -5,14 +5,16 @@ GraphRenderer::GraphRenderer(TextRenderer* textRenderer, effect* shader, const f
 {
 	this->textRenderer = textRenderer;
 	this->shader = shader;
-	pushData(0.0f);
 	this->width = width;
 	this->height = height;
+	for (int i = 0; i < limit; i++){
+		pushData(60.0f);
+	}
 }
 
 // Push data onto the graph
 void GraphRenderer::pushData(const float y){
-	if(y >= 0)
+	if(y > 0.0f && y < 100000.0f)
 		data.push_back(y);
 	if ((int)data.size() > limit)
 		data.erase(data.begin());

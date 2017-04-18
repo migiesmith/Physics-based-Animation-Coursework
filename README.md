@@ -1,4 +1,4 @@
-40111906 - Physics-based Animation Coursework
+Physics-based Animation Coursework
 =============================================
 
 To Run the simulation
